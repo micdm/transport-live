@@ -16,6 +16,8 @@ public class ServiceCache {
         return new ServiceCache(context);
     }
 
+    private static Service cached;
+
     private Context context;
 
     private ServiceCache(Context context) {
@@ -23,6 +25,13 @@ public class ServiceCache {
     }
 
     public Service get() {
+        if (cached == null) {
+            cached = getFromCache();
+        }
+        return cached;
+    }
+
+    private Service getFromCache() {
         try {
             FileInputStream input = context.openFileInput(CACHE_FILE_NAME);
             Service service = readServiceFromFile(input);
@@ -85,6 +94,7 @@ public class ServiceCache {
     }
 
     public void set(Service service) {
+        cached = service;
         try {
             FileOutputStream output = context.openFileOutput(CACHE_FILE_NAME, Context.MODE_PRIVATE);
             writeServiceToFile(output, service);

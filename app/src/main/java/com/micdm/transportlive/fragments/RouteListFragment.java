@@ -14,16 +14,19 @@ import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.misc.ServiceCache;
 import com.micdm.transportlive.misc.ServiceLoader;
 
+/**
+ * TODO: добавить пустые конструкторы для фрагментов
+ */
 public class RouteListFragment extends Fragment {
 
     @Override
-    public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_route_list, null);
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         ServiceCache cache = ServiceCache.getInstance(getActivity());
         Service service = cache.get();
         if (service == null) {
