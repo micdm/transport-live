@@ -1,26 +1,16 @@
 package com.micdm.transportlive.misc;
 
 import android.content.Context;
-
 import com.micdm.transportlive.data.Direction;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 
-import org.apache.commons.io.IOUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 
 public class ServiceCache {
 
-    private static final String CACHE_FILE_NAME = "service.json";
+    private static final String CACHE_FILE_NAME = "service.bin";
 
     public static ServiceCache getInstance(Context context) {
         return new ServiceCache(context);
@@ -34,44 +24,40 @@ public class ServiceCache {
 
     public Service get() {
         try {
-            JSONObject json = load();
-            if (json == null) {
-                return null;
-            }
-            return jsonToService(json);
-        } catch (JSONException e) {
-            return null;
-        }
-    }
-
-    private JSONObject load() {
-        try {
             FileInputStream input = context.openFileInput(CACHE_FILE_NAME);
-            String content = IOUtils.toString(input);
-            return (JSONObject)new JSONTokener(content).nextValue();
+            Service service = readServiceFromFile(input);
+            input.close();
+            return service;
         } catch (FileNotFoundException e) {
+            return null;
+        } catch (StreamCorruptedException e) {
             return null;
         } catch (IOException e) {
             return null;
-        } catch (JSONException e) {
-            return null;
         }
     }
 
-    private Service jsonToService(JSONObject json) throws JSONException {
+    private Service readServiceFromFile(FileInputStream file) throws IOException {
+        ObjectInputStream input = new ObjectInputStream(file);
+        Service service = readService(input);
+        input.close();
+        return service;
+    }
+
+    private Service readService(ObjectInputStream input) throws IOException {
         Service service = new Service();
-        JSONArray transportJson = json.getJSONArray("transports");
-        for (int i = 0; i < transportJson.length(); i += 1) {
-            service.transports.add(jsonToTransport(transportJson.getJSONObject(i)));
+        int count = input.readInt();
+        for (int i = 0; i < count; i += 1) {
+            service.transports.add(readTransport(input));
         }
         return service;
     }
 
-    private Transport jsonToTransport(JSONObject json) throws JSONException {
-        Transport transport = new Transport(json.getInt("id"), getTransportType(json.getString("type")));
-        JSONArray routeJson = json.getJSONArray("routes");
-        for (int i = 0; i < routeJson.length(); i += 1) {
-            transport.routes.add(jsonToRoute(routeJson.getJSONObject(i)));
+    private Transport readTransport(ObjectInputStream input) throws IOException {
+        Transport transport = new Transport(input.readInt(), getTransportType(input.readUTF()));
+        int count = input.readInt();
+        for (int i = 0; i < count; i += 1) {
+            transport.routes.add(readRoute(input));
         }
         return transport;
     }
@@ -85,78 +71,65 @@ public class ServiceCache {
         throw new RuntimeException("unknown transport type");
     }
 
-    private Route jsonToRoute(JSONObject json) throws JSONException {
-        Route route = new Route(json.getInt("number"), json.getBoolean("isChecked"));
-        JSONArray directionJson = json.getJSONArray("directions");
-        for (int i = 0; i < directionJson.length(); i += 1) {
-            route.directions.add(jsonToDirection(directionJson.getJSONObject(i)));
+    private Route readRoute(ObjectInputStream input) throws IOException {
+        Route route = new Route(input.readInt(), input.readBoolean());
+        int count = input.readInt();
+        for (int i = 0; i < count; i += 1) {
+            route.directions.add(readDirection(input));
         }
         return route;
     }
 
-    private Direction jsonToDirection(JSONObject json) throws JSONException {
-        return new Direction(json.getInt("id"), json.getString("start"), json.getString("finish"));
+    private Direction readDirection(ObjectInputStream input) throws IOException {
+        return new Direction(input.readInt(), input.readUTF(), input.readUTF());
     }
 
     public void set(Service service) {
         try {
-            save(serviceToJson(service));
-        } catch (JSONException e) {
-
-        }
-    }
-
-    private void save(JSONObject object) {
-        try {
             FileOutputStream output = context.openFileOutput(CACHE_FILE_NAME, Context.MODE_PRIVATE);
-            output.write(object.toString().getBytes());
+            writeServiceToFile(output, service);
             output.close();
         } catch (FileNotFoundException e) {
-
+            return;
         } catch (IOException e) {
-
+            return;
         }
     }
 
-    private JSONObject serviceToJson(Service service) throws JSONException {
-        JSONObject json = new JSONObject();
-        JSONArray transportJson = new JSONArray();
+    private void writeServiceToFile(FileOutputStream file, Service service) throws IOException {
+        ObjectOutputStream output = new ObjectOutputStream(file);
+        writeService(output, service);
+        output.close();
+    }
+
+    private void writeService(ObjectOutputStream output, Service service) throws IOException {
+        output.writeInt(service.transports.size());
         for (Transport transport: service.transports) {
-            transportJson.put(transportToJson(transport));
+            writeTransport(output, transport);
         }
-        json.put("transports", transportJson);
-        return json;
     }
 
-    private JSONObject transportToJson(Transport transport) throws JSONException {
-        JSONObject json = new JSONObject();
-        json.put("id", transport.id);
-        json.put("type", transport.type.toString());
-        JSONArray routeJson = new JSONArray();
+    private void writeTransport(ObjectOutputStream output, Transport transport) throws IOException {
+        output.writeInt(transport.id);
+        output.writeUTF(transport.type.toString());
+        output.writeInt(transport.routes.size());
         for (Route route: transport.routes) {
-            routeJson.put(routeToJson(route));
+            writeRoute(output, route);
         }
-        json.put("routes", routeJson);
-        return json;
     }
 
-    private JSONObject routeToJson(Route route) throws JSONException {
-        JSONObject json = new JSONObject();
-        json.put("number", route.number);
-        json.put("isChecked", route.isChecked);
-        JSONArray directionJson = new JSONArray();
+    private void writeRoute(ObjectOutputStream output, Route route) throws IOException {
+        output.writeInt(route.number);
+        output.writeBoolean(route.isChecked);
+        output.writeInt(route.directions.size());
         for (Direction direction: route.directions) {
-            directionJson.put(directionToJson(direction));
+            writeDirection(output, direction);
         }
-        json.put("directions", directionJson);
-        return json;
     }
 
-    private JSONObject directionToJson(Direction direction) throws JSONException {
-        JSONObject json = new JSONObject();
-        json.put("id", direction.id);
-        json.put("start", direction.start);
-        json.put("finish", direction.finish);
-        return json;
+    private void writeDirection(ObjectOutputStream output, Direction direction) throws IOException {
+        output.writeInt(direction.id);
+        output.writeUTF(direction.start);
+        output.writeUTF(direction.finish);
     }
 }
