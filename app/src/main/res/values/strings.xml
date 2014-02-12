@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Транспорт Томска</string>
+    <string name="tab_title_route_list">Маршруты</string>
+    <string name="tab_title_map">Карта</string>
+    <string name="transport_type_bus">Автобус</string>
+    <string name="transport_type_trolleybus">Троллейбус</string>
+    <string name="transport_type_tram">Трамвай</string>
+    <string name="transport_type_taxi">Маршрутное такси</string>
+</resources>
