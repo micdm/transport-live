@@ -16,4 +16,13 @@ public class Route {
     public Route(int number) {
         this(number, false);
     }
+
+    public Direction getDirectionById(int id) {
+        for (Direction direction: directions) {
+            if (direction.id == id) {
+                return direction;
+            }
+        }
+        return null;
+    }
 }

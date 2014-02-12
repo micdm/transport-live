@@ -14,4 +14,13 @@ public class Direction {
         this.start = start;
         this.finish = finish;
     }
+
+    public Vehicle getVehicleById(int id) {
+        for (Vehicle vehicle: vehicles) {
+            if (vehicle.id == id) {
+                return vehicle;
+            }
+        }
+        return null;
+    }
 }

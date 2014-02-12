@@ -23,13 +23,20 @@ public class GetTransportsCommandHandler extends CommandHandler {
             Service service = ((GetTransportsCommand)command).service;
             for (int i = 0; i < typesJson.length(); i += 1) {
                 JSONObject typeJson = typesJson.getJSONObject(i);
-                Transport transport = new Transport(typeJson.getInt("typeId"), getType(typeJson.getString("typeName")));
+                Transport transport = parseTransport(typeJson);
                 service.transports.add(transport);
             }
             return new GetTransportsCommand.Result(service);
         } catch (JSONException e) {
             throw new RuntimeException("can't parse JSON");
         }
+    }
+
+    private Transport parseTransport(JSONObject json) throws JSONException {
+        int id = json.getInt("typeId");
+        Transport.Type type = getType(json.getString("typeName"));
+        String code = json.getString("typeShName");
+        return new Transport(id, type, code);
     }
 
     private Transport.Type getType(String name) {

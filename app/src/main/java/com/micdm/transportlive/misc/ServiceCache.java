@@ -54,7 +54,7 @@ public class ServiceCache {
     }
 
     private Transport readTransport(ObjectInputStream input) throws IOException {
-        Transport transport = new Transport(input.readInt(), getTransportType(input.readUTF()));
+        Transport transport = new Transport(input.readInt(), getTransportType(input.readUTF()), input.readUTF());
         int count = input.readInt();
         for (int i = 0; i < count; i += 1) {
             transport.routes.add(readRoute(input));
@@ -112,6 +112,7 @@ public class ServiceCache {
     private void writeTransport(ObjectOutputStream output, Transport transport) throws IOException {
         output.writeInt(transport.id);
         output.writeUTF(transport.type.toString());
+        output.writeUTF(transport.code);
         output.writeInt(transport.routes.size());
         for (Route route: transport.routes) {
             writeRoute(output, route);

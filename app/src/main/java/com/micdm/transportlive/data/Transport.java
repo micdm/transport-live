@@ -13,11 +13,22 @@ public class Transport {
 
     public int id;
     public Type type;
+    public String code;
     public ArrayList<Route> routes = new ArrayList<Route>();
 
-    public Transport(int id, Type type) {
+    public Transport(int id, Type type, String code) {
         this.id = id;
         this.type = type;
+        this.code = code;
+    }
+
+    public Route getRouteByNumber(int number) {
+        for (Route route: routes) {
+            if (route.number == number) {
+                return route;
+            }
+        }
+        return null;
     }
 
     public RouteInfo[] getAllRouteInfo() {
