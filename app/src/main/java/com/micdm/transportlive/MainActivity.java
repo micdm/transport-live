@@ -10,10 +10,16 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 
+import com.micdm.transportlive.data.Route;
+import com.micdm.transportlive.data.Service;
+import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.fragments.MapFragment;
 import com.micdm.transportlive.fragments.RouteListFragment;
+import com.micdm.transportlive.fragments.TransportRouteListFragment;
+import com.micdm.transportlive.misc.ServiceCache;
+import com.micdm.transportlive.misc.ServiceLoader;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements TransportRouteListFragment.OnRouteCheckChangeListener {
 
     private static class CustomPagerAdapter extends FragmentPagerAdapter {
 
@@ -62,15 +68,42 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setupActionBarAndPager();
+        setupActionBar();
+        loadService();
     }
 
-    private void setupActionBarAndPager() {
-        final ActionBar actionBar = getSupportActionBar();
+    private void setupActionBar() {
+        ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setDisplayUseLogoEnabled(false);
         actionBar.setDisplayShowTitleEnabled(false);
+    }
+
+    /**
+     * TODO: показывать сообщение с кнопкой, если не получилось загрузить сервис
+     */
+    private void loadService() {
+        Service service = ServiceCache.get(this);
+        if (service == null) {
+            ServiceLoader.load(new ServiceLoader.OnLoadListener() {
+                @Override
+                public void onLoad(Service service) {
+                    onServiceLoad(service);
+                }
+            });
+        } else {
+            onServiceLoad(service);
+        }
+    }
+
+    private void onServiceLoad(Service service) {
+        ServiceCache.set(this, service);
+        setupPager();
+    }
+
+    private void setupPager() {
+        final ActionBar actionBar = getSupportActionBar();
         final CustomViewPager pager = (CustomViewPager)findViewById(R.id.pager);
         pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
@@ -95,5 +128,18 @@ public class MainActivity extends ActionBarActivity {
             actionBar.addTab(tab);
         }
         pager.setAdapter(adapter);
+    }
+
+    public Service getService() {
+        return ServiceCache.get(this);
+    }
+
+    @Override
+    public void onRouteCheckChange(int transportId, int routeNumber, boolean isChecked) {
+        Service service = ServiceCache.get(this);
+        Transport transport = service.getTransportById(transportId);
+        Route route = transport.getRouteByNumber(routeNumber);
+        route.isChecked = isChecked;
+        ServiceCache.set(this, service);
     }
 }

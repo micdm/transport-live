@@ -9,23 +9,16 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import com.micdm.transportlive.MainActivity;
 import com.micdm.transportlive.R;
-import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.RouteInfo;
+import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 
 public class TransportRouteListFragment extends Fragment {
 
     public static interface OnRouteCheckChangeListener {
-        public void onRouteCheckChange(Route route, boolean isChecked);
-    }
-
-    private Transport transport;
-    private OnRouteCheckChangeListener listener;
-
-    public TransportRouteListFragment(Transport transport, OnRouteCheckChangeListener listener) {
-        this.transport = transport;
-        this.listener = listener;
+        public void onRouteCheckChange(int transportId, int routeNumber, boolean isChecked);
     }
 
     @Override
@@ -36,11 +29,18 @@ public class TransportRouteListFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        setupTitle();
-        setupRouteList();
+        Transport transport = getTransport();
+        setupTitle(transport);
+        setupRouteList(transport);
     }
 
-    private void setupTitle() {
+    private Transport getTransport() {
+        int id = getArguments().getInt("id");
+        Service service = ((MainActivity) getActivity()).getService();
+        return service.getTransportById(id);
+    }
+
+    private void setupTitle(Transport transport) {
         TextView titleView = (TextView) getView().findViewById(R.id.title);
         switch (transport.type) {
             case BUS:
@@ -58,21 +58,21 @@ public class TransportRouteListFragment extends Fragment {
         }
     }
 
-    private void setupRouteList() {
+    private void setupRouteList(Transport transport) {
         ViewGroup container = (ViewGroup)getView().findViewById(R.id.list);
         for (RouteInfo info: transport.getAllRouteInfo()) {
-            addRouteListItem(container, info);
+            addRouteListItem(container, transport, info);
         }
     }
 
-    private void addRouteListItem(ViewGroup container, final RouteInfo info) {
+    private void addRouteListItem(ViewGroup container, final Transport transport, final RouteInfo info) {
         View view = View.inflate(getActivity(), R.layout.view_route_list_item, null);
         CheckBox checkbox = (CheckBox)view.findViewById(R.id.is_checked);
         checkbox.setChecked(info.route.isChecked);
         checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton button, boolean isChecked) {
-                listener.onRouteCheckChange(info.route, isChecked);
+                ((OnRouteCheckChangeListener) getActivity()).onRouteCheckChange(transport.id, info.route.number, isChecked);
             }
         });
         TextView numberView = (TextView)view.findViewById(R.id.number);

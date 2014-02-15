@@ -1,37 +1,34 @@
 package com.micdm.transportlive.misc;
 
 import android.content.Context;
+
 import com.micdm.transportlive.data.Direction;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.StreamCorruptedException;
 
 public class ServiceCache {
 
     private static final String CACHE_FILE_NAME = "service.bin";
 
-    public static ServiceCache getInstance(Context context) {
-        return new ServiceCache(context);
-    }
-
     private static Service cached;
 
-    private Context context;
-
-    private ServiceCache(Context context) {
-        this.context = context;
-    }
-
-    public Service get() {
+    public static Service get(Context context) {
         if (cached == null) {
-            cached = getFromCache();
+            cached = getFromCache(context);
         }
         return cached;
     }
 
-    private Service getFromCache() {
+    private static Service getFromCache(Context context) {
         try {
             FileInputStream input = context.openFileInput(CACHE_FILE_NAME);
             Service service = readServiceFromFile(input);
@@ -46,14 +43,14 @@ public class ServiceCache {
         }
     }
 
-    private Service readServiceFromFile(FileInputStream file) throws IOException {
+    private static Service readServiceFromFile(FileInputStream file) throws IOException {
         ObjectInputStream input = new ObjectInputStream(file);
         Service service = readService(input);
         input.close();
         return service;
     }
 
-    private Service readService(ObjectInputStream input) throws IOException {
+    private static Service readService(ObjectInputStream input) throws IOException {
         Service service = new Service();
         int count = input.readInt();
         for (int i = 0; i < count; i += 1) {
@@ -62,7 +59,7 @@ public class ServiceCache {
         return service;
     }
 
-    private Transport readTransport(ObjectInputStream input) throws IOException {
+    private static Transport readTransport(ObjectInputStream input) throws IOException {
         Transport transport = new Transport(input.readInt(), getTransportType(input.readUTF()), input.readUTF());
         int count = input.readInt();
         for (int i = 0; i < count; i += 1) {
@@ -71,7 +68,7 @@ public class ServiceCache {
         return transport;
     }
 
-    private Transport.Type getTransportType(String value) {
+    private static Transport.Type getTransportType(String value) {
         for (Transport.Type type: Transport.Type.values()) {
             if (value.equals(type.toString())) {
                 return type;
@@ -80,7 +77,7 @@ public class ServiceCache {
         throw new RuntimeException("unknown transport type");
     }
 
-    private Route readRoute(ObjectInputStream input) throws IOException {
+    private static Route readRoute(ObjectInputStream input) throws IOException {
         Route route = new Route(input.readInt(), input.readBoolean());
         int count = input.readInt();
         for (int i = 0; i < count; i += 1) {
@@ -89,11 +86,11 @@ public class ServiceCache {
         return route;
     }
 
-    private Direction readDirection(ObjectInputStream input) throws IOException {
+    private static Direction readDirection(ObjectInputStream input) throws IOException {
         return new Direction(input.readInt(), input.readUTF(), input.readUTF());
     }
 
-    public void set(Service service) {
+    public static void set(Context context, Service service) {
         cached = service;
         try {
             FileOutputStream output = context.openFileOutput(CACHE_FILE_NAME, Context.MODE_PRIVATE);
@@ -106,20 +103,20 @@ public class ServiceCache {
         }
     }
 
-    private void writeServiceToFile(FileOutputStream file, Service service) throws IOException {
+    private static void writeServiceToFile(FileOutputStream file, Service service) throws IOException {
         ObjectOutputStream output = new ObjectOutputStream(file);
         writeService(output, service);
         output.close();
     }
 
-    private void writeService(ObjectOutputStream output, Service service) throws IOException {
+    private static void writeService(ObjectOutputStream output, Service service) throws IOException {
         output.writeInt(service.transports.size());
         for (Transport transport: service.transports) {
             writeTransport(output, transport);
         }
     }
 
-    private void writeTransport(ObjectOutputStream output, Transport transport) throws IOException {
+    private static void writeTransport(ObjectOutputStream output, Transport transport) throws IOException {
         output.writeInt(transport.id);
         output.writeUTF(transport.type.toString());
         output.writeUTF(transport.code);
@@ -129,7 +126,7 @@ public class ServiceCache {
         }
     }
 
-    private void writeRoute(ObjectOutputStream output, Route route) throws IOException {
+    private static void writeRoute(ObjectOutputStream output, Route route) throws IOException {
         output.writeInt(route.number);
         output.writeBoolean(route.isChecked);
         output.writeInt(route.directions.size());
@@ -138,7 +135,7 @@ public class ServiceCache {
         }
     }
 
-    private void writeDirection(ObjectOutputStream output, Direction direction) throws IOException {
+    private static void writeDirection(ObjectOutputStream output, Direction direction) throws IOException {
         output.writeInt(direction.id);
         output.writeUTF(direction.start);
         output.writeUTF(direction.finish);

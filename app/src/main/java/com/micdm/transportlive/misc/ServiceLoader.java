@@ -12,32 +12,26 @@ public class ServiceLoader {
         public void onLoad(Service service);
     }
 
-    private OnLoadListener listener;
-
-    public ServiceLoader(OnLoadListener listener) {
-        this.listener = listener;
-    }
-
-    public void load() {
+    public static void load(OnLoadListener callback) {
         Service service = new Service();
-        loadTransports(service);
+        loadTransports(service, callback);
     }
 
-    private void loadTransports(Service service) {
+    private static void loadTransports(Service service, final OnLoadListener callback) {
         ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
             @Override
             public void onResult(Command.Result result) {
-                loadRoutes(((GetTransportsCommand.Result)result).service);
+                loadRoutes(((GetTransportsCommand.Result)result).service, callback);
             }
         });
         task.execute(new GetTransportsCommand(service));
     }
 
-    private void loadRoutes(final Service service) {
+    private static void loadRoutes(final Service service, final OnLoadListener callback) {
         ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
             @Override
             public void onResult(Command.Result result) {
-                listener.onLoad(service);
+                callback.onLoad(service);
             }
         });
         task.execute(new GetRoutesCommand(service));

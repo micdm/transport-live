@@ -7,13 +7,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.micdm.transportlive.MainActivity;
 import com.micdm.transportlive.R;
-import com.micdm.transportlive.data.*;
-import com.micdm.transportlive.misc.ServiceCache;
-import com.micdm.transportlive.misc.ServiceLoader;
+import com.micdm.transportlive.data.Direction;
+import com.micdm.transportlive.data.Route;
+import com.micdm.transportlive.data.Service;
+import com.micdm.transportlive.data.Transport;
+import com.micdm.transportlive.data.Vehicle;
 import com.micdm.transportlive.server.ServerConnectTask;
 import com.micdm.transportlive.server.commands.Command;
 import com.micdm.transportlive.server.commands.GetVehiclesCommand;
+
 import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
@@ -37,26 +41,11 @@ public class MapFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        ServiceCache cache = ServiceCache.getInstance(getActivity());
-        Service service = cache.get();
-        if (service == null) {
-            ServiceLoader loader = new ServiceLoader(new ServiceLoader.OnLoadListener() {
-                @Override
-                public void onLoad(Service service) {
-                    ServiceCache cache = ServiceCache.getInstance(getActivity());
-                    cache.set(service);
-                    loadVehicles();
-                }
-            });
-            loader.load();
-        } else {
-            loadVehicles();
-        }
+        loadVehicles();
     }
 
     private void loadVehicles() {
-        ServiceCache cache = ServiceCache.getInstance(getActivity());
-        Service service = cache.get();
+        Service service = ((MainActivity) getActivity()).getService();
         ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
             @Override
             public void onResult(Command.Result result) {

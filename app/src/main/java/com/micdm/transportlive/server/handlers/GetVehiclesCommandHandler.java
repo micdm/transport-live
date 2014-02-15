@@ -2,7 +2,11 @@ package com.micdm.transportlive.server.handlers;
 
 import android.util.Xml;
 
-import com.micdm.transportlive.data.*;
+import com.micdm.transportlive.data.Direction;
+import com.micdm.transportlive.data.Route;
+import com.micdm.transportlive.data.Service;
+import com.micdm.transportlive.data.Transport;
+import com.micdm.transportlive.data.Vehicle;
 import com.micdm.transportlive.server.commands.GetVehiclesCommand;
 
 import org.apache.commons.io.IOUtils;
