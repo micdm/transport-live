@@ -1,10 +1,15 @@
 package com.micdm.transportlive.misc;
 
+import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
+import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.server.ServerConnectTask;
 import com.micdm.transportlive.server.commands.Command;
 import com.micdm.transportlive.server.commands.GetRoutesCommand;
+import com.micdm.transportlive.server.commands.GetStationsCommand;
 import com.micdm.transportlive.server.commands.GetTransportsCommand;
+
+import java.util.ArrayList;
 
 public class ServiceLoader {
 
@@ -21,19 +26,38 @@ public class ServiceLoader {
         ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
             @Override
             public void onResult(Command.Result result) {
-                loadRoutes(((GetTransportsCommand.Result)result).service, callback);
+                Service service = ((GetTransportsCommand.Result)result).service;
+                loadRoutes(service, callback);
             }
         });
         task.execute(new GetTransportsCommand(service));
     }
 
-    private static void loadRoutes(final Service service, final OnLoadListener callback) {
+    private static void loadRoutes(Service service, final OnLoadListener callback) {
         ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
             @Override
             public void onResult(Command.Result result) {
-                callback.onLoad(service);
+                Service service = ((GetRoutesCommand.Result)result).service;
+                loadStations(service, callback);
             }
         });
         task.execute(new GetRoutesCommand(service));
+    }
+
+    private static void loadStations(Service service, final OnLoadListener callback) {
+        ArrayList<Command> commands = new ArrayList<Command>();
+        for (Transport transport: service.transports) {
+            for (Route route: transport.routes) {
+                commands.add(new GetStationsCommand(service, transport, route));
+            }
+        }
+        TaskGroupExecutor executor = new TaskGroupExecutor();
+        executor.execute(commands.toArray(new Command[commands.size()]), new TaskGroupExecutor.OnExecuteListener() {
+            @Override
+            public void onExecute(Command.Result[] results) {
+                Service service = ((GetStationsCommand.Result)results[0]).service;
+                callback.onLoad(service);
+            }
+        });
     }
 }

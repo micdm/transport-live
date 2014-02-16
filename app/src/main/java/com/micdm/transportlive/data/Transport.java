@@ -35,7 +35,7 @@ public class Transport {
         ArrayList<RouteInfo> info = new ArrayList<RouteInfo>();
         for (Route route: routes) {
             Direction direction = route.directions.get(0);
-            info.add(new RouteInfo(type, route, direction.start, direction.finish));
+            info.add(new RouteInfo(type, route, direction.getStart().name, direction.getFinish().name));
         }
         return info.toArray(new RouteInfo[info.size()]);
     }

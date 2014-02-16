@@ -59,8 +59,8 @@ public class GetRoutesCommandHandler extends CommandHandler {
     private Route parseRoute(String description) {
         String[] chunks = description.split(";");
         Route route = new Route(Integer.valueOf(chunks[2]));
-        route.directions.add(new Direction(Integer.valueOf(chunks[6]), chunks[3], chunks[4]));
-        route.directions.add(new Direction(Integer.valueOf(chunks[7]), chunks[4], chunks[3]));
+        route.directions.add(new Direction(Integer.valueOf(chunks[6])));
+        route.directions.add(new Direction(Integer.valueOf(chunks[7])));
         return route;
     }
 }

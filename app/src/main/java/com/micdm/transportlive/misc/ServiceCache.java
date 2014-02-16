@@ -5,6 +5,7 @@ import android.content.Context;
 import com.micdm.transportlive.data.Direction;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
+import com.micdm.transportlive.data.Station;
 import com.micdm.transportlive.data.Transport;
 
 import java.io.FileInputStream;
@@ -87,7 +88,16 @@ public class ServiceCache {
     }
 
     private static Direction readDirection(ObjectInputStream input) throws IOException {
-        return new Direction(input.readInt(), input.readUTF(), input.readUTF());
+        Direction direction = new Direction(input.readInt());
+        int count = input.readInt();
+        for (int i = 0; i < count; i += 1) {
+            direction.stations.add(readStation(input));
+        }
+        return direction;
+    }
+
+    private static Station readStation(ObjectInputStream input) throws IOException {
+        return new Station(input.readUTF(), input.readInt(), input.readInt());
     }
 
     public static void set(Context context, Service service) {
@@ -137,7 +147,15 @@ public class ServiceCache {
 
     private static void writeDirection(ObjectOutputStream output, Direction direction) throws IOException {
         output.writeInt(direction.id);
-        output.writeUTF(direction.start);
-        output.writeUTF(direction.finish);
+        output.writeInt(direction.stations.size());
+        for (Station station: direction.stations) {
+            writeStation(output, station);
+        }
+    }
+
+    private static void writeStation(ObjectOutputStream output, Station station) throws IOException {
+        output.writeUTF(station.name);
+        output.writeInt(station.latitude);
+        output.writeInt(station.longitude);
     }
 }

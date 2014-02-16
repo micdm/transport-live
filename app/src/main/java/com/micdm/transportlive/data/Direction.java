@@ -5,14 +5,19 @@ import java.util.ArrayList;
 public class Direction {
 
     public int id;
-    public String start;
-    public String finish;
+    public ArrayList<Station> stations = new ArrayList<Station>();
     public ArrayList<Vehicle> vehicles = new ArrayList<Vehicle>();
 
-    public Direction(int id, String start, String finish) {
+    public Direction(int id) {
         this.id = id;
-        this.start = start;
-        this.finish = finish;
+    }
+
+    public Station getStart() {
+        return stations.get(0);
+    }
+
+    public Station getFinish() {
+        return stations.get(stations.size() - 1);
     }
 
     public Vehicle getVehicleById(int id) {
