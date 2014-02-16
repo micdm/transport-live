@@ -14,12 +14,13 @@ import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.fragments.MapFragment;
+import com.micdm.transportlive.fragments.NoConnectionFragment;
 import com.micdm.transportlive.fragments.RouteListFragment;
 import com.micdm.transportlive.fragments.TransportRouteListFragment;
 import com.micdm.transportlive.misc.ServiceCache;
 import com.micdm.transportlive.misc.ServiceLoader;
 
-public class MainActivity extends ActionBarActivity implements TransportRouteListFragment.OnRouteCheckChangeListener {
+public class MainActivity extends ActionBarActivity implements NoConnectionFragment.OnRetryConnectionListener, TransportRouteListFragment.OnRouteCheckChangeListener {
 
     private static class CustomPagerAdapter extends FragmentPagerAdapter {
 
@@ -80,16 +81,19 @@ public class MainActivity extends ActionBarActivity implements TransportRouteLis
         actionBar.setDisplayShowTitleEnabled(false);
     }
 
-    /**
-     * TODO: показывать сообщение с кнопкой, если не получилось загрузить сервис
-     */
     private void loadService() {
         Service service = ServiceCache.get(this);
         if (service == null) {
-            ServiceLoader.load(new ServiceLoader.OnLoadListener() {
+            ServiceLoader.load(this, new ServiceLoader.OnLoadListener() {
                 @Override
                 public void onLoad(Service service) {
                     onServiceLoad(service);
+                }
+                @Override
+                public void onNoConnection() {
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                    transaction.add(0, new NoConnectionFragment());
+                    transaction.commit();
                 }
             });
         } else {
@@ -132,6 +136,11 @@ public class MainActivity extends ActionBarActivity implements TransportRouteLis
 
     public Service getService() {
         return ServiceCache.get(this);
+    }
+
+    @Override
+    public void onRetryConnection() {
+        loadService();
     }
 
     @Override

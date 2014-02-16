@@ -1,5 +1,9 @@
 package com.micdm.transportlive.misc;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
@@ -16,11 +20,22 @@ public class ServiceLoader {
 
     public static interface OnLoadListener {
         public void onLoad(Service service);
+        public void onNoConnection();
     }
 
-    public static void load(OnLoadListener callback) {
-        Service service = new Service();
-        loadTransports(service, callback);
+    public static void load(Context context, OnLoadListener callback) {
+        if (!isNetworkAvailable(context)) {
+            callback.onNoConnection();
+        } else {
+            Service service = new Service();
+            loadTransports(service, callback);
+        }
+    }
+
+    private static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = manager.getActiveNetworkInfo();
+        return info != null && info.isConnected();
     }
 
     private static void loadTransports(Service service, final OnLoadListener callback) {

@@ -7,4 +7,6 @@
     <string name="transport_type_trolleybus">Троллейбус</string>
     <string name="transport_type_tram">Трамвай</string>
     <string name="transport_type_taxi">Маршрутное такси</string>
+    <string name="no_connection">Сервер недоступен.\nВключите WiFi или мобильный интернет.</string>
+    <string name="retry_connection">Повторить</string>
 </resources>
