@@ -3,6 +3,7 @@ package com.micdm.transportlive.misc;
 import android.content.Context;
 
 import com.micdm.transportlive.data.Direction;
+import com.micdm.transportlive.data.Point;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Station;
@@ -82,9 +83,17 @@ public class ServiceCache {
         Route route = new Route(input.readInt(), input.readBoolean());
         int count = input.readInt();
         for (int i = 0; i < count; i += 1) {
+            route.points.add(readPoint(input));
+        }
+        count = input.readInt();
+        for (int i = 0; i < count; i += 1) {
             route.directions.add(readDirection(input));
         }
         return route;
+    }
+
+    private static Point readPoint(ObjectInputStream input) throws IOException {
+        return new Point(input.readInt(), input.readInt());
     }
 
     private static Direction readDirection(ObjectInputStream input) throws IOException {
@@ -97,7 +106,7 @@ public class ServiceCache {
     }
 
     private static Station readStation(ObjectInputStream input) throws IOException {
-        return new Station(input.readUTF(), input.readInt(), input.readInt());
+        return new Station(input.readUTF(), readPoint(input));
     }
 
     public static void set(Context context, Service service) {
@@ -139,10 +148,19 @@ public class ServiceCache {
     private static void writeRoute(ObjectOutputStream output, Route route) throws IOException {
         output.writeInt(route.number);
         output.writeBoolean(route.isChecked);
+        output.writeInt(route.points.size());
+        for (Point point: route.points) {
+            writePoint(output, point);
+        }
         output.writeInt(route.directions.size());
         for (Direction direction: route.directions) {
             writeDirection(output, direction);
         }
+    }
+
+    private static void writePoint(ObjectOutputStream output, Point point) throws IOException {
+        output.writeInt(point.latitude);
+        output.writeInt(point.longitude);
     }
 
     private static void writeDirection(ObjectOutputStream output, Direction direction) throws IOException {
@@ -155,7 +173,6 @@ public class ServiceCache {
 
     private static void writeStation(ObjectOutputStream output, Station station) throws IOException {
         output.writeUTF(station.name);
-        output.writeInt(station.latitude);
-        output.writeInt(station.longitude);
+        writePoint(output, station.location);
     }
 }

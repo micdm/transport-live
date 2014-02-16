@@ -3,6 +3,7 @@ package com.micdm.transportlive.server.handlers;
 import android.util.Xml;
 
 import com.micdm.transportlive.data.Direction;
+import com.micdm.transportlive.data.Point;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
@@ -56,8 +57,7 @@ public class GetVehiclesCommandHandler extends CommandHandler {
                 if (vehicle == null) {
                     direction.vehicles.add(update);
                 } else {
-                    vehicle.latitude = update.latitude;
-                    vehicle.longitude = update.longitude;
+                    vehicle.location = update.location;
                     vehicle.direction = update.direction;
                     vehicle.lastUpdate = update.lastUpdate;
                 }
@@ -131,7 +131,7 @@ public class GetVehiclesCommandHandler extends CommandHandler {
         if (lastUpdate == null) {
             return null;
         }
-        return new Vehicle(id, number, latitude, longitude, direction, lastUpdate);
+        return new Vehicle(id, number, new Point(latitude, longitude), direction, lastUpdate);
     }
 
     private Date parseVehicleLastUpdate(XmlPullParser parser) {

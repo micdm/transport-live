@@ -63,14 +63,14 @@ public class MapFragment extends Fragment {
             if (now.getTime() - vehicle.lastUpdate.getTime() > UPDATE_TIMEOUT) {
                 // TODO: убирать с карты устаревшие метки
             }
-            OverlayItem marker = new OverlayItem(vehicle.number, "", new GeoPoint(vehicle.latitude, vehicle.longitude));
+            OverlayItem marker = new OverlayItem(vehicle.number, "", new GeoPoint(vehicle.location.latitude, vehicle.location.longitude));
             marker.setMarker(getResources().getDrawable(android.R.drawable.arrow_down_float));
             marker.setMarkerHotspot(OverlayItem.HotspotPlace.BOTTOM_CENTER);
             markers.add(marker);
-            box.left = Math.min(box.left, vehicle.longitude);
-            box.top = Math.min(box.top, vehicle.latitude);
-            box.right = Math.max(box.right, vehicle.longitude);
-            box.bottom = Math.max(box.bottom, vehicle.latitude);
+            box.left = Math.min(box.left, vehicle.location.longitude);
+            box.top = Math.min(box.top, vehicle.location.latitude);
+            box.right = Math.max(box.right, vehicle.location.longitude);
+            box.bottom = Math.max(box.bottom, vehicle.location.latitude);
         }
         Overlay overlay = new ItemizedIconOverlay<OverlayItem>(getActivity(), markers, new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
             @Override

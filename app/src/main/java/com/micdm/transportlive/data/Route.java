@@ -6,6 +6,7 @@ public class Route {
 
     public int number;
     public boolean isChecked;
+    public ArrayList<Point> points = new ArrayList<Point>();
     public ArrayList<Direction> directions = new ArrayList<Direction>();
 
     public Route(int number, boolean isChecked) {

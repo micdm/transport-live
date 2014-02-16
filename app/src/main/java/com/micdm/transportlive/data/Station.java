@@ -3,12 +3,10 @@ package com.micdm.transportlive.data;
 public class Station {
 
     public String name;
-    public int latitude;
-    public int longitude;
+    public Point location;
 
-    public Station(String name, int latitude, int longitude) {
+    public Station(String name, Point location) {
         this.name = name;
-        this.latitude = latitude;
-        this.longitude = longitude;
+        this.location = location;
     }
 }

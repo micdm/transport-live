@@ -2,13 +2,11 @@ package com.micdm.transportlive.server.handlers;
 
 import android.util.Xml;
 
-import com.micdm.transportlive.data.Direction;
 import com.micdm.transportlive.data.Point;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
-import com.micdm.transportlive.data.Station;
 import com.micdm.transportlive.data.Transport;
-import com.micdm.transportlive.server.commands.GetStationsCommand;
+import com.micdm.transportlive.server.commands.GetPointsCommand;
 
 import org.apache.commons.io.IOUtils;
 import org.xmlpull.v1.XmlPullParser;
@@ -16,48 +14,34 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 
-public class GetStationsCommandHandler extends CommandHandler {
+public class GetPointsCommandHandler extends CommandHandler {
 
-    public GetStationsCommandHandler() {
+    public GetPointsCommandHandler() {
         super(Backend.SECOND);
     }
 
     @Override
-    public GetStationsCommand.Result handle() {
-        Service service = ((GetStationsCommand)command).service;
-        Transport transport = ((GetStationsCommand)command).transport;
-        Route route = ((GetStationsCommand)command).route;
+    public GetPointsCommand.Result handle() {
+        Service service = ((GetPointsCommand)command).service;
+        Transport transport = ((GetPointsCommand)command).transport;
+        Route route = ((GetPointsCommand)command).route;
         HashMap<String, String> params = getRequestParams(transport, route);
         try {
-            String response = sendRequest("getRouteStations", params);
+            String response = sendRequest("getSubRoutePolyline", params);
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(IOUtils.toInputStream(response), null);
             parser.nextTag();
-            parser.require(XmlPullParser.START_TAG, "", "stations");
-            Direction direction = null;
-            Iterator<Direction> directions = route.directions.iterator();
+            parser.require(XmlPullParser.START_TAG, "", "poly");
             while (parser.next() != XmlPullParser.END_TAG) {
                 if (parser.getEventType() != XmlPullParser.START_TAG) {
                     continue;
                 }
-                parser.require(XmlPullParser.START_TAG, "", "station");
-                Station station = parseStation(parser);
-                if (parser.getAttributeValue("", "end") != null) {
-                    if (direction == null) {
-                        direction = directions.next();
-                        direction.stations.add(station);
-                    } else {
-                        direction.stations.add(station);
-                        direction = null;
-                    }
-                } else {
-                    direction.stations.add(station);
-                }
+                parser.require(XmlPullParser.START_TAG, "", "node");
+                route.points.add(parsePoint(parser));
                 parser.nextTag();
             }
-            return new GetStationsCommand.Result(service);
+            return new GetPointsCommand.Result(service);
         } catch (XmlPullParserException e) {
             throw new RuntimeException("can't parse XML");
         } catch (IOException e) {
@@ -86,10 +70,9 @@ public class GetStationsCommandHandler extends CommandHandler {
         }
     }
 
-    private Station parseStation(XmlPullParser parser) {
-        String name = parser.getAttributeValue("", "name");
-        int latitude = Integer.valueOf(parser.getAttributeValue("", "lat0"));
-        int longitude = Integer.valueOf(parser.getAttributeValue("", "lon0"));
-        return new Station(name, new Point(latitude, longitude));
+    private Point parsePoint(XmlPullParser parser) {
+        int latitude = Integer.valueOf(parser.getAttributeValue("", "lat"));
+        int longitude = Integer.valueOf(parser.getAttributeValue("", "lon"));
+        return new Point(latitude, longitude);
     }
 }

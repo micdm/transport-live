@@ -4,11 +4,13 @@ import android.os.AsyncTask;
 
 import com.micdm.transportlive.server.cities.CityConfig;
 import com.micdm.transportlive.server.commands.Command;
+import com.micdm.transportlive.server.commands.GetPointsCommand;
 import com.micdm.transportlive.server.commands.GetRoutesCommand;
 import com.micdm.transportlive.server.commands.GetStationsCommand;
 import com.micdm.transportlive.server.commands.GetTransportsCommand;
 import com.micdm.transportlive.server.commands.GetVehiclesCommand;
 import com.micdm.transportlive.server.handlers.CommandHandler;
+import com.micdm.transportlive.server.handlers.GetPointsCommandHandler;
 import com.micdm.transportlive.server.handlers.GetRoutesCommandHandler;
 import com.micdm.transportlive.server.handlers.GetStationsCommandHandler;
 import com.micdm.transportlive.server.handlers.GetTransportsCommandHandler;
@@ -50,6 +52,9 @@ public class ServerConnectTask extends AsyncTask<Command, Void, Command.Result> 
         }
         if (command instanceof GetStationsCommand) {
             return new GetStationsCommandHandler();
+        }
+        if (command instanceof GetPointsCommand) {
+            return new GetPointsCommandHandler();
         }
         if (command instanceof GetVehiclesCommand) {
             return new GetVehiclesCommandHandler();
