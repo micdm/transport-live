@@ -84,16 +84,14 @@ public class MainActivity extends ActionBarActivity implements NoConnectionFragm
     private void loadService() {
         Service service = ServiceCache.get(this);
         if (service == null) {
-            ServiceLoader.load(this, new ServiceLoader.OnLoadListener() {
+            ServiceLoader.loadService(this, new ServiceLoader.OnLoadListener() {
                 @Override
-                public void onLoad(Service service) {
-                    onServiceLoad(service);
+                public void onLoad(Object data) {
+                    onServiceLoad((Service) data);
                 }
                 @Override
                 public void onNoConnection() {
-                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                    transaction.add(0, new NoConnectionFragment());
-                    transaction.commit();
+                    (new NoConnectionFragment()).show(getSupportFragmentManager(), "no_connection");
                 }
             });
         } else {
@@ -136,6 +134,24 @@ public class MainActivity extends ActionBarActivity implements NoConnectionFragm
 
     public Service getService() {
         return ServiceCache.get(this);
+    }
+
+    public static interface OnLoadVehiclesListener {
+        public void onLoadVehicles(Service service);
+    }
+
+    public void loadVehicles(final OnLoadVehiclesListener callback) {
+        ServiceLoader.loadVehicles(this, getService(), new ServiceLoader.OnLoadListener() {
+            @Override
+            public void onLoad(Object data) {
+                callback.onLoadVehicles((Service) data);
+            }
+
+            @Override
+            public void onNoConnection() {
+                (new NoConnectionFragment()).show(getSupportFragmentManager(), "no_connection");
+            }
+        });
     }
 
     @Override

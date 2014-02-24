@@ -21,8 +21,7 @@ public abstract class CommandHandler {
         SECOND
     }
 
-    private static final String USER_AGENT = "transportlive";
-    private static final String CITY_KEY = "ryazan";// "tomsk";
+    private static final String USER_AGENT = "transportlive (Android)";
 
     protected Backend backend;
     protected CityConfig city;

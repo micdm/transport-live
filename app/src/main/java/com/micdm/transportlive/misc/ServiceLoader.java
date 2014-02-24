@@ -13,17 +13,18 @@ import com.micdm.transportlive.server.commands.GetPointsCommand;
 import com.micdm.transportlive.server.commands.GetRoutesCommand;
 import com.micdm.transportlive.server.commands.GetStationsCommand;
 import com.micdm.transportlive.server.commands.GetTransportsCommand;
+import com.micdm.transportlive.server.commands.GetVehiclesCommand;
 
 import java.util.ArrayList;
 
 public class ServiceLoader {
 
     public static interface OnLoadListener {
-        public void onLoad(Service service);
+        public void onLoad(Object data);
         public void onNoConnection();
     }
 
-    public static void load(Context context, OnLoadListener callback) {
+    public static void loadService(Context context, OnLoadListener callback) {
         if (!isNetworkAvailable(context)) {
             callback.onNoConnection();
         } else {
@@ -92,5 +93,19 @@ public class ServiceLoader {
                 callback.onLoad(service);
             }
         });
+    }
+
+    public static void loadVehicles(Context context, Service service, final OnLoadListener callback) {
+        if (!isNetworkAvailable(context)) {
+            callback.onNoConnection();
+        } else {
+            ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
+                @Override
+                public void onResult(Command.Result result) {
+                    callback.onLoad(((GetVehiclesCommand.Result)result).service);
+                }
+            });
+            task.execute(new GetVehiclesCommand(service));
+        }
     }
 }

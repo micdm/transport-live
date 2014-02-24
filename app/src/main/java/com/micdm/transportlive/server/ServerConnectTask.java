@@ -16,9 +16,6 @@ import com.micdm.transportlive.server.handlers.GetStationsCommandHandler;
 import com.micdm.transportlive.server.handlers.GetTransportsCommandHandler;
 import com.micdm.transportlive.server.handlers.GetVehiclesCommandHandler;
 
-/**
- * TODO: обработать ситуацию, когда сети нет
- */
 public class ServerConnectTask extends AsyncTask<Command, Void, Command.Result> {
 
     public static interface OnResultListener {
