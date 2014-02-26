@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.micdm.transportlive.MainActivity;
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.Direction;
 import com.micdm.transportlive.data.Point;
@@ -16,6 +15,7 @@ import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.Vehicle;
+import com.micdm.transportlive.misc.ServiceLoader;
 
 import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
@@ -37,11 +37,15 @@ public class MapFragment extends Fragment {
     private Runnable update = new Runnable() {
         @Override
         public void run() {
-            ((MainActivity) getActivity()).loadVehicles(new MainActivity.OnLoadVehiclesListener() {
+            ServiceLoader.loadVehicles(getActivity(), null, new ServiceLoader.OnLoadListener() {
                 @Override
-                public void onLoadVehicles(Service service) {
-                    update(service);
+                public void onLoad(Service service) {
+                    updateMarkers(service);
                     handler.postDelayed(update, UPDATE_INTERVAL * 1000);
+                }
+                @Override
+                public void onNoConnection() {
+
                 }
             });
         }
@@ -58,16 +62,16 @@ public class MapFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        update.run();
+        //update.run();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        handler.removeCallbacks(update);
+        //handler.removeCallbacks(update);
     }
 
-    private void update(Service service) {
+    private void updateMarkers(Service service) {
         Date now = new Date();
         ArrayList<OverlayItem> markers = new ArrayList<OverlayItem>();
         Rect bounds = new Rect(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);

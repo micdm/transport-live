@@ -1,17 +1,21 @@
 package com.micdm.transportlive.fragments;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.micdm.transportlive.MainActivity;
 import com.micdm.transportlive.R;
+import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
+import com.micdm.transportlive.misc.ServiceCache;
 
-public class RouteListFragment extends Fragment {
+public class RouteListFragment extends ServiceFragment {
+
+    public static interface OnServiceReadyListener {
+        public void onServiceReady();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -19,15 +23,15 @@ public class RouteListFragment extends Fragment {
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        addTransportRouteLists();
+    protected void onServiceReady(Service service) {
+        ServiceCache.set(getActivity(), service);
+        ((OnServiceReadyListener) getActivity()).onServiceReady();
+        addTransportRouteLists(service);
     }
 
-    private void addTransportRouteLists() {
-        MainActivity activity = (MainActivity) getActivity();
-        FragmentTransaction transaction = activity.getSupportFragmentManager().beginTransaction();
-        for (Transport transport: activity.getService().transports) {
+    private void addTransportRouteLists(Service service) {
+        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+        for (Transport transport: service.transports) {
             TransportRouteListFragment fragment = getTransportRouteListFragment(transport);
             transaction.add(R.id.route_list, fragment);
         }

@@ -19,18 +19,9 @@ import java.util.ArrayList;
 
 public class ServiceLoader {
 
-    public static interface OnLoadListener {
-        public void onLoad(Object data);
+    public interface OnLoadListener {
+        public void onLoad(Service service);
         public void onNoConnection();
-    }
-
-    public static void loadService(Context context, OnLoadListener callback) {
-        if (!isNetworkAvailable(context)) {
-            callback.onNoConnection();
-        } else {
-            Service service = new Service();
-            loadTransports(service, callback);
-        }
     }
 
     private static boolean isNetworkAvailable(Context context) {
@@ -39,60 +30,76 @@ public class ServiceLoader {
         return info != null && info.isConnected();
     }
 
-    private static void loadTransports(Service service, final OnLoadListener callback) {
-        ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
-            @Override
-            public void onResult(Command.Result result) {
-                Service service = ((GetTransportsCommand.Result)result).service;
-                loadRoutes(service, callback);
-            }
-        });
-        task.execute(new GetTransportsCommand(service));
-    }
-
-    private static void loadRoutes(Service service, final OnLoadListener callback) {
-        ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
-            @Override
-            public void onResult(Command.Result result) {
-                Service service = ((GetRoutesCommand.Result)result).service;
-                loadPoints(service, callback);
-            }
-        });
-        task.execute(new GetRoutesCommand(service));
-    }
-
-    private static void loadPoints(Service service, final OnLoadListener callback) {
-        ArrayList<Command> commands = new ArrayList<Command>();
-        for (Transport transport: service.transports) {
-            for (Route route: transport.routes) {
-                commands.add(new GetPointsCommand(service, transport, route));
-            }
+    public static void loadTransports(Context context, Service service, final OnLoadListener callback) {
+        if (!isNetworkAvailable(context)) {
+            callback.onNoConnection();
+        } else {
+            ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
+                @Override
+                public void onResult(Command.Result result) {
+                    Service service = ((GetTransportsCommand.Result)result).service;
+                    callback.onLoad(service);
+                }
+            });
+            task.execute(new GetTransportsCommand(service));
         }
-        TaskGroupExecutor executor = new TaskGroupExecutor();
-        executor.execute(commands.toArray(new Command[commands.size()]), new TaskGroupExecutor.OnExecuteListener() {
-            @Override
-            public void onExecute(Command.Result[] results) {
-                Service service = ((GetPointsCommand.Result)results[0]).service;
-                loadStations(service, callback);
-            }
-        });
     }
 
-    private static void loadStations(Service service, final OnLoadListener callback) {
-        ArrayList<Command> commands = new ArrayList<Command>();
-        for (Transport transport: service.transports) {
-            for (Route route: transport.routes) {
-                commands.add(new GetStationsCommand(service, transport, route));
-            }
+    public static void loadRoutes(Context context, Service service, final OnLoadListener callback) {
+        if (!isNetworkAvailable(context)) {
+            callback.onNoConnection();
+        } else {
+            ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
+                @Override
+                public void onResult(Command.Result result) {
+                    Service service = ((GetRoutesCommand.Result)result).service;
+                    callback.onLoad(service);
+                }
+            });
+            task.execute(new GetRoutesCommand(service));
         }
-        TaskGroupExecutor executor = new TaskGroupExecutor();
-        executor.execute(commands.toArray(new Command[commands.size()]), new TaskGroupExecutor.OnExecuteListener() {
-            @Override
-            public void onExecute(Command.Result[] results) {
-                Service service = ((GetStationsCommand.Result)results[0]).service;
-                callback.onLoad(service);
+    }
+
+    public static void loadPoints(Context context, Service service, final OnLoadListener callback) {
+        if (!isNetworkAvailable(context)) {
+            callback.onNoConnection();
+        } else {
+            ArrayList<Command> commands = new ArrayList<Command>();
+            for (Transport transport: service.transports) {
+                for (Route route: transport.routes) {
+                    commands.add(new GetPointsCommand(service, transport, route));
+                }
             }
-        });
+            TaskGroupExecutor executor = new TaskGroupExecutor();
+            executor.execute(commands.toArray(new Command[commands.size()]), new TaskGroupExecutor.OnExecuteListener() {
+                @Override
+                public void onExecute(Command.Result[] results) {
+                    Service service = ((GetPointsCommand.Result)results[0]).service;
+                    callback.onLoad(service);
+                }
+            });
+        }
+    }
+
+    public static void loadStations(Context context, Service service, final OnLoadListener callback) {
+        if (!isNetworkAvailable(context)) {
+            callback.onNoConnection();
+        } else {
+            ArrayList<Command> commands = new ArrayList<Command>();
+            for (Transport transport: service.transports) {
+                for (Route route: transport.routes) {
+                    commands.add(new GetStationsCommand(service, transport, route));
+                }
+            }
+            TaskGroupExecutor executor = new TaskGroupExecutor();
+            executor.execute(commands.toArray(new Command[commands.size()]), new TaskGroupExecutor.OnExecuteListener() {
+                @Override
+                public void onExecute(Command.Result[] results) {
+                    Service service = ((GetStationsCommand.Result)results[0]).service;
+                    callback.onLoad(service);
+                }
+            });
+        }
     }
 
     public static void loadVehicles(Context context, Service service, final OnLoadListener callback) {
@@ -102,7 +109,8 @@ public class ServiceLoader {
             ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
                 @Override
                 public void onResult(Command.Result result) {
-                    callback.onLoad(((GetVehiclesCommand.Result)result).service);
+                    Service service = ((GetVehiclesCommand.Result)result).service;
+                    callback.onLoad(service);
                 }
             });
             task.execute(new GetVehiclesCommand(service));

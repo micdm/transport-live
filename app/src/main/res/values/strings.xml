@@ -9,4 +9,8 @@
     <string name="transport_type_taxi">Маршрутное такси</string>
     <string name="no_connection">Сервер недоступен.\nВключите WiFi или мобильный интернет.</string>
     <string name="retry_connection">Повторить</string>
+    <!-- Сообщения при первой загрузке -->
+    <string name="first_loading_transports">Загружаются виды транспорта…</string>
+    <string name="first_loading_routes">Загружаются маршруты…</string>
+    <string name="first_loading_stations">Загружаются остановки…</string>
 </resources>

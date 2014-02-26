@@ -1,6 +1,5 @@
 package com.micdm.transportlive;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -10,58 +9,50 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 
-import com.micdm.transportlive.data.Route;
-import com.micdm.transportlive.data.Service;
-import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.fragments.MapFragment;
-import com.micdm.transportlive.fragments.NoConnectionFragment;
 import com.micdm.transportlive.fragments.RouteListFragment;
-import com.micdm.transportlive.fragments.TransportRouteListFragment;
-import com.micdm.transportlive.misc.ServiceCache;
-import com.micdm.transportlive.misc.ServiceLoader;
 
-public class MainActivity extends ActionBarActivity implements NoConnectionFragment.OnRetryConnectionListener, TransportRouteListFragment.OnRouteCheckChangeListener {
+import java.util.ArrayList;
+
+public class MainActivity extends ActionBarActivity implements RouteListFragment.OnServiceReadyListener {
 
     private static class CustomPagerAdapter extends FragmentPagerAdapter {
 
-        private static final int PAGE_COUNT = 2;
+        private ArrayList<Page> pages = new ArrayList<Page>();
 
-        private static final int PAGE_ROUTE_LIST = 0;
-        private static final int PAGE_MAP = 1;
-
-        private Context context;
-
-        public CustomPagerAdapter(Context context, FragmentManager fm) {
+        public CustomPagerAdapter(FragmentManager fm) {
             super(fm);
-            this.context = context;
+        }
+
+        public void add(Page page) {
+            pages.add(page);
+            notifyDataSetChanged();
         }
 
         @Override
         public Fragment getItem(int i) {
-            if (i == PAGE_ROUTE_LIST) {
-                return new RouteListFragment();
-            }
-            if (i == PAGE_MAP) {
-                return new MapFragment();
-            }
-            throw new RuntimeException("unknown page");
+            return pages.get(i).fragment;
         }
 
         @Override
         public int getCount() {
-            return PAGE_COUNT;
+            return pages.size();
         }
 
         @Override
         public CharSequence getPageTitle(int i) {
-            switch (i) {
-                case PAGE_ROUTE_LIST:
-                    return context.getString(R.string.tab_title_route_list);
-                case PAGE_MAP:
-                    return context.getString(R.string.tab_title_map);
-                default:
-                    throw new RuntimeException("unknown page");
-            }
+            return pages.get(i).title;
+        }
+    }
+
+    private static class Page {
+
+        public String title;
+        public Fragment fragment;
+
+        public Page(String title, Fragment fragment) {
+            this.title = title;
+            this.fragment = fragment;
         }
     }
 
@@ -70,7 +61,7 @@ public class MainActivity extends ActionBarActivity implements NoConnectionFragm
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setupActionBar();
-        loadService();
+        setupPager();
     }
 
     private void setupActionBar() {
@@ -81,90 +72,41 @@ public class MainActivity extends ActionBarActivity implements NoConnectionFragm
         actionBar.setDisplayShowTitleEnabled(false);
     }
 
-    private void loadService() {
-        Service service = ServiceCache.get(this);
-        if (service == null) {
-            ServiceLoader.loadService(this, new ServiceLoader.OnLoadListener() {
-                @Override
-                public void onLoad(Object data) {
-                    onServiceLoad((Service) data);
-                }
-                @Override
-                public void onNoConnection() {
-                    (new NoConnectionFragment()).show(getSupportFragmentManager(), "no_connection");
-                }
-            });
-        } else {
-            onServiceLoad(service);
-        }
-    }
-
-    private void onServiceLoad(Service service) {
-        ServiceCache.set(this, service);
-        setupPager();
+    @Override
+    public void onServiceReady() {
+        addPage(new Page(getString(R.string.tab_title_map), new MapFragment()));
     }
 
     private void setupPager() {
         final ActionBar actionBar = getSupportActionBar();
-        final CustomViewPager pager = (CustomViewPager)findViewById(R.id.pager);
+        final CustomViewPager pager = (CustomViewPager) findViewById(R.id.pager);
         pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int i) {
                 actionBar.setSelectedNavigationItem(i);
             }
         });
-        CustomPagerAdapter adapter = new CustomPagerAdapter(this, getSupportFragmentManager());
-        for (int i = 0; i < adapter.getCount(); i += 1) {
-            ActionBar.Tab tab = actionBar.newTab();
-            tab.setText(adapter.getPageTitle(i));
-            tab.setTabListener(new ActionBar.TabListener() {
-                @Override
-                public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-                    pager.setCurrentItem(tab.getPosition());
-                }
-                @Override
-                public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {}
-                @Override
-                public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {}
-            });
-            actionBar.addTab(tab);
-        }
+        CustomPagerAdapter adapter = new CustomPagerAdapter(getSupportFragmentManager());
         pager.setAdapter(adapter);
+        addPage(new Page(getString(R.string.tab_title_route_list), new RouteListFragment()));
     }
 
-    public Service getService() {
-        return ServiceCache.get(this);
-    }
-
-    public static interface OnLoadVehiclesListener {
-        public void onLoadVehicles(Service service);
-    }
-
-    public void loadVehicles(final OnLoadVehiclesListener callback) {
-        ServiceLoader.loadVehicles(this, getService(), new ServiceLoader.OnLoadListener() {
+    private void addPage(Page page) {
+        final CustomViewPager pager = (CustomViewPager) findViewById(R.id.pager);
+        ((CustomPagerAdapter) pager.getAdapter()).add(page);
+        ActionBar actionBar = getSupportActionBar();
+        ActionBar.Tab tab = actionBar.newTab();
+        tab.setText(page.title);
+        tab.setTabListener(new ActionBar.TabListener() {
             @Override
-            public void onLoad(Object data) {
-                callback.onLoadVehicles((Service) data);
+            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+                pager.setCurrentItem(tab.getPosition());
             }
-
             @Override
-            public void onNoConnection() {
-                (new NoConnectionFragment()).show(getSupportFragmentManager(), "no_connection");
-            }
+            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {}
+            @Override
+            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {}
         });
-    }
-
-    @Override
-    public void onRetryConnection() {
-        loadService();
-    }
-
-    @Override
-    public void onRouteCheckChange(int transportId, int routeNumber, boolean isChecked) {
-        Service service = ServiceCache.get(this);
-        Transport transport = service.getTransportById(transportId);
-        Route route = transport.getRouteByNumber(routeNumber);
-        route.isChecked = isChecked;
-        ServiceCache.set(this, service);
+        actionBar.addTab(tab);
     }
 }

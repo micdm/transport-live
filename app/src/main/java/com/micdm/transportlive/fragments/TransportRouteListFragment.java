@@ -1,7 +1,6 @@
 package com.micdm.transportlive.fragments;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,17 +8,12 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
-import com.micdm.transportlive.MainActivity;
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.RouteInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 
-public class TransportRouteListFragment extends Fragment {
-
-    public static interface OnRouteCheckChangeListener {
-        public void onRouteCheckChange(int transportId, int routeNumber, boolean isChecked);
-    }
+public class TransportRouteListFragment extends ServiceFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -27,17 +21,11 @@ public class TransportRouteListFragment extends Fragment {
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        Transport transport = getTransport();
+    protected void onServiceReady(Service service) {
+        int id = getArguments().getInt("id");
+        Transport transport = service.getTransportById(id);
         setupTitle(transport);
         setupRouteList(transport);
-    }
-
-    private Transport getTransport() {
-        int id = getArguments().getInt("id");
-        Service service = ((MainActivity) getActivity()).getService();
-        return service.getTransportById(id);
     }
 
     private void setupTitle(Transport transport) {
@@ -59,20 +47,22 @@ public class TransportRouteListFragment extends Fragment {
     }
 
     private void setupRouteList(Transport transport) {
-        ViewGroup container = (ViewGroup)getView().findViewById(R.id.list);
+        ViewGroup container = (ViewGroup) getView().findViewById(R.id.list);
         for (RouteInfo info: transport.getAllRouteInfo()) {
-            addRouteListItem(container, transport, info);
+            View view = getRouteListItemView(transport, info);
+            container.addView(view);
         }
     }
 
-    private void addRouteListItem(ViewGroup container, final Transport transport, final RouteInfo info) {
+    private View getRouteListItemView(final Transport transport, final RouteInfo info) {
         View view = View.inflate(getActivity(), R.layout.view_route_list_item, null);
         CheckBox checkbox = (CheckBox)view.findViewById(R.id.is_checked);
         checkbox.setChecked(info.route.isChecked);
         checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton button, boolean isChecked) {
-                ((OnRouteCheckChangeListener) getActivity()).onRouteCheckChange(transport.id, info.route.number, isChecked);
+//                info.route.isChecked = isChecked;
+//                ServiceCache.set(getActivity(), ser);
             }
         });
         TextView numberView = (TextView)view.findViewById(R.id.number);
@@ -81,6 +71,6 @@ public class TransportRouteListFragment extends Fragment {
         startView.setText(info.start);
         TextView finishView = (TextView)view.findViewById(R.id.finish);
         finishView.setText(info.finish);
-        container.addView(view);
+        return view;
     }
 }
