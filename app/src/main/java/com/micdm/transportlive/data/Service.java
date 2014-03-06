@@ -15,6 +15,15 @@ public class Service {
         return null;
     }
 
+    public Transport getTransportByType(Transport.Type type) {
+        for (Transport transport: transports) {
+            if (transport.type.equals(type)) {
+                return transport;
+            }
+        }
+        return null;
+    }
+
     public Transport getTransportByCode(String code) {
         for (Transport transport: transports) {
             if (transport.code.equals(code)) {

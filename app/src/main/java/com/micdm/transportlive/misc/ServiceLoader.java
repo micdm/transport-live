@@ -19,20 +19,31 @@ import java.util.ArrayList;
 
 public class ServiceLoader {
 
-    public interface OnLoadListener {
-        public void onLoad(Service service);
+    public interface OnNoConnectionListener {
         public void onNoConnection();
     }
 
-    private static boolean isNetworkAvailable(Context context) {
+    public interface OnLoadListener {
+        public void onLoad(Service service);
+    }
+
+    private Context context;
+    private OnNoConnectionListener noConnectionCallback;
+
+    public ServiceLoader(Context context, OnNoConnectionListener noConnectionCallback) {
+        this.context = context;
+        this.noConnectionCallback = noConnectionCallback;
+    }
+
+    private boolean isNetworkAvailable() {
         ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = manager.getActiveNetworkInfo();
         return info != null && info.isConnected();
     }
 
-    public static void loadTransports(Context context, Service service, final OnLoadListener callback) {
-        if (!isNetworkAvailable(context)) {
-            callback.onNoConnection();
+    public void loadTransports(Service service, final OnLoadListener callback) {
+        if (!isNetworkAvailable()) {
+            noConnectionCallback.onNoConnection();
         } else {
             ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
                 @Override
@@ -45,9 +56,9 @@ public class ServiceLoader {
         }
     }
 
-    public static void loadRoutes(Context context, Service service, final OnLoadListener callback) {
-        if (!isNetworkAvailable(context)) {
-            callback.onNoConnection();
+    public void loadRoutes(Service service, final OnLoadListener callback) {
+        if (!isNetworkAvailable()) {
+            noConnectionCallback.onNoConnection();
         } else {
             ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
                 @Override
@@ -60,9 +71,9 @@ public class ServiceLoader {
         }
     }
 
-    public static void loadPoints(Context context, Service service, final OnLoadListener callback) {
-        if (!isNetworkAvailable(context)) {
-            callback.onNoConnection();
+    public void loadPoints(Service service, final OnLoadListener callback) {
+        if (!isNetworkAvailable()) {
+            noConnectionCallback.onNoConnection();
         } else {
             ArrayList<Command> commands = new ArrayList<Command>();
             for (Transport transport: service.transports) {
@@ -81,9 +92,9 @@ public class ServiceLoader {
         }
     }
 
-    public static void loadStations(Context context, Service service, final OnLoadListener callback) {
-        if (!isNetworkAvailable(context)) {
-            callback.onNoConnection();
+    public void loadStations(Service service, final OnLoadListener callback) {
+        if (!isNetworkAvailable()) {
+            noConnectionCallback.onNoConnection();
         } else {
             ArrayList<Command> commands = new ArrayList<Command>();
             for (Transport transport: service.transports) {
@@ -102,9 +113,9 @@ public class ServiceLoader {
         }
     }
 
-    public static void loadVehicles(Context context, Service service, final OnLoadListener callback) {
-        if (!isNetworkAvailable(context)) {
-            callback.onNoConnection();
+    public void loadVehicles(Service service, final OnLoadListener callback) {
+        if (!isNetworkAvailable()) {
+            noConnectionCallback.onNoConnection();
         } else {
             ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
                 @Override

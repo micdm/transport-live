@@ -21,16 +21,25 @@ public class ServiceCache {
 
     private static final String CACHE_FILE_NAME = "service.bin";
 
-    private static Service cached;
+    private Context context;
+    private Service service;
 
-    public static Service get(Context context) {
-        if (cached == null) {
-            cached = getFromCache(context);
-        }
-        return cached;
+    public ServiceCache(Context context) {
+        this.context = context;
     }
 
-    private static Service getFromCache(Context context) {
+    public Service get() {
+        if (service == null) {
+            service = getFromCache();
+        }
+        return service;
+    }
+
+//    private Service getFromCache() {
+//        return null;
+//    }
+
+    private Service getFromCache() {
         try {
             FileInputStream input = context.openFileInput(CACHE_FILE_NAME);
             Service service = readServiceFromFile(input);
@@ -45,14 +54,14 @@ public class ServiceCache {
         }
     }
 
-    private static Service readServiceFromFile(FileInputStream file) throws IOException {
+    private Service readServiceFromFile(FileInputStream file) throws IOException {
         ObjectInputStream input = new ObjectInputStream(file);
         Service service = readService(input);
         input.close();
         return service;
     }
 
-    private static Service readService(ObjectInputStream input) throws IOException {
+    private Service readService(ObjectInputStream input) throws IOException {
         Service service = new Service();
         int count = input.readInt();
         for (int i = 0; i < count; i += 1) {
@@ -61,7 +70,7 @@ public class ServiceCache {
         return service;
     }
 
-    private static Transport readTransport(ObjectInputStream input) throws IOException {
+    private Transport readTransport(ObjectInputStream input) throws IOException {
         Transport transport = new Transport(input.readInt(), getTransportType(input.readUTF()), input.readUTF());
         int count = input.readInt();
         for (int i = 0; i < count; i += 1) {
@@ -70,7 +79,7 @@ public class ServiceCache {
         return transport;
     }
 
-    private static Transport.Type getTransportType(String value) {
+    private Transport.Type getTransportType(String value) {
         for (Transport.Type type: Transport.Type.values()) {
             if (value.equals(type.toString())) {
                 return type;
@@ -79,7 +88,7 @@ public class ServiceCache {
         throw new RuntimeException("unknown transport type");
     }
 
-    private static Route readRoute(ObjectInputStream input) throws IOException {
+    private Route readRoute(ObjectInputStream input) throws IOException {
         Route route = new Route(input.readInt(), input.readBoolean());
         int count = input.readInt();
         for (int i = 0; i < count; i += 1) {
@@ -92,11 +101,11 @@ public class ServiceCache {
         return route;
     }
 
-    private static Point readPoint(ObjectInputStream input) throws IOException {
+    private Point readPoint(ObjectInputStream input) throws IOException {
         return new Point(input.readInt(), input.readInt());
     }
 
-    private static Direction readDirection(ObjectInputStream input) throws IOException {
+    private Direction readDirection(ObjectInputStream input) throws IOException {
         Direction direction = new Direction(input.readInt());
         int count = input.readInt();
         for (int i = 0; i < count; i += 1) {
@@ -105,12 +114,12 @@ public class ServiceCache {
         return direction;
     }
 
-    private static Station readStation(ObjectInputStream input) throws IOException {
+    private Station readStation(ObjectInputStream input) throws IOException {
         return new Station(input.readUTF(), readPoint(input));
     }
 
-    public static void set(Context context, Service service) {
-        cached = service;
+    public void put(Service service) {
+        this.service = service;
         try {
             FileOutputStream output = context.openFileOutput(CACHE_FILE_NAME, Context.MODE_PRIVATE);
             writeServiceToFile(output, service);
@@ -122,20 +131,20 @@ public class ServiceCache {
         }
     }
 
-    private static void writeServiceToFile(FileOutputStream file, Service service) throws IOException {
+    private void writeServiceToFile(FileOutputStream file, Service service) throws IOException {
         ObjectOutputStream output = new ObjectOutputStream(file);
         writeService(output, service);
         output.close();
     }
 
-    private static void writeService(ObjectOutputStream output, Service service) throws IOException {
+    private void writeService(ObjectOutputStream output, Service service) throws IOException {
         output.writeInt(service.transports.size());
         for (Transport transport: service.transports) {
             writeTransport(output, transport);
         }
     }
 
-    private static void writeTransport(ObjectOutputStream output, Transport transport) throws IOException {
+    private void writeTransport(ObjectOutputStream output, Transport transport) throws IOException {
         output.writeInt(transport.id);
         output.writeUTF(transport.type.toString());
         output.writeUTF(transport.code);
@@ -145,9 +154,9 @@ public class ServiceCache {
         }
     }
 
-    private static void writeRoute(ObjectOutputStream output, Route route) throws IOException {
+    private void writeRoute(ObjectOutputStream output, Route route) throws IOException {
         output.writeInt(route.number);
-        output.writeBoolean(route.isChecked);
+        output.writeBoolean(route.isSelected);
         output.writeInt(route.points.size());
         for (Point point: route.points) {
             writePoint(output, point);
@@ -158,12 +167,12 @@ public class ServiceCache {
         }
     }
 
-    private static void writePoint(ObjectOutputStream output, Point point) throws IOException {
+    private void writePoint(ObjectOutputStream output, Point point) throws IOException {
         output.writeInt(point.latitude);
         output.writeInt(point.longitude);
     }
 
-    private static void writeDirection(ObjectOutputStream output, Direction direction) throws IOException {
+    private void writeDirection(ObjectOutputStream output, Direction direction) throws IOException {
         output.writeInt(direction.id);
         output.writeInt(direction.stations.size());
         for (Station station: direction.stations) {
@@ -171,7 +180,7 @@ public class ServiceCache {
         }
     }
 
-    private static void writeStation(ObjectOutputStream output, Station station) throws IOException {
+    private void writeStation(ObjectOutputStream output, Station station) throws IOException {
         output.writeUTF(station.name);
         writePoint(output, station.location);
     }

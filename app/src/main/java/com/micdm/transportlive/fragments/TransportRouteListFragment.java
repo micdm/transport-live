@@ -1,6 +1,7 @@
 package com.micdm.transportlive.fragments;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +13,9 @@ import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.RouteInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
+import com.micdm.transportlive.misc.ServiceHandler;
 
-public class TransportRouteListFragment extends ServiceFragment {
+public class TransportRouteListFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -21,28 +23,35 @@ public class TransportRouteListFragment extends ServiceFragment {
     }
 
     @Override
-    protected void onServiceReady(Service service) {
-        int id = getArguments().getInt("id");
-        Transport transport = service.getTransportById(id);
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setup();
+    }
+
+    private void setup() {
+        Service service = ((ServiceHandler) getActivity()).getService();
+        Transport transport = service.getTransportById(getArguments().getInt("id"));
         setupTitle(transport);
         setupRouteList(transport);
     }
 
     private void setupTitle(Transport transport) {
         TextView titleView = (TextView) getView().findViewById(R.id.title);
-        switch (transport.type) {
+        titleView.setText(getTitle(transport.type));
+    }
+
+    private String getTitle(Transport.Type type) {
+        switch (type) {
             case BUS:
-                titleView.setText(getString(R.string.transport_type_bus));
-                break;
+                return getString(R.string.transport_type_bus);
             case TROLLEYBUS:
-                titleView.setText(getString(R.string.transport_type_trolleybus));
-                break;
+                return getString(R.string.transport_type_trolleybus);
             case TRAM:
-                titleView.setText(getString(R.string.transport_type_tram));
-                break;
+                return getString(R.string.transport_type_tram);
             case TAXI:
-                titleView.setText(getString(R.string.transport_type_taxi));
-                break;
+                return getString(R.string.transport_type_taxi);
+            default:
+                throw new RuntimeException("unknown transport type");
         }
     }
 
@@ -56,13 +65,12 @@ public class TransportRouteListFragment extends ServiceFragment {
 
     private View getRouteListItemView(final Transport transport, final RouteInfo info) {
         View view = View.inflate(getActivity(), R.layout.view_route_list_item, null);
-        CheckBox checkbox = (CheckBox)view.findViewById(R.id.is_checked);
-        checkbox.setChecked(info.route.isChecked);
+        CheckBox checkbox = (CheckBox) view.findViewById(R.id.is_selected);
+        checkbox.setChecked(info.route.isSelected);
         checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton button, boolean isChecked) {
-//                info.route.isChecked = isChecked;
-//                ServiceCache.set(getActivity(), ser);
+                ((ServiceHandler) getActivity()).onSelectRoute(info, isChecked);
             }
         });
         TextView numberView = (TextView)view.findViewById(R.id.number);

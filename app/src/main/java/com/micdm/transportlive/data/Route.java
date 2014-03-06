@@ -5,13 +5,13 @@ import java.util.ArrayList;
 public class Route {
 
     public int number;
-    public boolean isChecked;
+    public boolean isSelected;
     public ArrayList<Point> points = new ArrayList<Point>();
     public ArrayList<Direction> directions = new ArrayList<Direction>();
 
-    public Route(int number, boolean isChecked) {
+    public Route(int number, boolean isSelected) {
         this.number = number;
-        this.isChecked = isChecked;
+        this.isSelected = isSelected;
     }
 
     public Route(int number) {

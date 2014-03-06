@@ -85,7 +85,7 @@ public class GetVehiclesCommandHandler extends CommandHandler {
         ArrayList<String> keys = new ArrayList<String>();
         for (Transport transport: ((GetVehiclesCommand)command).service.transports) {
             for (Route route: transport.routes) {
-                if (!route.isChecked) {
+                if (!route.isSelected) {
                     continue;
                 }
                 for (Direction direction: route.directions) {

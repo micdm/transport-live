@@ -2,7 +2,6 @@ package com.micdm.transportlive.fragments;
 
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +14,6 @@ import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.Vehicle;
-import com.micdm.transportlive.misc.ServiceLoader;
 
 import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
@@ -30,48 +28,19 @@ import java.util.List;
 
 public class MapFragment extends Fragment {
 
-    private static final int UPDATE_INTERVAL = 30;
     private static final int UPDATE_TIMEOUT = 30;
-
-    private Handler handler = new Handler();
-    private Runnable update = new Runnable() {
-        @Override
-        public void run() {
-            ServiceLoader.loadVehicles(getActivity(), null, new ServiceLoader.OnLoadListener() {
-                @Override
-                public void onLoad(Service service) {
-                    updateMarkers(service);
-                    handler.postDelayed(update, UPDATE_INTERVAL * 1000);
-                }
-                @Override
-                public void onNoConnection() {
-
-                }
-            });
-        }
-    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, null);
-        MapView map = (MapView) view.findViewById(R.id.map);
-        map.setMultiTouchControls(true);
+        if (view != null) {
+            MapView map = (MapView) view.findViewById(R.id.map);
+            map.setMultiTouchControls(true);
+        }
         return view;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        //update.run();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        //handler.removeCallbacks(update);
-    }
-
-    private void updateMarkers(Service service) {
+    public void update(Service service) {
         Date now = new Date();
         ArrayList<OverlayItem> markers = new ArrayList<OverlayItem>();
         Rect bounds = new Rect(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
