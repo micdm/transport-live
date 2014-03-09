@@ -20,9 +20,9 @@ public class Direction {
         return stations.get(stations.size() - 1);
     }
 
-    public Vehicle getVehicleById(int id) {
+    public Vehicle getVehicleById(String id) {
         for (Vehicle vehicle: vehicles) {
-            if (vehicle.id == id) {
+            if (vehicle.id.equals(id)) {
                 return vehicle;
             }
         }

@@ -1,5 +1,6 @@
 package com.micdm.transportlive.fragments;
 
+import android.app.Activity;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,6 +15,7 @@ import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.Vehicle;
+import com.micdm.transportlive.misc.ServiceHandler;
 
 import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
@@ -28,7 +30,13 @@ import java.util.List;
 
 public class MapFragment extends Fragment {
 
-    private static final int UPDATE_TIMEOUT = 30;
+    private ServiceHandler handler;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        handler = (ServiceHandler) getActivity();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -38,6 +46,23 @@ public class MapFragment extends Fragment {
             map.setMultiTouchControls(true);
         }
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        handler.setOnLoadVehiclesListener(new ServiceHandler.OnLoadVehiclesListener() {
+            @Override
+            public void onLoadVehicles(Service service) {
+                update(service);
+            }
+        });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        handler.setOnLoadVehiclesListener(null);
     }
 
     public void update(Service service) {

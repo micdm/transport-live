@@ -9,6 +9,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 
+import com.micdm.transportlive.data.Direction;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.RouteInfo;
 import com.micdm.transportlive.data.Service;
@@ -19,6 +20,7 @@ import com.micdm.transportlive.fragments.RouteListFragment;
 import com.micdm.transportlive.misc.ServiceCache;
 import com.micdm.transportlive.misc.ServiceHandler;
 import com.micdm.transportlive.misc.ServiceLoader;
+import com.micdm.transportlive.misc.ServicePoller;
 
 import java.util.ArrayList;
 
@@ -71,12 +73,39 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
             
         }
     });
+    private ServicePoller poller = new ServicePoller(loader, new ServicePoller.OnLoadListener() {
+        @Override
+        public void onLoad(Service service) {
+            if (onLoadVehiclesListener != null) {
+                onLoadVehiclesListener.onLoadVehicles(service);
+            }
+        }
+    });
+    private OnLoadServiceListener onLoadServiceListener;
+    private OnLoadVehiclesListener onLoadVehiclesListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setupActionBar();
+        setupPager();
         loadService();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Service service = cache.get();
+        if (service != null) {
+            poller.start(service);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        poller.stop();
     }
 
     private void loadService() {
@@ -84,7 +113,8 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
         if (service == null) {
             loadTransports(new Service());
         } else {
-            onLoadService();
+            onLoadService(service);
+            poller.start(service);
         }
     }
 
@@ -117,9 +147,15 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
             public void onLoad(Service service) {
                 hideLoadingMessage();
                 cache.put(service);
-                onLoadService();
+                onLoadService(service);
             }
         });
+    }
+
+    private void onLoadService(Service service) {
+        if (onLoadServiceListener != null) {
+            onLoadServiceListener.onLoadService(service);
+        }
     }
 
     private void showLoadingMessage(String message) {
@@ -135,11 +171,6 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
         if (fragment != null) {
             fragment.dismiss();
         }
-    }
-
-    private void onLoadService() {
-        setupActionBar();
-        setupPager();
     }
 
     private void setupActionBar() {
@@ -190,11 +221,35 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
     }
 
     @Override
-    public void onSelectRoute(RouteInfo info, boolean isSelected) {
+    public void selectRoute(RouteInfo info, boolean isSelected) {
         Service service = cache.get();
         Transport transport = service.getTransportByType(info.transport);
         Route route = transport.getRouteByNumber(info.route.number);
         route.isSelected = isSelected;
+        if (!isSelected) {
+            for (Direction direction: route.directions) {
+                direction.vehicles.clear();
+            }
+        }
         cache.put(service);
+        poller.restart(service);
+    }
+
+    @Override
+    public void setOnLoadServiceListener(OnLoadServiceListener listener) {
+        onLoadServiceListener = listener;
+        Service service = cache.get();
+        if (service != null) {
+            listener.onLoadService(service);
+        }
+    }
+
+    @Override
+    public void setOnLoadVehiclesListener(OnLoadVehiclesListener listener) {
+        onLoadVehiclesListener = listener;
+        Service service = cache.get();
+        if (service != null) {
+            listener.onLoadVehicles(service);
+        }
     }
 }

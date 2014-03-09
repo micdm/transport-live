@@ -122,7 +122,7 @@ public class GetVehiclesCommandHandler extends CommandHandler {
     }
 
     private Vehicle parseVehicle(XmlPullParser parser) {
-        int id = Integer.valueOf(parser.getAttributeValue("", "id"));
+        String id = parser.getAttributeValue("", "id");
         String number = parser.getAttributeValue("", "gos_num");
         int latitude = Integer.valueOf(parser.getAttributeValue("", "lat"));
         int longitude = Integer.valueOf(parser.getAttributeValue("", "lon"));

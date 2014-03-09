@@ -70,7 +70,7 @@ public class TransportRouteListFragment extends Fragment {
         checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton button, boolean isChecked) {
-                ((ServiceHandler) getActivity()).onSelectRoute(info, isChecked);
+                ((ServiceHandler) getActivity()).selectRoute(info, isChecked);
             }
         });
         TextView numberView = (TextView)view.findViewById(R.id.number);
