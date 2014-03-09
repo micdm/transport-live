@@ -58,14 +58,14 @@ public class TransportRouteListFragment extends Fragment {
     private void setupRouteList(Transport transport) {
         ViewGroup container = (ViewGroup) getView().findViewById(R.id.list);
         for (RouteInfo info: transport.getAllRouteInfo()) {
-            View view = getRouteListItemView(transport, info);
+            View view = getRouteListItemView(info);
             container.addView(view);
         }
     }
 
-    private View getRouteListItemView(final Transport transport, final RouteInfo info) {
+    private View getRouteListItemView(final RouteInfo info) {
         View view = View.inflate(getActivity(), R.layout.view_route_list_item, null);
-        CheckBox checkbox = (CheckBox) view.findViewById(R.id.is_selected);
+        final CheckBox checkbox = (CheckBox) view.findViewById(R.id.is_selected);
         checkbox.setChecked(info.route.isSelected);
         checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -79,6 +79,12 @@ public class TransportRouteListFragment extends Fragment {
         startView.setText(info.start);
         TextView finishView = (TextView)view.findViewById(R.id.finish);
         finishView.setText(info.finish);
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                checkbox.toggle();
+            }
+        });
         return view;
     }
 }
