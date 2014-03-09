@@ -5,6 +5,10 @@ import com.micdm.transportlive.data.Service;
 
 public interface ServiceHandler {
 
+    public static interface OnUnselectAllRoutesListener {
+        public void onUnselectAllRoutes();
+    }
+
     public static interface OnLoadServiceListener {
         public void onLoadService(Service service);
     }
@@ -15,6 +19,7 @@ public interface ServiceHandler {
 
     public Service getService();
     public void selectRoute(RouteInfo info, boolean isSelected);
+    public void setOnUnselectAllRoutesListener(OnUnselectAllRoutesListener listener);
     public void setOnLoadServiceListener(OnLoadServiceListener listener);
     public void setOnLoadVehiclesListener(OnLoadVehiclesListener listener);
 }

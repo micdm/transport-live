@@ -13,4 +13,7 @@
     <string name="first_loading_transports">Загружаются виды транспорта…</string>
     <string name="first_loading_routes">Загружаются маршруты…</string>
     <string name="first_loading_stations">Загружаются остановки…</string>
+    <!-- Фрагмент с картой -->
+    <string name="fragment_map_no_route_selected">Выберите маршруты из списка.</string>
+    <string name="fragment_map_no_vehicles">Похоже, весь транспорт в парке.</string>
 </resources>

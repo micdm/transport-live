@@ -17,6 +17,18 @@ import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.Vehicle;
 import com.micdm.transportlive.misc.ServiceHandler;
 
+import org.apache.commons.io.IOUtils;
+import org.osmdroid.DefaultResourceProxyImpl;
+import org.osmdroid.ResourceProxy;
+import org.osmdroid.tileprovider.IRegisterReceiver;
+import org.osmdroid.tileprovider.MapTileProviderArray;
+import org.osmdroid.tileprovider.modules.IArchiveFile;
+import org.osmdroid.tileprovider.modules.MapTileFileArchiveProvider;
+import org.osmdroid.tileprovider.modules.MapTileModuleProviderBase;
+import org.osmdroid.tileprovider.modules.ZipFileArchive;
+import org.osmdroid.tileprovider.tilesource.ITileSource;
+import org.osmdroid.tileprovider.tilesource.XYTileSource;
+import org.osmdroid.tileprovider.util.SimpleRegisterReceiver;
 import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
@@ -24,8 +36,12 @@ import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class MapFragment extends Fragment {
@@ -42,15 +58,64 @@ public class MapFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, null);
         if (view != null) {
-            MapView map = (MapView) view.findViewById(R.id.map);
-            map.setMultiTouchControls(true);
+            ResourceProxy proxy = new DefaultResourceProxyImpl(getActivity());
+            MapTileProviderArray providers = getTileProviders();
+            MapView mapView = new MapView(getActivity(), 256, proxy, providers);
+            mapView.setId(R.id.map);
+            mapView.setVisibility(View.GONE);
+            mapView.setMinZoomLevel(14);
+            mapView.setMaxZoomLevel(15);
+            //mapView.setScrollableAreaLimit(new BoundingBoxE6(56547372, 85122070, 56438204, 84902344));
+            mapView.setMultiTouchControls(true);
+            ((ViewGroup) view).removeView(view.findViewById(R.id.map));
+            ((ViewGroup) view).addView(mapView);
         }
         return view;
+    }
+
+    private MapTileProviderArray getTileProviders() {
+        try {
+            IRegisterReceiver receiver = new SimpleRegisterReceiver(getActivity());
+            ITileSource source = new XYTileSource("OSMPublicTransport", ResourceProxy.string.public_transport, 13, 14, 256, ".png", null);
+            ZipFileArchive archive = ZipFileArchive.getZipFileArchive(getAtlas());
+            MapTileFileArchiveProvider provider = new MapTileFileArchiveProvider(receiver, source, new IArchiveFile[] {archive});
+            return new MapTileProviderArray(source, receiver, new MapTileModuleProviderBase[] {provider});
+        } catch (IOException e) {
+            throw new RuntimeException("cannot load atlas");
+        }
+    }
+
+    private File getAtlas() {
+        File file = new File(new File(getActivity().getCacheDir(), "atlas.zip").getAbsolutePath());
+        if (!file.exists()) {
+            copyAtlasToCache(file);
+        }
+        return file;
+    }
+
+    private void copyAtlasToCache(File file) {
+        try {
+            InputStream input = getActivity().getAssets().open("atlas.zip");
+            OutputStream output = new FileOutputStream(file);
+            IOUtils.copy(input, output);
+            input.close();
+            output.close();
+        } catch (IOException e) {
+            throw new RuntimeException("cannot copy atlas to cache");
+        }
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        hideViews();
+        handler.setOnUnselectAllRoutesListener(new ServiceHandler.OnUnselectAllRoutesListener() {
+            @Override
+            public void onUnselectAllRoutes() {
+                hideViews();
+                showView(R.id.no_route_selected);
+            }
+        });
         handler.setOnLoadVehiclesListener(new ServiceHandler.OnLoadVehiclesListener() {
             @Override
             public void onLoadVehicles(Service service) {
@@ -66,17 +131,37 @@ public class MapFragment extends Fragment {
     }
 
     public void update(Service service) {
-        Date now = new Date();
+        hideViews();
+        Vehicle[] vehicles = getVehicles(service);
+        if (vehicles.length == 0) {
+            showView(R.id.no_vehicles);
+            return;
+        }
+        showView(R.id.map);
         ArrayList<OverlayItem> markers = new ArrayList<OverlayItem>();
         Rect bounds = new Rect(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
-        for (Vehicle vehicle: getVehicles(service)) {
-//            if (now.getTime() - vehicle.lastUpdate.getTime() > UPDATE_TIMEOUT) {
-//                continue;
-//            }
+        for (Vehicle vehicle: vehicles) {
             markers.add(getMarker(vehicle));
             updateBounds(bounds, vehicle.location);
         }
         updateMap(markers, new BoundingBoxE6(bounds.top, bounds.right, bounds.bottom, bounds.left));
+    }
+
+    private void showView(int id) {
+        getView().findViewById(id).setVisibility(View.VISIBLE);
+    }
+
+    private void hideViews() {
+        ViewGroup container = ((ViewGroup) ((ViewGroup) getView()).getChildAt(0));
+        if (container == null) {
+            return;
+        }
+        for (int i = 0; i < container.getChildCount(); i += 1) {
+            View view = container.getChildAt(i);
+            if (view != null) {
+                view.setVisibility(View.GONE);
+            }
+        }
     }
 
     private Vehicle[] getVehicles(Service service) {
@@ -119,10 +204,12 @@ public class MapFragment extends Fragment {
     }
 
     private void updateMap(List<OverlayItem> markers, BoundingBoxE6 bounds) {
-        MapView map = (MapView) getView().findViewById(R.id.map);
-        List<Overlay> overlays = map.getOverlays();
-        overlays.clear();
-        overlays.add(getLayer(markers));
-        map.zoomToBoundingBox(bounds);
+        MapView view = (MapView) ((ViewGroup) getView()).getChildAt(0);
+        if (view != null) {
+            List<Overlay> overlays = view.getOverlays();
+            overlays.clear();
+            overlays.add(getLayer(markers));
+            view.zoomToBoundingBox(bounds);
+        }
     }
 }

@@ -59,9 +59,4 @@ public class ServicePoller {
             currentTask = null;
         }
     }
-
-    public void restart(Service service) {
-        stop();
-        start(service);
-    }
 }

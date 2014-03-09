@@ -81,6 +81,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
             }
         }
     });
+    private OnUnselectAllRoutesListener onUnselectAllRoutesListener;
     private OnLoadServiceListener onLoadServiceListener;
     private OnLoadVehiclesListener onLoadVehiclesListener;
 
@@ -97,7 +98,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
     protected void onStart() {
         super.onStart();
         Service service = cache.get();
-        if (service != null) {
+        if (service != null && getSelectedRouteCount(service) != 0) {
             poller.start(service);
         }
     }
@@ -108,13 +109,27 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
         poller.stop();
     }
 
+    private int getSelectedRouteCount(Service service) {
+        int count = 0;
+        for (Transport transport: service.transports) {
+            for (Route route: transport.routes) {
+                if (route.isSelected) {
+                    count += 1;
+                }
+            }
+        }
+        return count;
+    }
+
     private void loadService() {
         Service service = cache.get();
         if (service == null) {
             loadTransports(new Service());
         } else {
             onLoadService(service);
-            poller.start(service);
+            if (getSelectedRouteCount(service) != 0) {
+                poller.start(service);
+            }
         }
     }
 
@@ -153,6 +168,9 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
     }
 
     private void onLoadService(Service service) {
+        if (onUnselectAllRoutesListener != null && getSelectedRouteCount(service) == 0) {
+            onUnselectAllRoutesListener.onUnselectAllRoutes();
+        }
         if (onLoadServiceListener != null) {
             onLoadServiceListener.onLoadService(service);
         }
@@ -222,6 +240,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
 
     @Override
     public void selectRoute(RouteInfo info, boolean isSelected) {
+        poller.stop();
         Service service = cache.get();
         Transport transport = service.getTransportByType(info.transport);
         Route route = transport.getRouteByNumber(info.route.number);
@@ -232,7 +251,22 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
             }
         }
         cache.put(service);
-        poller.restart(service);
+        if (getSelectedRouteCount(service) == 0) {
+            if (onUnselectAllRoutesListener != null) {
+                onUnselectAllRoutesListener.onUnselectAllRoutes();
+            }
+        } else {
+            poller.start(service);
+        }
+    }
+
+    @Override
+    public void setOnUnselectAllRoutesListener(OnUnselectAllRoutesListener listener) {
+        onUnselectAllRoutesListener = listener;
+        Service service = cache.get();
+        if (service != null && getSelectedRouteCount(service) == 0) {
+            listener.onUnselectAllRoutes();
+        }
     }
 
     @Override
@@ -248,7 +282,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
     public void setOnLoadVehiclesListener(OnLoadVehiclesListener listener) {
         onLoadVehiclesListener = listener;
         Service service = cache.get();
-        if (service != null) {
+        if (service != null && getSelectedRouteCount(service) != 0) {
             listener.onLoadVehicles(service);
         }
     }
