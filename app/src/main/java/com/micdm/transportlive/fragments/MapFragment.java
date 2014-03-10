@@ -1,7 +1,6 @@
 package com.micdm.transportlive.fragments;
 
 import android.app.Activity;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -10,7 +9,6 @@ import android.view.ViewGroup;
 
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.Direction;
-import com.micdm.transportlive.data.Point;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
@@ -147,12 +145,10 @@ public class MapFragment extends Fragment {
         }
         showView(R.id.map);
         ArrayList<OverlayItem> markers = new ArrayList<OverlayItem>();
-        Rect bounds = new Rect(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
         for (Vehicle vehicle: vehicles) {
             markers.add(getMarker(vehicle));
-            updateBounds(bounds, vehicle.location);
         }
-        updateMap(markers, new BoundingBoxE6(bounds.top, bounds.right, bounds.bottom, bounds.left));
+        updateMap(markers);
     }
 
     private void showView(int id) {
@@ -191,13 +187,6 @@ public class MapFragment extends Fragment {
         return marker;
     }
 
-    private void updateBounds(Rect bounds, Point location) {
-        bounds.left = Math.min(bounds.left, location.longitude);
-        bounds.top = Math.min(bounds.top, location.latitude);
-        bounds.right = Math.max(bounds.right, location.longitude);
-        bounds.bottom = Math.max(bounds.bottom, location.latitude);
-    }
-
     private Overlay getLayer(List<OverlayItem> markers) {
         return new ItemizedIconOverlay<OverlayItem>(getActivity(), markers, new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
             @Override
@@ -211,13 +200,12 @@ public class MapFragment extends Fragment {
         });
     }
 
-    private void updateMap(List<OverlayItem> markers, BoundingBoxE6 bounds) {
+    private void updateMap(List<OverlayItem> markers) {
         MapView view = (MapView) getView().findViewById(R.id.map);
         if (view != null) {
             List<Overlay> overlays = view.getOverlays();
             overlays.clear();
             overlays.add(getLayer(markers));
-            view.zoomToBoundingBox(bounds);
         }
     }
 }
