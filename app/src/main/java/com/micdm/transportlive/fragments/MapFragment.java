@@ -46,6 +46,15 @@ import java.util.List;
 
 public class MapFragment extends Fragment {
 
+    private static final String ATLAS_FILE_NAME = "atlas.zip";
+    private static final int TILE_SIZE = 256;
+    private static final int MIN_ZOOM = 14;
+    private static final int MAX_ZOOM = 15;
+    private static final int NORTH = 56547372;
+    private static final int WEST = 84902344;
+    private static final int SOUTH = 56438204;
+    private static final int EAST = 85122070;
+
     private ServiceHandler handler;
 
     @Override
@@ -60,14 +69,13 @@ public class MapFragment extends Fragment {
         if (view != null) {
             ResourceProxy proxy = new DefaultResourceProxyImpl(getActivity());
             MapTileProviderArray providers = getTileProviders();
-            MapView mapView = new MapView(getActivity(), 256, proxy, providers);
+            MapView mapView = new MapView(getActivity(), TILE_SIZE, proxy, providers);
             mapView.setId(R.id.map);
             mapView.setVisibility(View.GONE);
-            mapView.setMinZoomLevel(14);
-            mapView.setMaxZoomLevel(15);
-            //mapView.setScrollableAreaLimit(new BoundingBoxE6(56547372, 85122070, 56438204, 84902344));
+            mapView.setMinZoomLevel(MIN_ZOOM);
+            mapView.setMaxZoomLevel(MAX_ZOOM);
+            mapView.setScrollableAreaLimit(new BoundingBoxE6(NORTH, EAST, SOUTH, WEST));
             mapView.setMultiTouchControls(true);
-            ((ViewGroup) view).removeView(view.findViewById(R.id.map));
             ((ViewGroup) view).addView(mapView);
         }
         return view;
@@ -76,7 +84,7 @@ public class MapFragment extends Fragment {
     private MapTileProviderArray getTileProviders() {
         try {
             IRegisterReceiver receiver = new SimpleRegisterReceiver(getActivity());
-            ITileSource source = new XYTileSource("OSMPublicTransport", ResourceProxy.string.public_transport, 13, 14, 256, ".png", null);
+            ITileSource source = new XYTileSource("OSMPublicTransport", ResourceProxy.string.public_transport, MIN_ZOOM, MAX_ZOOM, TILE_SIZE, ".png", null);
             ZipFileArchive archive = ZipFileArchive.getZipFileArchive(getAtlas());
             MapTileFileArchiveProvider provider = new MapTileFileArchiveProvider(receiver, source, new IArchiveFile[] {archive});
             return new MapTileProviderArray(source, receiver, new MapTileModuleProviderBase[] {provider});
@@ -86,7 +94,7 @@ public class MapFragment extends Fragment {
     }
 
     private File getAtlas() {
-        File file = new File(new File(getActivity().getCacheDir(), "atlas.zip").getAbsolutePath());
+        File file = new File(new File(getActivity().getCacheDir(), ATLAS_FILE_NAME).getAbsolutePath());
         if (!file.exists()) {
             copyAtlasToCache(file);
         }
@@ -95,7 +103,7 @@ public class MapFragment extends Fragment {
 
     private void copyAtlasToCache(File file) {
         try {
-            InputStream input = getActivity().getAssets().open("atlas.zip");
+            InputStream input = getActivity().getAssets().open(ATLAS_FILE_NAME);
             OutputStream output = new FileOutputStream(file);
             IOUtils.copy(input, output);
             input.close();
@@ -204,7 +212,7 @@ public class MapFragment extends Fragment {
     }
 
     private void updateMap(List<OverlayItem> markers, BoundingBoxE6 bounds) {
-        MapView view = (MapView) ((ViewGroup) getView()).getChildAt(0);
+        MapView view = (MapView) getView().findViewById(R.id.map);
         if (view != null) {
             List<Overlay> overlays = view.getOverlays();
             overlays.clear();
