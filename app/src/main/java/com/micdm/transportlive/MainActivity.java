@@ -21,6 +21,7 @@ import com.micdm.transportlive.data.RouteInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.fragments.AboutFragment;
+import com.micdm.transportlive.fragments.MapFragment;
 import com.micdm.transportlive.fragments.ProgressFragment;
 import com.micdm.transportlive.fragments.RouteListFragment;
 import com.micdm.transportlive.misc.ServiceCache;
@@ -203,18 +204,18 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
     }
 
     private void setupPager() {
-        final ActionBar actionBar = getSupportActionBar();
-        final CustomViewPager pager = (CustomViewPager) findViewById(R.id.pager);
-        pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-            @Override
-            public void onPageSelected(int i) {
-                actionBar.setSelectedNavigationItem(i);
-            }
-        });
-        CustomPagerAdapter adapter = new CustomPagerAdapter(getSupportFragmentManager());
-        pager.setAdapter(adapter);
-        addPage(new Page(getString(R.string.tab_title_route_list), new RouteListFragment()));
-        addPage(new Page(getString(R.string.tab_title_map), new MapFragment()));
+        CustomViewPager pager = (CustomViewPager) findViewById(R.id.pager);
+        if (pager != null) {
+            pager.setAdapter(new CustomPagerAdapter(getSupportFragmentManager()));
+            pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+                @Override
+                public void onPageSelected(int i) {
+                    getSupportActionBar().setSelectedNavigationItem(i);
+                }
+            });
+            addPage(new Page(getString(R.string.tab_title_route_list), new RouteListFragment()));
+            addPage(new Page(getString(R.string.tab_title_map), new MapFragment()));
+        }
     }
 
     private void addPage(Page page) {
@@ -294,27 +295,33 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
     @Override
     public void setOnUnselectAllRoutesListener(OnUnselectAllRoutesListener listener) {
         onUnselectAllRoutesListener = listener;
-        Service service = cache.get();
-        if (service != null && getSelectedRouteCount(service) == 0) {
-            listener.onUnselectAllRoutes();
+        if (listener != null) {
+            Service service = cache.get();
+            if (service != null && getSelectedRouteCount(service) == 0) {
+                listener.onUnselectAllRoutes();
+            }
         }
     }
 
     @Override
     public void setOnLoadServiceListener(OnLoadServiceListener listener) {
         onLoadServiceListener = listener;
-        Service service = cache.get();
-        if (service != null) {
-            listener.onLoadService(service);
+        if (listener != null) {
+            Service service = cache.get();
+            if (service != null) {
+                listener.onLoadService(service);
+            }
         }
     }
 
     @Override
     public void setOnLoadVehiclesListener(OnLoadVehiclesListener listener) {
         onLoadVehiclesListener = listener;
-        Service service = cache.get();
-        if (service != null && getSelectedRouteCount(service) != 0) {
-            listener.onLoadVehicles(service);
+        if (listener != null) {
+            Service service = cache.get();
+            if (service != null && getSelectedRouteCount(service) != 0) {
+                listener.onLoadVehicles(service);
+            }
         }
     }
 }

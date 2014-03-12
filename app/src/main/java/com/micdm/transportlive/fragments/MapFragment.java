@@ -140,8 +140,8 @@ public class MapFragment extends Fragment {
             MapView mapView = getMapView();
             ((ViewGroup) view).addView(mapView);
             IMapController controller = mapView.getController();
-            controller.setCenter(INITIAL_LOCATION);
             controller.setZoom(MAX_ZOOM);
+            controller.setCenter(INITIAL_LOCATION);
         }
         return view;
     }
