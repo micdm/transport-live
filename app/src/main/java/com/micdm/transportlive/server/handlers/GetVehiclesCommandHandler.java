@@ -1,5 +1,6 @@
 package com.micdm.transportlive.server.handlers;
 
+import android.content.Context;
 import android.util.Xml;
 
 import com.micdm.transportlive.data.Direction;
@@ -24,8 +25,8 @@ import java.util.HashMap;
 
 public class GetVehiclesCommandHandler extends CommandHandler {
 
-    public GetVehiclesCommandHandler() {
-        super(Backend.SECOND);
+    public GetVehiclesCommandHandler(Context context) {
+        super(context, Backend.SECOND);
     }
 
     @Override

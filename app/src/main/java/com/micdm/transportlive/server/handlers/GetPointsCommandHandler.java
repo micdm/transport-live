@@ -1,5 +1,6 @@
 package com.micdm.transportlive.server.handlers;
 
+import android.content.Context;
 import android.util.Xml;
 
 import com.micdm.transportlive.data.Point;
@@ -17,8 +18,8 @@ import java.util.HashMap;
 
 public class GetPointsCommandHandler extends CommandHandler {
 
-    public GetPointsCommandHandler() {
-        super(Backend.SECOND);
+    public GetPointsCommandHandler(Context context) {
+        super(context, Backend.SECOND);
     }
 
     @Override

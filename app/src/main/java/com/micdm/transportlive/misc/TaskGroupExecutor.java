@@ -1,6 +1,7 @@
 package com.micdm.transportlive.misc;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.os.Build;
 
 import com.micdm.transportlive.server.ServerConnectTask;
@@ -14,11 +15,16 @@ public class TaskGroupExecutor {
         public void onExecute(Command.Result[] results);
     }
 
+    private Context context;
     private ArrayList<Command.Result> results = new ArrayList<Command.Result>();
+
+    public TaskGroupExecutor(Context context) {
+        this.context = context;
+    }
 
     public void execute(final Command[] commands, final OnExecuteListener callback) {
         for (Command command: commands) {
-            ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
+            ServerConnectTask task = new ServerConnectTask(context, new ServerConnectTask.OnResultListener() {
                 @Override
                 public void onResult(Command.Result result) {
                     results.add(result);

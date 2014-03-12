@@ -58,7 +58,7 @@ public class ServiceLoader {
         if (!isNetworkAvailable()) {
             noConnectionListener.onNoConnection();
         } else {
-            ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
+            ServerConnectTask task = new ServerConnectTask(context, new ServerConnectTask.OnResultListener() {
                 @Override
                 public void onResult(Command.Result result) {
                     Service service = ((GetTransportsCommand.Result)result).service;
@@ -73,7 +73,7 @@ public class ServiceLoader {
         if (!isNetworkAvailable()) {
             noConnectionListener.onNoConnection();
         } else {
-            ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
+            ServerConnectTask task = new ServerConnectTask(context, new ServerConnectTask.OnResultListener() {
                 @Override
                 public void onResult(Command.Result result) {
                     Service service = ((GetRoutesCommand.Result)result).service;
@@ -94,7 +94,7 @@ public class ServiceLoader {
                     commands.add(new GetPointsCommand(service, transport, route));
                 }
             }
-            TaskGroupExecutor executor = new TaskGroupExecutor();
+            TaskGroupExecutor executor = new TaskGroupExecutor(context);
             executor.execute(commands.toArray(new Command[commands.size()]), new TaskGroupExecutor.OnExecuteListener() {
                 @Override
                 public void onExecute(Command.Result[] results) {
@@ -115,7 +115,7 @@ public class ServiceLoader {
                     commands.add(new GetStationsCommand(service, transport, route));
                 }
             }
-            TaskGroupExecutor executor = new TaskGroupExecutor();
+            TaskGroupExecutor executor = new TaskGroupExecutor(context);
             executor.execute(commands.toArray(new Command[commands.size()]), new TaskGroupExecutor.OnExecuteListener() {
                 @Override
                 public void onExecute(Command.Result[] results) {
@@ -131,7 +131,7 @@ public class ServiceLoader {
             noConnectionListener.onNoConnection();
             return null;
         }
-        ServerConnectTask task = new ServerConnectTask(new ServerConnectTask.OnResultListener() {
+        ServerConnectTask task = new ServerConnectTask(context, new ServerConnectTask.OnResultListener() {
             @Override
             public void onResult(Command.Result result) {
                 Service service = ((GetVehiclesCommand.Result)result).service;

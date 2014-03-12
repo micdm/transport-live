@@ -1,14 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Общее -->
     <string name="app_name">Транспорт Томска</string>
-    <string name="tab_title_route_list">Маршруты</string>
-    <string name="tab_title_map">Карта</string>
+    <string name="contact_email">demerzov@gmail.com</string>
+    <string name="user_agent">transport-live %1$s on Android (mail to %2$s for discussion)</string>
+    <!-- Названия транспорта -->
     <string name="transport_type_bus">Автобус</string>
     <string name="transport_type_trolleybus">Троллейбус</string>
     <string name="transport_type_tram">Трамвай</string>
     <string name="transport_type_taxi">Маршрутное такси</string>
+    <!-- Вкладки -->
+    <string name="tab_title_route_list">Маршруты</string>
+    <string name="tab_title_map">Карта</string>
+    <!-- Сообщения -->
     <string name="no_connection">Сервер недоступен.\nВключите WiFi или мобильный интернет.</string>
     <string name="retry_connection">Повторить</string>
+    <!-- Меню -->
+    <string name="menu_item_share">Поделиться…</string>
+    <string name="menu_item_about">О приложении…</string>
+    <!-- Расшаривание -->
+    <string name="share_app_text">Троллейбусы и трамваи Томска на карте онлайн. https://play.google.com/store/apps/details?id=%s</string>
+    <!-- О приложении -->
+    <string name="about_app_text">По любым вопросам пишите на %s\nСделано на основе http://raspisanie.tomsk.ru/online/</string>
     <!-- Сообщения при первой загрузке -->
     <string name="first_loading_transports">Загружаются виды транспорта…</string>
     <string name="first_loading_routes">Загружаются маршруты…</string>

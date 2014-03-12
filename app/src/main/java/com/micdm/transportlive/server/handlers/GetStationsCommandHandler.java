@@ -1,5 +1,6 @@
 package com.micdm.transportlive.server.handlers;
 
+import android.content.Context;
 import android.util.Xml;
 
 import com.micdm.transportlive.data.Direction;
@@ -20,8 +21,8 @@ import java.util.Iterator;
 
 public class GetStationsCommandHandler extends CommandHandler {
 
-    public GetStationsCommandHandler() {
-        super(Backend.SECOND);
+    public GetStationsCommandHandler(Context context) {
+        super(context, Backend.SECOND);
     }
 
     @Override

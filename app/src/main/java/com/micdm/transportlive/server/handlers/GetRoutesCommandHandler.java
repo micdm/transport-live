@@ -1,5 +1,7 @@
 package com.micdm.transportlive.server.handlers;
 
+import android.content.Context;
+
 import com.micdm.transportlive.data.Direction;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
@@ -12,8 +14,8 @@ import org.json.JSONTokener;
 
 public class GetRoutesCommandHandler extends CommandHandler {
 
-    public GetRoutesCommandHandler() {
-        super(Backend.FIRST);
+    public GetRoutesCommandHandler(Context context) {
+        super(context, Backend.FIRST);
     }
 
     @Override

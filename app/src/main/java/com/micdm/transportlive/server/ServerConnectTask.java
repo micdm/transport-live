@@ -1,5 +1,6 @@
 package com.micdm.transportlive.server;
 
+import android.content.Context;
 import android.os.AsyncTask;
 
 import com.micdm.transportlive.server.cities.CityConfig;
@@ -22,9 +23,11 @@ public class ServerConnectTask extends AsyncTask<Command, Void, Command.Result> 
         public void onResult(Command.Result result);
     }
 
+    private Context context;
     private OnResultListener callback;
 
-    public ServerConnectTask(OnResultListener callback) {
+    public ServerConnectTask(Context context, OnResultListener callback) {
+        this.context = context;
         this.callback = callback;
     }
 
@@ -42,19 +45,19 @@ public class ServerConnectTask extends AsyncTask<Command, Void, Command.Result> 
 
     private CommandHandler getCommandHandler(Command command) {
         if (command instanceof GetTransportsCommand) {
-            return new GetTransportsCommandHandler();
+            return new GetTransportsCommandHandler(context);
         }
         if (command instanceof GetRoutesCommand) {
-            return new GetRoutesCommandHandler();
+            return new GetRoutesCommandHandler(context);
         }
         if (command instanceof GetStationsCommand) {
-            return new GetStationsCommandHandler();
+            return new GetStationsCommandHandler(context);
         }
         if (command instanceof GetPointsCommand) {
-            return new GetPointsCommandHandler();
+            return new GetPointsCommandHandler(context);
         }
         if (command instanceof GetVehiclesCommand) {
-            return new GetVehiclesCommandHandler();
+            return new GetVehiclesCommandHandler(context);
         }
         throw new RuntimeException("unknown command");
     }

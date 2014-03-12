@@ -1,5 +1,7 @@
 package com.micdm.transportlive.server.handlers;
 
+import android.content.Context;
+
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.server.commands.GetTransportsCommand;
@@ -11,8 +13,8 @@ import org.json.JSONTokener;
 
 public class GetTransportsCommandHandler extends CommandHandler {
 
-    public GetTransportsCommandHandler() {
-        super(Backend.FIRST);
+    public GetTransportsCommandHandler(Context context) {
+        super(context, Backend.FIRST);
     }
 
     @Override

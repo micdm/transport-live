@@ -1,20 +1,26 @@
 package com.micdm.transportlive;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.ShareActionProvider;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.micdm.transportlive.data.Direction;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.RouteInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
-import com.micdm.transportlive.fragments.MapFragment;
+import com.micdm.transportlive.fragments.AboutFragment;
 import com.micdm.transportlive.fragments.ProgressFragment;
 import com.micdm.transportlive.fragments.RouteListFragment;
 import com.micdm.transportlive.misc.ServiceCache;
@@ -194,9 +200,6 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
     private void setupActionBar() {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-        actionBar.setDisplayShowHomeEnabled(false);
-        actionBar.setDisplayUseLogoEnabled(false);
-        actionBar.setDisplayShowTitleEnabled(false);
     }
 
     private void setupPager() {
@@ -231,6 +234,34 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
             public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {}
         });
         actionBar.addTab(tab);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.common, menu);
+        setupShareMenuItem(menu);
+        return true;
+    }
+
+    private void setupShareMenuItem(Menu menu) {
+        MenuItem item = menu.findItem(R.id.share);
+        ShareActionProvider provider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("plain/text");
+        intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_text, getPackageName()));
+        provider.setShareIntent(intent);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.about:
+                (new AboutFragment()).show(getSupportFragmentManager(), "about");
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
