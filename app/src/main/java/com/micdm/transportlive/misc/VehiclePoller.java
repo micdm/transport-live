@@ -3,7 +3,10 @@ package com.micdm.transportlive.misc;
 import android.content.Context;
 import android.os.Handler;
 
+import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.Service;
+
+import java.util.List;
 
 public class VehiclePoller {
 
@@ -30,8 +33,8 @@ public class VehiclePoller {
         this.onLoadListener = onLoadListener;
     }
 
-    private void load(Service service) {
-        currentTask = loader.load(service, new VehicleLoader.OnLoadListener() {
+    private void load(Service service, List<SelectedRouteInfo> selected) {
+        currentTask = loader.load(service, selected, new VehicleLoader.OnLoadListener() {
             @Override
             public void onLoad(Service service) {
                 currentTask = null;
@@ -41,7 +44,7 @@ public class VehiclePoller {
         handler.postDelayed(load, UPDATE_INTERVAL * 1000);
     }
 
-    public void start(final Service service) {
+    public void start(final Service service, final List<SelectedRouteInfo> selected) {
         if (handler != null) {
             return;
         }
@@ -49,7 +52,7 @@ public class VehiclePoller {
         load = new Runnable() {
             @Override
             public void run() {
-                load(service);
+                load(service, selected);
             }
         };
         load.run();

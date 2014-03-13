@@ -1,5 +1,6 @@
 package com.micdm.transportlive.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -17,6 +18,14 @@ import com.micdm.transportlive.misc.ServiceHandler;
 
 public class TransportRouteListFragment extends Fragment {
 
+    private ServiceHandler handler;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        handler = (ServiceHandler) getActivity();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_transport_route_list, null);
@@ -29,7 +38,7 @@ public class TransportRouteListFragment extends Fragment {
     }
 
     private void setup() {
-        Service service = ((ServiceHandler) getActivity()).getService();
+        Service service = handler.getService();
         Transport transport = service.getTransportById(getArguments().getInt("id"));
         setupTitle(transport);
         setupRouteList(transport);
@@ -66,7 +75,7 @@ public class TransportRouteListFragment extends Fragment {
     private View getRouteListItemView(final RouteInfo info) {
         View view = View.inflate(getActivity(), R.layout.view_route_list_item, null);
         final CheckBox checkbox = (CheckBox) view.findViewById(R.id.is_selected);
-        checkbox.setChecked(info.route.isSelected);
+        checkbox.setChecked(handler.isRouteSelected(info.transport, info.route));
         checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton button, boolean isChecked) {

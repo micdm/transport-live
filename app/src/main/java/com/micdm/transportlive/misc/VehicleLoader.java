@@ -4,10 +4,13 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.server.ServerConnectTask;
 import com.micdm.transportlive.server.commands.Command;
 import com.micdm.transportlive.server.commands.GetVehiclesCommand;
+
+import java.util.List;
 
 public class VehicleLoader {
 
@@ -46,7 +49,7 @@ public class VehicleLoader {
         return info != null && info.isConnected();
     }
 
-    public Task load(Service service, final OnLoadListener listener) {
+    public Task load(Service service, List<SelectedRouteInfo> selected, final OnLoadListener listener) {
         if (!isNetworkAvailable()) {
             noConnectionListener.onNoConnection();
             return null;
@@ -58,7 +61,7 @@ public class VehicleLoader {
                 listener.onLoad(service);
             }
         });
-        task.execute(new GetVehiclesCommand(service));
+        task.execute(new GetVehiclesCommand(service, selected));
         return new Task(task);
     }
 }

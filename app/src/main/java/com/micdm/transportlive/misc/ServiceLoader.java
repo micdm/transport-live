@@ -14,10 +14,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StreamCorruptedException;
 
 public class ServiceLoader {
 
@@ -124,29 +122,17 @@ public class ServiceLoader {
     }
 
     private Context context;
-    private Service service;
 
     public ServiceLoader(Context context) {
         this.context = context;
     }
 
     public Service load() {
-        if (service == null) {
-            service = loadFromAssets();
-        }
-        return service;
-    }
-
-    private Service loadFromAssets() {
         try {
             InputStream input = context.getAssets().open("service.xml");
             Service service = unserialize(input);
             input.close();
             return service;
-        } catch (FileNotFoundException e) {
-            return null;
-        } catch (StreamCorruptedException e) {
-            return null;
         } catch (SAXException e) {
             return null;
         } catch (IOException e) {

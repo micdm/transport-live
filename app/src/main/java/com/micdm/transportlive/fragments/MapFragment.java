@@ -45,7 +45,6 @@ import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class MapFragment extends Fragment {
@@ -73,12 +72,12 @@ public class MapFragment extends Fragment {
             paint.setTextSize(original.getWidth() / 2);
         }
 
-        public OverlayItem[] build(VehicleInfo[] vehicles) {
+        public List<OverlayItem> build(List<VehicleInfo> vehicles) {
             ArrayList<OverlayItem> markers = new ArrayList<OverlayItem>();
             for (VehicleInfo info: vehicles) {
                 markers.add(getMarker(info));
             }
-            return markers.toArray(new OverlayItem[markers.size()]);
+            return markers;
         }
 
         private OverlayItem getMarker(VehicleInfo info) {
@@ -108,7 +107,6 @@ public class MapFragment extends Fragment {
         }
     }
 
-    private static final String ATLAS_FILE_NAME = "atlas.zip";
     private static final int TILE_SIZE = 256;
     private static final int MIN_ZOOM = 14;
     private static final int MAX_ZOOM = 15;
@@ -189,8 +187,8 @@ public class MapFragment extends Fragment {
 
     public void update(Service service) {
         hideViews();
-        VehicleInfo[] vehicles = getVehicles(service);
-        if (vehicles.length == 0) {
+        List<VehicleInfo> vehicles = getVehicles(service);
+        if (vehicles.size() == 0) {
             showView(R.id.no_vehicles);
             return;
         }
@@ -198,7 +196,7 @@ public class MapFragment extends Fragment {
         if (builder == null) {
             builder = new MarkerBuilder(getResources());
         }
-        OverlayItem[] markers = builder.build(vehicles);
+        List<OverlayItem> markers = builder.build(vehicles);
         updateMap(markers);
     }
 
@@ -219,7 +217,7 @@ public class MapFragment extends Fragment {
         }
     }
 
-    private VehicleInfo[] getVehicles(Service service) {
+    private List<VehicleInfo> getVehicles(Service service) {
         ArrayList<VehicleInfo> vehicles = new ArrayList<VehicleInfo>();
         for (Transport transport: service.transports) {
             for (Route route: transport.routes) {
@@ -230,10 +228,10 @@ public class MapFragment extends Fragment {
                 }
             }
         }
-        return vehicles.toArray(new VehicleInfo[vehicles.size()]);
+        return vehicles;
     }
 
-    private void updateMap(OverlayItem[] markers) {
+    private void updateMap(List<OverlayItem> markers) {
         MapView view = (MapView) getView().findViewById(R.id.map);
         if (view != null) {
             List<Overlay> overlays = view.getOverlays();
@@ -242,10 +240,8 @@ public class MapFragment extends Fragment {
         }
     }
 
-    private Overlay getLayer(OverlayItem[] markers) {
-        ArrayList<OverlayItem> list = new ArrayList<OverlayItem>();
-        Collections.addAll(list, markers);
-        return new ItemizedIconOverlay<OverlayItem>(getActivity(), list, new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
+    private Overlay getLayer(List<OverlayItem> markers) {
+        return new ItemizedIconOverlay<OverlayItem>(getActivity(), markers, new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
             @Override
             public boolean onItemSingleTapUp(int i, OverlayItem item) {
                 return false;

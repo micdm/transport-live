@@ -1,6 +1,9 @@
 package com.micdm.transportlive.server.commands;
 
+import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.Service;
+
+import java.util.List;
 
 public class GetVehiclesCommand implements Command {
 
@@ -14,8 +17,10 @@ public class GetVehiclesCommand implements Command {
     }
 
     public Service service;
+    public List<SelectedRouteInfo> selected;
 
-    public GetVehiclesCommand(Service service) {
+    public GetVehiclesCommand(Service service, List<SelectedRouteInfo> selected) {
         this.service = service;
+        this.selected = selected;
     }
 }

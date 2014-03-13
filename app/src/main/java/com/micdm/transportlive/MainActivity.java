@@ -18,16 +18,19 @@ import android.view.MenuItem;
 import com.micdm.transportlive.data.Direction;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.RouteInfo;
+import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.fragments.AboutFragment;
 import com.micdm.transportlive.fragments.MapFragment;
 import com.micdm.transportlive.fragments.RouteListFragment;
+import com.micdm.transportlive.misc.SelectedRouteStore;
 import com.micdm.transportlive.misc.ServiceHandler;
 import com.micdm.transportlive.misc.ServiceLoader;
 import com.micdm.transportlive.misc.VehiclePoller;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends ActionBarActivity implements ServiceHandler {
 
@@ -71,7 +74,6 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
         }
     }
 
-    private ServiceLoader loader = new ServiceLoader(this);
     private VehiclePoller poller = new VehiclePoller(this, new VehiclePoller.OnLoadListener() {
         @Override
         public void onLoad(Service service) {
@@ -84,6 +86,8 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
 
         }
     });
+    private Service service;
+    private List<SelectedRouteInfo> selected;
     private OnUnselectAllRoutesListener onUnselectAllRoutesListener;
     private OnLoadServiceListener onLoadServiceListener;
     private OnLoadVehiclesListener onLoadVehiclesListener;
@@ -94,47 +98,8 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
         setContentView(R.layout.activity_main);
         setupActionBar();
         setupPager();
-        loadService();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Service service = loader.load();
-        if (service != null && getSelectedRouteCount(service) != 0) {
-            poller.start(service);
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        poller.stop();
-    }
-
-    private int getSelectedRouteCount(Service service) {
-        int count = 0;
-        for (Transport transport: service.transports) {
-            for (Route route: transport.routes) {
-                if (route.isSelected) {
-                    count += 1;
-                }
-            }
-        }
-        return count;
-    }
-
-    private void loadService() {
-        Service service = loader.load();
-        if (onUnselectAllRoutesListener != null && getSelectedRouteCount(service) == 0) {
-            onUnselectAllRoutesListener.onUnselectAllRoutes();
-        }
-        if (onLoadServiceListener != null) {
-            onLoadServiceListener.onLoadService(service);
-        }
-        if (getSelectedRouteCount(service) != 0) {
-            poller.start(service);
-        }
+        loadData();
+        init();
     }
 
     private void setupActionBar() {
@@ -176,6 +141,37 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
         actionBar.addTab(tab);
     }
 
+    private void loadData() {
+        service = (new ServiceLoader(this)).load();
+        selected = (new SelectedRouteStore(this)).load(service);
+    }
+
+    private void init() {
+        if (onUnselectAllRoutesListener != null && selected.isEmpty()) {
+            onUnselectAllRoutesListener.onUnselectAllRoutes();
+        }
+        if (onLoadServiceListener != null) {
+            onLoadServiceListener.onLoadService(service);
+        }
+        if (!selected.isEmpty()) {
+            poller.start(service, selected);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!selected.isEmpty()) {
+            poller.start(service, selected);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        poller.stop();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -206,38 +202,61 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
 
     @Override
     public Service getService() {
-        return loader.load();
+        return service;
+    }
+
+    @Override
+    public boolean isRouteSelected(Transport transport, Route route) {
+        for (SelectedRouteInfo info: selected) {
+            if (info.transport.equals(transport) && info.route.equals(route)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public void selectRoute(RouteInfo info, boolean isSelected) {
         poller.stop();
-        Service service = loader.load();
-        Transport transport = service.getTransportByType(info.transport);
-        Route route = transport.getRouteByNumber(info.route.number);
-        route.isSelected = isSelected;
-        if (!isSelected) {
-            for (Direction direction: route.directions) {
+        if (isSelected) {
+            addSelectedRoute(info.transport, info.route);
+        } else {
+            removeSelectedRoute(info.transport, info.route);
+            for (Direction direction: info.route.directions) {
                 direction.vehicles.clear();
             }
         }
-        if (getSelectedRouteCount(service) == 0) {
-            if (onUnselectAllRoutesListener != null) {
-                onUnselectAllRoutesListener.onUnselectAllRoutes();
+        (new SelectedRouteStore(this)).put(selected);
+        if (onUnselectAllRoutesListener != null && selected.isEmpty()) {
+            onUnselectAllRoutesListener.onUnselectAllRoutes();
+        }
+        if (!selected.isEmpty()) {
+            poller.start(service, selected);
+        }
+    }
+
+    private void addSelectedRoute(Transport transport, Route route) {
+        if (!isRouteSelected(transport, route)) {
+            selected.add(new SelectedRouteInfo(transport, route));
+        }
+    }
+
+    private void removeSelectedRoute(Transport transport, Route route) {
+        if (isRouteSelected(transport, route)) {
+            for (SelectedRouteInfo info: selected) {
+                if (info.transport.equals(transport) && info.route.equals(route)) {
+                    selected.remove(info);
+                    break;
+                }
             }
-        } else {
-            poller.start(service);
         }
     }
 
     @Override
     public void setOnUnselectAllRoutesListener(OnUnselectAllRoutesListener listener) {
         onUnselectAllRoutesListener = listener;
-        if (listener != null) {
-            Service service = loader.load();
-            if (service != null && getSelectedRouteCount(service) == 0) {
-                listener.onUnselectAllRoutes();
-            }
+        if (listener != null && selected.isEmpty()) {
+            listener.onUnselectAllRoutes();
         }
     }
 
@@ -245,21 +264,15 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
     public void setOnLoadServiceListener(OnLoadServiceListener listener) {
         onLoadServiceListener = listener;
         if (listener != null) {
-            Service service = loader.load();
-            if (service != null) {
-                listener.onLoadService(service);
-            }
+            listener.onLoadService(service);
         }
     }
 
     @Override
     public void setOnLoadVehiclesListener(OnLoadVehiclesListener listener) {
         onLoadVehiclesListener = listener;
-        if (listener != null) {
-            Service service = loader.load();
-            if (service != null && getSelectedRouteCount(service) != 0) {
-                listener.onLoadVehicles(service);
-            }
+        if (listener != null && !selected.isEmpty()) {
+            listener.onLoadVehicles(service);
         }
     }
 }

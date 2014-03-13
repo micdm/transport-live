@@ -6,6 +6,7 @@ import android.util.Xml;
 import com.micdm.transportlive.data.Direction;
 import com.micdm.transportlive.data.Point;
 import com.micdm.transportlive.data.Route;
+import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.Vehicle;
@@ -22,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 public class GetVehiclesCommandHandler extends CommandHandler {
 
@@ -31,13 +33,10 @@ public class GetVehiclesCommandHandler extends CommandHandler {
 
     @Override
     public GetVehiclesCommand.Result handle() {
-        Service service = ((GetVehiclesCommand)command).service;
-        HashMap<String, String> params = getRequestParams();
-        if (params == null) {
-            return new GetVehiclesCommand.Result(service);
-        }
         try {
+            HashMap<String, String> params = getRequestParams(((GetVehiclesCommand) command).selected);
             String response = sendRequest("getRoutesVehicles", params);
+            Service service = ((GetVehiclesCommand) command).service;
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(IOUtils.toInputStream(response), null);
             parser.nextTag();
@@ -72,29 +71,24 @@ public class GetVehiclesCommandHandler extends CommandHandler {
         }
     }
 
-    private HashMap<String, String> getRequestParams() {
-        String[] keys = getSelectedDirectionKeys();
-        if (keys.length == 0) {
-            return null;
+    private HashMap<String, String> getRequestParams(List<SelectedRouteInfo> selected) {
+        List<String> keys = getSelectedDirectionKeys(selected);
+        if (keys.size() == 0) {
+            throw new RuntimeException("cannot build request: no route selected");
         }
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("ids", StringUtils.join(keys, '|'));
         return params;
     }
 
-    private String[] getSelectedDirectionKeys() {
+    private List<String> getSelectedDirectionKeys(List<SelectedRouteInfo> selected) {
         ArrayList<String> keys = new ArrayList<String>();
-        for (Transport transport: ((GetVehiclesCommand)command).service.transports) {
-            for (Route route: transport.routes) {
-                if (!route.isSelected) {
-                    continue;
-                }
-                for (Direction direction: route.directions) {
-                    keys.add(String.format("%s;%s", direction.id, getTransportId(transport)));
-                }
+        for (SelectedRouteInfo info: selected) {
+            for (Direction direction: info.route.directions) {
+                keys.add(String.format("%s;%s", direction.id, getTransportId(info.transport)));
             }
         }
-        return keys.toArray(new String[keys.size()]);
+        return keys;
     }
 
     private int getTransportId(Transport transport) {

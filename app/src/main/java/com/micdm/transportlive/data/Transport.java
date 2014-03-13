@@ -1,6 +1,7 @@
 package com.micdm.transportlive.data;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Transport {
 
@@ -31,12 +32,12 @@ public class Transport {
         return null;
     }
 
-    public RouteInfo[] getAllRouteInfo() {
+    public List<RouteInfo> getAllRouteInfo() {
         ArrayList<RouteInfo> info = new ArrayList<RouteInfo>();
         for (Route route: routes) {
             Direction direction = route.directions.get(0);
-            info.add(new RouteInfo(type, route, direction.getStart().name, direction.getFinish().name));
+            info.add(new RouteInfo(this, route, direction.getStart().name, direction.getFinish().name));
         }
-        return info.toArray(new RouteInfo[info.size()]);
+        return info;
     }
 }
