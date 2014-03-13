@@ -24,10 +24,10 @@ import com.micdm.transportlive.fragments.AboutFragment;
 import com.micdm.transportlive.fragments.MapFragment;
 import com.micdm.transportlive.fragments.ProgressFragment;
 import com.micdm.transportlive.fragments.RouteListFragment;
-import com.micdm.transportlive.misc.ServiceCache;
 import com.micdm.transportlive.misc.ServiceHandler;
 import com.micdm.transportlive.misc.ServiceLoader;
 import com.micdm.transportlive.misc.ServicePoller;
+import com.micdm.transportlive.misc.ServiceXmlCache;
 
 import java.util.ArrayList;
 
@@ -73,7 +73,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
         }
     }
 
-    private ServiceCache cache = new ServiceCache(this);
+    private ServiceXmlCache cache = new ServiceXmlCache(this);
     private ServiceLoader loader = new ServiceLoader(this, new ServiceLoader.OnNoConnectionListener() {
         @Override
         public void onNoConnection() {
@@ -168,6 +168,16 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
             @Override
             public void onLoad(Service service) {
                 hideLoadingMessage();
+                loadPoints(service);
+            }
+        });
+    }
+
+    private void loadPoints(Service service) {
+        final ServiceXmlCache cache = new ServiceXmlCache(this);
+        loader.loadPoints(service, new ServiceLoader.OnLoadListener() {
+            @Override
+            public void onLoad(Service service) {
                 cache.put(service);
                 onLoadService(service);
             }

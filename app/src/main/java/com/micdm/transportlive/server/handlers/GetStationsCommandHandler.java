@@ -91,6 +91,6 @@ public class GetStationsCommandHandler extends CommandHandler {
         String name = parser.getAttributeValue("", "name");
         int latitude = Integer.valueOf(parser.getAttributeValue("", "lat0"));
         int longitude = Integer.valueOf(parser.getAttributeValue("", "lon0"));
-        return new Station(name, new Point(latitude, longitude));
+        return new Station(name, latitude, longitude);
     }
 }
