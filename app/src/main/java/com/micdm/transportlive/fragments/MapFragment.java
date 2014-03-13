@@ -23,9 +23,9 @@ import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.Vehicle;
 import com.micdm.transportlive.data.VehicleInfo;
+import com.micdm.transportlive.misc.AssetArchive;
 import com.micdm.transportlive.misc.ServiceHandler;
 
-import org.apache.commons.io.IOUtils;
 import org.osmdroid.DefaultResourceProxyImpl;
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IMapController;
@@ -34,7 +34,6 @@ import org.osmdroid.tileprovider.MapTileProviderArray;
 import org.osmdroid.tileprovider.modules.IArchiveFile;
 import org.osmdroid.tileprovider.modules.MapTileFileArchiveProvider;
 import org.osmdroid.tileprovider.modules.MapTileModuleProviderBase;
-import org.osmdroid.tileprovider.modules.ZipFileArchive;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.tileprovider.util.SimpleRegisterReceiver;
@@ -45,11 +44,6 @@ import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -160,35 +154,11 @@ public class MapFragment extends Fragment {
     }
 
     private MapTileProviderArray getTileProviders() {
-        try {
-            IRegisterReceiver receiver = new SimpleRegisterReceiver(getActivity());
-            ITileSource source = new XYTileSource("OSMPublicTransport", ResourceProxy.string.public_transport, MIN_ZOOM, MAX_ZOOM, TILE_SIZE, ".png", null);
-            ZipFileArchive archive = ZipFileArchive.getZipFileArchive(getAtlas());
-            MapTileFileArchiveProvider provider = new MapTileFileArchiveProvider(receiver, source, new IArchiveFile[] {archive});
-            return new MapTileProviderArray(source, receiver, new MapTileModuleProviderBase[] {provider});
-        } catch (IOException e) {
-            throw new RuntimeException("cannot load atlas");
-        }
-    }
-
-    private File getAtlas() {
-        File file = new File(new File(getActivity().getCacheDir(), ATLAS_FILE_NAME).getAbsolutePath());
-        if (!file.exists()) {
-            copyAtlasToCache(file);
-        }
-        return file;
-    }
-
-    private void copyAtlasToCache(File file) {
-        try {
-            InputStream input = getActivity().getAssets().open(ATLAS_FILE_NAME);
-            OutputStream output = new FileOutputStream(file);
-            IOUtils.copy(input, output);
-            input.close();
-            output.close();
-        } catch (IOException e) {
-            throw new RuntimeException("cannot copy atlas to cache");
-        }
+        IRegisterReceiver receiver = new SimpleRegisterReceiver(getActivity());
+        ITileSource source = new XYTileSource("OSMPublicTransport", ResourceProxy.string.public_transport, MIN_ZOOM, MAX_ZOOM, TILE_SIZE, ".png", null);
+        AssetArchive archive = AssetArchive.getAssetArchive(getActivity());
+        MapTileFileArchiveProvider provider = new MapTileFileArchiveProvider(receiver, source, new IArchiveFile[] {archive});
+        return new MapTileProviderArray(source, receiver, new MapTileModuleProviderBase[] {provider});
     }
 
     @Override
