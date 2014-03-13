@@ -13,16 +13,14 @@ public class CityConfig {
         }
     }
 
-    public static CityConfig CITY_RYAZAN = new CityConfig("ryazan", new Backend("bus62.ru", "/php/%s.php"), new Backend("78.31.72.3", "/bus/common/map6/%s.php"));
-    public static CityConfig CITY_TOMSK = new CityConfig("tomsk", new Backend("bus62.ru", "/tomsk/php/%s.php"), new Backend("83.137.52.160", "/bus/common/map6/%s.php"));
+    public static CityConfig CITY_RYAZAN = new CityConfig("ryazan", new Backend("78.31.72.3", "/bus/common/map6/%s.php"));
+    public static CityConfig CITY_TOMSK = new CityConfig("tomsk", new Backend("83.137.52.160", "/bus/common/map6/%s.php"));
 
     public String id;
-    public Backend firstBackend;
-    public Backend secondBackend;
+    public Backend backend;
 
-    protected CityConfig(String id, Backend firstBackend, Backend secondBackend) {
+    protected CityConfig(String id, Backend backend) {
         this.id = id;
-        this.firstBackend = firstBackend;
-        this.secondBackend = secondBackend;
+        this.backend = backend;
     }
 }

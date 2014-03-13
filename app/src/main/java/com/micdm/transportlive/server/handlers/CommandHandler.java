@@ -20,19 +20,12 @@ import java.util.Map;
 
 public abstract class CommandHandler {
 
-    protected static enum Backend {
-        FIRST,
-        SECOND
-    }
-
     private Context context;
-    protected Backend backend;
     protected CityConfig city;
     protected Command command;
 
-    public CommandHandler(Context context, Backend backend) {
+    public CommandHandler(Context context) {
         this.context = context;
-        this.backend = backend;
     }
 
     public void setCity(CityConfig city) {
@@ -73,32 +66,22 @@ public abstract class CommandHandler {
         }
     }
 
-    protected String sendRequest(String method) {
-        return sendRequest(method, null);
-    }
-
     private String getRequestUri(String method, HashMap<String, String> params) {
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("http");
-        switch (backend) {
-            case FIRST:
-                builder.authority(city.firstBackend.host);
-                builder.path(String.format(city.firstBackend.path, method));
-                break;
-            case SECOND:
-                builder.authority(city.secondBackend.host);
-                builder.path(String.format(city.secondBackend.path, method));
-                break;
-            default:
-                throw new RuntimeException("unknown backend");
-        }
+        builder.authority(city.backend.host);
+        builder.path(String.format(city.backend.path, method));
         builder.appendQueryParameter("city", city.id);
         if (params != null) {
             for (Map.Entry<String, String> item: params.entrySet()) {
                 builder.appendQueryParameter(item.getKey(), item.getValue());
             }
         }
-        return builder.build().toString();
+        Uri uri = builder.build();
+        if (uri == null) {
+            throw new RuntimeException("cannot build URI");
+        }
+        return uri.toString();
     }
 
     public abstract Command.Result handle();

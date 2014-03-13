@@ -26,7 +26,7 @@ import java.util.HashMap;
 public class GetVehiclesCommandHandler extends CommandHandler {
 
     public GetVehiclesCommandHandler(Context context) {
-        super(context, Backend.SECOND);
+        super(context);
     }
 
     @Override

@@ -1,30 +1,37 @@
 package com.micdm.transportlive.misc;
 
+import android.content.Context;
 import android.os.Handler;
 
 import com.micdm.transportlive.data.Service;
 
-public class ServicePoller {
+public class VehiclePoller {
 
     public static interface OnLoadListener {
         public void onLoad(Service service);
+        public void onNoConnection();
     }
 
     private static final int UPDATE_INTERVAL = 30;
 
     private Handler handler;
     private Runnable load;
-    private ServiceLoader loader;
-    private ServiceLoader.Task currentTask;
+    private VehicleLoader loader;
+    private VehicleLoader.Task currentTask;
     private OnLoadListener onLoadListener;
 
-    public ServicePoller(ServiceLoader loader, OnLoadListener onLoadListener) {
-        this.loader = loader;
+    public VehiclePoller(Context context, OnLoadListener onLoadListener) {
+        this.loader = new VehicleLoader(context, new VehicleLoader.OnNoConnectionListener() {
+            @Override
+            public void onNoConnection() {
+
+            }
+        });
         this.onLoadListener = onLoadListener;
     }
 
     private void load(Service service) {
-        currentTask = loader.loadVehicles(service, new ServiceLoader.OnLoadListener() {
+        currentTask = loader.load(service, new VehicleLoader.OnLoadListener() {
             @Override
             public void onLoad(Service service) {
                 currentTask = null;
