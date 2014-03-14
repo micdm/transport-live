@@ -1,8 +1,6 @@
 package com.micdm.transportlive.misc;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 
 import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.Service;
@@ -13,10 +11,6 @@ import com.micdm.transportlive.server.commands.GetVehiclesCommand;
 import java.util.List;
 
 public class VehicleLoader {
-
-    public static interface OnNoConnectionListener {
-        public void onNoConnection();
-    }
 
     public static interface OnLoadListener {
         public void onLoad(Service service);
@@ -36,24 +30,12 @@ public class VehicleLoader {
     }
 
     private Context context;
-    private OnNoConnectionListener noConnectionListener;
 
-    public VehicleLoader(Context context, OnNoConnectionListener noConnectionListener) {
+    public VehicleLoader(Context context) {
         this.context = context;
-        this.noConnectionListener = noConnectionListener;
-    }
-
-    private boolean isNetworkAvailable() {
-        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo info = manager.getActiveNetworkInfo();
-        return info != null && info.isConnected();
     }
 
     public Task load(Service service, List<SelectedRouteInfo> selected, final OnLoadListener listener) {
-        if (!isNetworkAvailable()) {
-            noConnectionListener.onNoConnection();
-            return null;
-        }
         ServerConnectTask task = new ServerConnectTask(context, new ServerConnectTask.OnResultListener() {
             @Override
             public void onResult(Command.Result result) {

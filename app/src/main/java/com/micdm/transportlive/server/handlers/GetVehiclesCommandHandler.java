@@ -82,7 +82,7 @@ public class GetVehiclesCommandHandler extends CommandHandler {
     }
 
     private List<String> getSelectedDirectionKeys(List<SelectedRouteInfo> selected) {
-        ArrayList<String> keys = new ArrayList<String>();
+        List<String> keys = new ArrayList<String>();
         for (SelectedRouteInfo info: selected) {
             for (Direction direction: info.route.directions) {
                 keys.add(String.format("%s;%s", direction.id, getTransportId(info.transport)));

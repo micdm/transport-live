@@ -1,12 +1,13 @@
 package com.micdm.transportlive.data;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Direction {
 
     public int id;
-    public ArrayList<Station> stations = new ArrayList<Station>();
-    public ArrayList<Vehicle> vehicles = new ArrayList<Vehicle>();
+    public List<Station> stations = new ArrayList<Station>();
+    public List<Vehicle> vehicles = new ArrayList<Vehicle>();
 
     public Direction(int id) {
         this.id = id;

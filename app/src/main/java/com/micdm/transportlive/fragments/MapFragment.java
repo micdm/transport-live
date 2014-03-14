@@ -24,6 +24,7 @@ import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.Vehicle;
 import com.micdm.transportlive.data.VehicleInfo;
 import com.micdm.transportlive.misc.AssetArchive;
+import com.micdm.transportlive.misc.ConnectionHandler;
 import com.micdm.transportlive.misc.ServiceHandler;
 
 import org.osmdroid.DefaultResourceProxyImpl;
@@ -73,7 +74,7 @@ public class MapFragment extends Fragment {
         }
 
         public List<OverlayItem> build(List<VehicleInfo> vehicles) {
-            ArrayList<OverlayItem> markers = new ArrayList<OverlayItem>();
+            List<OverlayItem> markers = new ArrayList<OverlayItem>();
             for (VehicleInfo info: vehicles) {
                 markers.add(getMarker(info));
             }
@@ -116,19 +117,28 @@ public class MapFragment extends Fragment {
     private static final int EAST_EDGE = 85122070;
     private static final GeoPoint INITIAL_LOCATION = new GeoPoint(56484642, 84948100);
 
-    private ServiceHandler handler;
+    private ConnectionHandler connectionHandler;
+    private ServiceHandler serviceHandler;
     private MarkerBuilder builder;
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        handler = (ServiceHandler) getActivity();
+        connectionHandler = (ConnectionHandler) getActivity();
+        serviceHandler = (ServiceHandler) getActivity();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, null);
         if (view != null) {
+            View reconnectView = view.findViewById(R.id.reconnect);
+            reconnectView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    connectionHandler.reconnect();
+                }
+            });
             MapView mapView = getMapView();
             ((ViewGroup) view).addView(mapView);
             IMapController controller = mapView.getController();
@@ -163,26 +173,26 @@ public class MapFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         hideViews();
-        handler.setOnUnselectAllRoutesListener(new ServiceHandler.OnUnselectAllRoutesListener() {
+        connectionHandler.setOnNoConnectionListener(new ConnectionHandler.OnNoConnectionListener() {
+            @Override
+            public void onNoConnection() {
+                hideViews();
+                showView(R.id.no_connection);
+            }
+        });
+        serviceHandler.setOnUnselectAllRoutesListener(new ServiceHandler.OnUnselectAllRoutesListener() {
             @Override
             public void onUnselectAllRoutes() {
                 hideViews();
                 showView(R.id.no_route_selected);
             }
         });
-        handler.setOnLoadVehiclesListener(new ServiceHandler.OnLoadVehiclesListener() {
+        serviceHandler.setOnLoadVehiclesListener(new ServiceHandler.OnLoadVehiclesListener() {
             @Override
             public void onLoadVehicles(Service service) {
                 update(service);
             }
         });
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        handler.setOnUnselectAllRoutesListener(null);
-        handler.setOnLoadVehiclesListener(null);
     }
 
     public void update(Service service) {
@@ -218,7 +228,7 @@ public class MapFragment extends Fragment {
     }
 
     private List<VehicleInfo> getVehicles(Service service) {
-        ArrayList<VehicleInfo> vehicles = new ArrayList<VehicleInfo>();
+        List<VehicleInfo> vehicles = new ArrayList<VehicleInfo>();
         for (Transport transport: service.transports) {
             for (Route route: transport.routes) {
                 for (Direction direction: route.directions) {
@@ -251,5 +261,13 @@ public class MapFragment extends Fragment {
                 return false;
             }
         });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        connectionHandler.setOnNoConnectionListener(null);
+        serviceHandler.setOnUnselectAllRoutesListener(null);
+        serviceHandler.setOnLoadVehiclesListener(null);
     }
 }

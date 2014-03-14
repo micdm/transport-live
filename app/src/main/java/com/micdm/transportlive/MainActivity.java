@@ -24,6 +24,7 @@ import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.fragments.AboutFragment;
 import com.micdm.transportlive.fragments.MapFragment;
 import com.micdm.transportlive.fragments.RouteListFragment;
+import com.micdm.transportlive.misc.ConnectionHandler;
 import com.micdm.transportlive.misc.SelectedRouteStore;
 import com.micdm.transportlive.misc.ServiceHandler;
 import com.micdm.transportlive.misc.ServiceLoader;
@@ -32,11 +33,11 @@ import com.micdm.transportlive.misc.VehiclePoller;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends ActionBarActivity implements ServiceHandler {
+public class MainActivity extends ActionBarActivity implements ConnectionHandler, ServiceHandler {
 
     private static class CustomPagerAdapter extends FragmentPagerAdapter {
 
-        private ArrayList<Page> pages = new ArrayList<Page>();
+        private List<Page> pages = new ArrayList<Page>();
 
         public CustomPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -77,17 +78,23 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
     private VehiclePoller poller = new VehiclePoller(this, new VehiclePoller.OnLoadListener() {
         @Override
         public void onLoad(Service service) {
+            areVehiclesLoaded = true;
             if (onLoadVehiclesListener != null) {
                 onLoadVehiclesListener.onLoadVehicles(service);
             }
         }
         @Override
         public void onNoConnection() {
-
+            poller.stop();
+            if (onNoConnectionListener != null) {
+                onNoConnectionListener.onNoConnection();
+            }
         }
     });
     private Service service;
+    private boolean areVehiclesLoaded;
     private List<SelectedRouteInfo> selected;
+    private OnNoConnectionListener onNoConnectionListener;
     private OnUnselectAllRoutesListener onUnselectAllRoutesListener;
     private OnLoadServiceListener onLoadServiceListener;
     private OnLoadVehiclesListener onLoadVehiclesListener;
@@ -201,6 +208,19 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
     }
 
     @Override
+    public void reconnect() {
+        poller.start(service, selected);
+    }
+
+    @Override
+    public void setOnNoConnectionListener(OnNoConnectionListener listener) {
+        onNoConnectionListener = listener;
+        if (listener != null && !poller.isNetworkAvailable()) {
+            listener.onNoConnection();
+        }
+    }
+
+    @Override
     public Service getService() {
         return service;
     }
@@ -271,7 +291,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
     @Override
     public void setOnLoadVehiclesListener(OnLoadVehiclesListener listener) {
         onLoadVehiclesListener = listener;
-        if (listener != null && !selected.isEmpty()) {
+        if (listener != null && areVehiclesLoaded) {
             listener.onLoadVehicles(service);
         }
     }

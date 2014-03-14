@@ -1,10 +1,11 @@
 package com.micdm.transportlive.data;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Service {
 
-    public ArrayList<Transport> transports = new ArrayList<Transport>();
+    public List<Transport> transports = new ArrayList<Transport>();
 
     public Transport getTransportById(int id) {
         for (Transport transport: transports) {

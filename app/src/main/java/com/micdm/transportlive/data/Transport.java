@@ -15,7 +15,7 @@ public class Transport {
     public int id;
     public Type type;
     public String code;
-    public ArrayList<Route> routes = new ArrayList<Route>();
+    public List<Route> routes = new ArrayList<Route>();
 
     public Transport(int id, Type type, String code) {
         this.id = id;
@@ -33,7 +33,7 @@ public class Transport {
     }
 
     public List<RouteInfo> getAllRouteInfo() {
-        ArrayList<RouteInfo> info = new ArrayList<RouteInfo>();
+        List<RouteInfo> info = new ArrayList<RouteInfo>();
         for (Route route: routes) {
             Direction direction = route.directions.get(0);
             info.add(new RouteInfo(this, route, direction.getStart().name, direction.getFinish().name));

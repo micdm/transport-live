@@ -12,9 +12,6 @@
     <!-- Вкладки -->
     <string name="tab_title_route_list">Маршруты</string>
     <string name="tab_title_map">Карта</string>
-    <!-- Сообщения -->
-    <string name="no_connection">Сервер недоступен.\nВключите WiFi или мобильный интернет.</string>
-    <string name="retry_connection">Повторить</string>
     <!-- Меню -->
     <string name="menu_item_share">Поделиться…</string>
     <string name="menu_item_about">О приложении…</string>
@@ -28,5 +25,7 @@
     <string name="first_loading_stations">Загружаются остановки…</string>
     <!-- Фрагмент с картой -->
     <string name="fragment_map_no_route_selected">Выберите маршруты из списка.</string>
+    <string name="fragment_map_no_connection">Отсутствует подключение к сети.\nВключите Wi-Fi или мобильный интернет.</string>
+    <string name="fragment_map_reconnect">Переподключиться</string>
     <string name="fragment_map_no_vehicles">Похоже, весь транспорт в парке.</string>
 </resources>

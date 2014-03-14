@@ -1,12 +1,13 @@
 package com.micdm.transportlive.data;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Route {
 
     public int number;
-    public ArrayList<Point> points = new ArrayList<Point>();
-    public ArrayList<Direction> directions = new ArrayList<Direction>();
+    public List<Point> points = new ArrayList<Point>();
+    public List<Direction> directions = new ArrayList<Direction>();
 
     public Route(int number) {
         this.number = number;
