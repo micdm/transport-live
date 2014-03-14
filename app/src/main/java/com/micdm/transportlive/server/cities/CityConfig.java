@@ -19,7 +19,7 @@ public class CityConfig {
     public String id;
     public Backend backend;
 
-    protected CityConfig(String id, Backend backend) {
+    private CityConfig(String id, Backend backend) {
         this.id = id;
         this.backend = backend;
     }

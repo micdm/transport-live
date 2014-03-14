@@ -21,7 +21,7 @@ import java.util.Map;
 public abstract class CommandHandler {
 
     private Context context;
-    protected CityConfig city;
+    private CityConfig city;
     protected Command command;
 
     public CommandHandler(Context context) {
