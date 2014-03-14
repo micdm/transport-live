@@ -6,14 +6,16 @@ public class Vehicle {
 
     public String id;
     public String number;
-    public Point location;
+    public int latitude;
+    public int longitude;
     public int direction;
     public Date lastUpdate;
 
-    public Vehicle(String id, String number, Point location, int direction, Date lastUpdate) {
+    public Vehicle(String id, String number, int latitude, int longitude, int direction, Date lastUpdate) {
         this.id = id;
         this.number = number;
-        this.location = location;
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.direction = direction;
         this.lastUpdate = lastUpdate;
     }

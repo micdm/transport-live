@@ -4,6 +4,9 @@ import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.RouteInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
+import com.micdm.transportlive.data.VehicleInfo;
+
+import java.util.List;
 
 public interface ServiceHandler {
 
@@ -16,7 +19,9 @@ public interface ServiceHandler {
     }
 
     public static interface OnLoadVehiclesListener {
-        public void onLoadVehicles(Service service);
+        public void onStart();
+        public void onFinish();
+        public void onLoadVehicles(List<VehicleInfo> vehicles);
     }
 
     public Service getService();

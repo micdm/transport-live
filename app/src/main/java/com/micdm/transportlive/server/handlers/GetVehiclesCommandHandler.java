@@ -4,20 +4,18 @@ import android.content.Context;
 import android.util.Xml;
 
 import com.micdm.transportlive.data.Direction;
-import com.micdm.transportlive.data.Point;
-import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.SelectedRouteInfo;
-import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.Vehicle;
+import com.micdm.transportlive.data.VehicleInfo;
 import com.micdm.transportlive.server.commands.GetVehiclesCommand;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
-import java.io.IOException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -27,6 +25,81 @@ import java.util.List;
 
 public class GetVehiclesCommandHandler extends CommandHandler {
 
+    private static class ContentHandler extends DefaultHandler {
+
+        private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        private List<SelectedRouteInfo> selected;
+        public List<VehicleInfo> vehicles = new ArrayList<VehicleInfo>();
+
+        public ContentHandler(List<SelectedRouteInfo> selected) {
+            this.selected = selected;
+        }
+
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attrs) {
+            if (localName.equals("veh")) {
+                Date lastUpdate = getLastVehicleUpdate(attrs);
+                if (lastUpdate == null) {
+                    return;
+                }
+                SelectedRouteInfo info = getSelectedRouteInfo(getTransportCode(attrs), getRouteNumber(attrs));
+                Direction direction = info.route.getDirectionById(getDirectionId(attrs));
+                Vehicle vehicle = new Vehicle(getVehicleId(attrs), getVehicleNumber(attrs), getVehicleLatitude(attrs), getVehicleLongitude(attrs), getVehicleDirection(attrs), lastUpdate);
+                vehicles.add(new VehicleInfo(info.transport, info.route, direction, vehicle));
+            }
+        }
+
+        private SelectedRouteInfo getSelectedRouteInfo(String transportCode, int routeNumber) {
+            for (SelectedRouteInfo info: selected) {
+                if (info.transport.code.equals(transportCode) && info.route.number == routeNumber) {
+                    return info;
+                }
+            }
+            throw new RuntimeException("cannot find route info");
+        }
+
+        private String getTransportCode(Attributes attrs) {
+            return attrs.getValue("", "rtype");
+        }
+
+        private int getRouteNumber(Attributes attrs) {
+            return Integer.valueOf(attrs.getValue("", "rnum"));
+        }
+
+        private int getDirectionId(Attributes attrs) {
+            return Integer.valueOf(attrs.getValue("", "rid"));
+        }
+
+        private String getVehicleId(Attributes attrs) {
+            return attrs.getValue("", "id");
+        }
+
+        private String getVehicleNumber(Attributes attrs) {
+            return attrs.getValue("", "gos_num");
+        }
+
+        private int getVehicleLatitude(Attributes attrs) {
+            return Integer.valueOf(attrs.getValue("", "lat"));
+        }
+
+        private int getVehicleLongitude(Attributes attrs) {
+            return Integer.valueOf(attrs.getValue("", "lon"));
+        }
+
+        private int getVehicleDirection(Attributes attrs) {
+            return Integer.valueOf(attrs.getValue("", "dir"));
+        }
+
+        private Date getLastVehicleUpdate(Attributes attrs) {
+            try {
+                return DATE_FORMAT.parse(attrs.getValue("", "lasttime"));
+            } catch (ParseException e) {
+                return null;
+            }
+        }
+    }
+
     public GetVehiclesCommandHandler(Context context) {
         super(context);
     }
@@ -34,40 +107,14 @@ public class GetVehiclesCommandHandler extends CommandHandler {
     @Override
     public GetVehiclesCommand.Result handle() {
         try {
-            HashMap<String, String> params = getRequestParams(((GetVehiclesCommand) command).selected);
+            List<SelectedRouteInfo> selected = ((GetVehiclesCommand) command).selected;
+            HashMap<String, String> params = getRequestParams(selected);
             String response = sendRequest("getRoutesVehicles", params);
-            Service service = ((GetVehiclesCommand) command).service;
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(IOUtils.toInputStream(response), null);
-            parser.nextTag();
-            parser.require(XmlPullParser.START_TAG, "", "vehicles");
-            while (parser.next() != XmlPullParser.END_TAG) {
-                if (parser.getEventType() != XmlPullParser.START_TAG) {
-                    continue;
-                }
-                parser.require(XmlPullParser.START_TAG, "", "veh");
-                Transport transport = service.getTransportByCode(parseTransportCode(parser));
-                Route route = transport.getRouteByNumber(parseRouteNumber(parser));
-                Direction direction = route.getDirectionById(parseDirectionId(parser));
-                Vehicle update = parseVehicle(parser);
-                if (update == null) {
-                    continue;
-                }
-                Vehicle vehicle = direction.getVehicleById(update.id);
-                if (vehicle == null) {
-                    direction.vehicles.add(update);
-                } else {
-                    vehicle.location = update.location;
-                    vehicle.direction = update.direction;
-                    vehicle.lastUpdate = update.lastUpdate;
-                }
-                parser.nextTag();
-            }
-            return new GetVehiclesCommand.Result(service);
-        } catch (XmlPullParserException e) {
-            throw new RuntimeException("can't parse XML");
-        } catch (IOException e) {
-            throw new RuntimeException("can't parse XML");
+            ContentHandler handler = new ContentHandler(selected);
+            Xml.parse(response, handler);
+            return new GetVehiclesCommand.Result(handler.vehicles);
+        } catch (SAXException e) {
+            throw new RuntimeException("cannot parse XML");
         }
     }
 
@@ -101,40 +148,6 @@ public class GetVehiclesCommandHandler extends CommandHandler {
                 return 1;
             default:
                 throw new RuntimeException("unknown transport type");
-        }
-    }
-
-    private String parseTransportCode(XmlPullParser parser) {
-        return parser.getAttributeValue("", "rtype");
-    }
-
-    private int parseRouteNumber(XmlPullParser parser) {
-        return Integer.valueOf(parser.getAttributeValue("", "rnum"));
-    }
-
-    private int parseDirectionId(XmlPullParser parser) {
-        return Integer.valueOf(parser.getAttributeValue("", "rid"));
-    }
-
-    private Vehicle parseVehicle(XmlPullParser parser) {
-        String id = parser.getAttributeValue("", "id");
-        String number = parser.getAttributeValue("", "gos_num");
-        int latitude = Integer.valueOf(parser.getAttributeValue("", "lat"));
-        int longitude = Integer.valueOf(parser.getAttributeValue("", "lon"));
-        int direction = Integer.valueOf(parser.getAttributeValue("", "dir"));
-        Date lastUpdate = parseVehicleLastUpdate(parser);
-        if (lastUpdate == null) {
-            return null;
-        }
-        return new Vehicle(id, number, new Point(latitude, longitude), direction, lastUpdate);
-    }
-
-    private Date parseVehicleLastUpdate(XmlPullParser parser) {
-        try {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            return format.parse(parser.getAttributeValue("", "lasttime"));
-        } catch (ParseException e) {
-            return null;
         }
     }
 }

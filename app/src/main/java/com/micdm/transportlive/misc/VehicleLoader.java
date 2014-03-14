@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.Service;
+import com.micdm.transportlive.data.VehicleInfo;
 import com.micdm.transportlive.server.ServerConnectTask;
 import com.micdm.transportlive.server.commands.Command;
 import com.micdm.transportlive.server.commands.GetVehiclesCommand;
@@ -13,7 +14,7 @@ import java.util.List;
 public class VehicleLoader {
 
     public static interface OnLoadListener {
-        public void onLoad(Service service);
+        public void onLoad(List<VehicleInfo> vehicles);
     }
 
     public static class Task {
@@ -35,15 +36,15 @@ public class VehicleLoader {
         this.context = context;
     }
 
-    public Task load(Service service, List<SelectedRouteInfo> selected, final OnLoadListener listener) {
+    public Task load(List<SelectedRouteInfo> selected, final OnLoadListener listener) {
         ServerConnectTask task = new ServerConnectTask(context, new ServerConnectTask.OnResultListener() {
             @Override
             public void onResult(Command.Result result) {
-                Service service = ((GetVehiclesCommand.Result)result).service;
-                listener.onLoad(service);
+                List<VehicleInfo> vehicles = ((GetVehiclesCommand.Result) result).vehicles;
+                listener.onLoad(vehicles);
             }
         });
-        task.execute(new GetVehiclesCommand(service, selected));
+        task.execute(new GetVehiclesCommand(selected));
         return new Task(task);
     }
 }

@@ -17,11 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.micdm.transportlive.R;
-import com.micdm.transportlive.data.Direction;
-import com.micdm.transportlive.data.Route;
-import com.micdm.transportlive.data.Service;
-import com.micdm.transportlive.data.Transport;
-import com.micdm.transportlive.data.Vehicle;
 import com.micdm.transportlive.data.VehicleInfo;
 import com.micdm.transportlive.misc.AssetArchive;
 import com.micdm.transportlive.misc.ConnectionHandler;
@@ -82,7 +77,7 @@ public class MapFragment extends Fragment {
         }
 
         private OverlayItem getMarker(VehicleInfo info) {
-            OverlayItem marker = new OverlayItem(info.vehicle.number, "", new GeoPoint(info.vehicle.location.latitude, info.vehicle.location.longitude));
+            OverlayItem marker = new OverlayItem(info.vehicle.number, "", new GeoPoint(info.vehicle.latitude, info.vehicle.longitude));
             Bitmap bitmap = getBitmap(info);
             marker.setMarker(new BitmapDrawable(resources, bitmap));
             marker.setMarkerHotspot(OverlayItem.HotspotPlace.CENTER);
@@ -140,7 +135,7 @@ public class MapFragment extends Fragment {
                 }
             });
             MapView mapView = getMapView();
-            ((ViewGroup) view).addView(mapView);
+            ((ViewGroup) view).addView(mapView, 0);
             IMapController controller = mapView.getController();
             controller.setZoom(MAX_ZOOM);
             controller.setCenter(INITIAL_LOCATION);
@@ -172,32 +167,39 @@ public class MapFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        hideViews();
+        hideAllViews();
         connectionHandler.setOnNoConnectionListener(new ConnectionHandler.OnNoConnectionListener() {
             @Override
             public void onNoConnection() {
-                hideViews();
+                hideAllViews();
                 showView(R.id.no_connection);
             }
         });
         serviceHandler.setOnUnselectAllRoutesListener(new ServiceHandler.OnUnselectAllRoutesListener() {
             @Override
             public void onUnselectAllRoutes() {
-                hideViews();
+                hideAllViews();
                 showView(R.id.no_route_selected);
             }
         });
         serviceHandler.setOnLoadVehiclesListener(new ServiceHandler.OnLoadVehiclesListener() {
             @Override
-            public void onLoadVehicles(Service service) {
-                update(service);
+            public void onStart() {
+                showView(R.id.loading);
+            }
+            @Override
+            public void onFinish() {
+                hideView(R.id.loading);
+            }
+            @Override
+            public void onLoadVehicles(List<VehicleInfo> vehicles) {
+                update(vehicles);
             }
         });
     }
 
-    public void update(Service service) {
-        hideViews();
-        List<VehicleInfo> vehicles = getVehicles(service);
+    public void update(List<VehicleInfo> vehicles) {
+        hideAllViews();
         if (vehicles.size() == 0) {
             showView(R.id.no_vehicles);
             return;
@@ -214,31 +216,15 @@ public class MapFragment extends Fragment {
         getView().findViewById(id).setVisibility(View.VISIBLE);
     }
 
-    private void hideViews() {
-        ViewGroup container = ((ViewGroup) ((ViewGroup) getView()).getChildAt(0));
-        if (container == null) {
-            return;
-        }
-        for (int i = 0; i < container.getChildCount(); i += 1) {
-            View view = container.getChildAt(i);
-            if (view != null) {
-                view.setVisibility(View.GONE);
-            }
-        }
+    private void hideView(int id) {
+        getView().findViewById(id).setVisibility(View.GONE);
     }
-
-    private List<VehicleInfo> getVehicles(Service service) {
-        List<VehicleInfo> vehicles = new ArrayList<VehicleInfo>();
-        for (Transport transport: service.transports) {
-            for (Route route: transport.routes) {
-                for (Direction direction: route.directions) {
-                    for (Vehicle vehicle: direction.vehicles) {
-                        vehicles.add(new VehicleInfo(route, vehicle));
-                    }
-                }
-            }
-        }
-        return vehicles;
+    
+    private void hideAllViews() {
+        hideView(R.id.map);
+        hideView(R.id.no_route_selected);
+        hideView(R.id.no_connection);
+        hideView(R.id.no_vehicles);
     }
 
     private void updateMap(List<OverlayItem> markers) {

@@ -15,12 +15,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.micdm.transportlive.data.Direction;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.RouteInfo;
 import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
+import com.micdm.transportlive.data.VehicleInfo;
 import com.micdm.transportlive.fragments.AboutFragment;
 import com.micdm.transportlive.fragments.MapFragment;
 import com.micdm.transportlive.fragments.RouteListFragment;
@@ -31,6 +31,7 @@ import com.micdm.transportlive.misc.ServiceLoader;
 import com.micdm.transportlive.misc.VehiclePoller;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class MainActivity extends ActionBarActivity implements ConnectionHandler, ServiceHandler {
@@ -77,10 +78,22 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
 
     private VehiclePoller poller = new VehiclePoller(this, new VehiclePoller.OnLoadListener() {
         @Override
-        public void onLoad(Service service) {
-            areVehiclesLoaded = true;
+        public void onStart() {
             if (onLoadVehiclesListener != null) {
-                onLoadVehiclesListener.onLoadVehicles(service);
+                onLoadVehiclesListener.onStart();
+            }
+        }
+        @Override
+        public void onFinish() {
+            if (onLoadVehiclesListener != null) {
+                onLoadVehiclesListener.onFinish();
+            }
+        }
+        @Override
+        public void onLoad(List<VehicleInfo> loaded) {
+            vehicles = loaded;
+            if (onLoadVehiclesListener != null) {
+                onLoadVehiclesListener.onLoadVehicles(vehicles);
             }
         }
         @Override
@@ -92,7 +105,7 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
         }
     });
     private Service service;
-    private boolean areVehiclesLoaded;
+    private List<VehicleInfo> vehicles;
     private List<SelectedRouteInfo> selected;
     private OnNoConnectionListener onNoConnectionListener;
     private OnUnselectAllRoutesListener onUnselectAllRoutesListener;
@@ -106,7 +119,6 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
         setupActionBar();
         setupPager();
         loadData();
-        init();
     }
 
     private void setupActionBar() {
@@ -151,17 +163,11 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
     private void loadData() {
         service = (new ServiceLoader(this)).load();
         selected = (new SelectedRouteStore(this)).load(service);
-    }
-
-    private void init() {
         if (onUnselectAllRoutesListener != null && selected.isEmpty()) {
             onUnselectAllRoutesListener.onUnselectAllRoutes();
         }
         if (onLoadServiceListener != null) {
             onLoadServiceListener.onLoadService(service);
-        }
-        if (!selected.isEmpty()) {
-            poller.start(service, selected);
         }
     }
 
@@ -242,8 +248,9 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
             addSelectedRoute(info.transport, info.route);
         } else {
             removeSelectedRoute(info.transport, info.route);
-            for (Direction direction: info.route.directions) {
-                direction.vehicles.clear();
+            removeVehicles(info.transport, info.route);
+            if (onLoadVehiclesListener != null && vehicles != null) {
+                onLoadVehiclesListener.onLoadVehicles(vehicles);
             }
         }
         (new SelectedRouteStore(this)).put(selected);
@@ -272,6 +279,16 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
         }
     }
 
+    private void removeVehicles(Transport transport, Route route) {
+        Iterator<VehicleInfo> iterator = vehicles.iterator();
+        while (iterator.hasNext()) {
+            VehicleInfo info = iterator.next();
+            if (info.transport.equals(transport) && info.route.equals(route)) {
+                iterator.remove();
+            }
+        }
+    }
+
     @Override
     public void setOnUnselectAllRoutesListener(OnUnselectAllRoutesListener listener) {
         onUnselectAllRoutesListener = listener;
@@ -291,8 +308,8 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
     @Override
     public void setOnLoadVehiclesListener(OnLoadVehiclesListener listener) {
         onLoadVehiclesListener = listener;
-        if (listener != null && areVehiclesLoaded) {
-            listener.onLoadVehicles(service);
+        if (listener != null && vehicles != null) {
+            listener.onLoadVehicles(vehicles);
         }
     }
 }

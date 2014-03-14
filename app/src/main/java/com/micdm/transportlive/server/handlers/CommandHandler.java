@@ -45,7 +45,7 @@ public abstract class CommandHandler {
             client.close();
             return content;
         } catch (IOException e) {
-            throw new RuntimeException("can't send request");
+            throw new RuntimeException("cannot send request");
         }
     }
 

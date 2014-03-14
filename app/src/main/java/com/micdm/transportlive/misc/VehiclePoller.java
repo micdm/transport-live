@@ -7,13 +7,16 @@ import android.os.Handler;
 
 import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.Service;
+import com.micdm.transportlive.data.VehicleInfo;
 
 import java.util.List;
 
 public class VehiclePoller {
 
     public static interface OnLoadListener {
-        public void onLoad(Service service);
+        public void onStart();
+        public void onFinish();
+        public void onLoad(List<VehicleInfo> vehicles);
         public void onNoConnection();
     }
 
@@ -49,11 +52,13 @@ public class VehiclePoller {
     private void load(Service service, List<SelectedRouteInfo> selected) {
         handler.postDelayed(load, UPDATE_INTERVAL * 1000);
         if (isNetworkAvailable()) {
-            currentTask = loader.load(service, selected, new VehicleLoader.OnLoadListener() {
+            onLoadListener.onStart();
+            currentTask = loader.load(selected, new VehicleLoader.OnLoadListener() {
                 @Override
-                public void onLoad(Service service) {
+                public void onLoad(List<VehicleInfo> vehicles) {
                     currentTask = null;
-                    onLoadListener.onLoad(service);
+                    onLoadListener.onFinish();
+                    onLoadListener.onLoad(vehicles);
                 }
             });
         } else {
@@ -70,6 +75,7 @@ public class VehiclePoller {
         if (currentTask != null) {
             currentTask.cancel();
             currentTask = null;
+            onLoadListener.onFinish();
         }
     }
 

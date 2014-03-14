@@ -28,4 +28,5 @@
     <string name="fragment_map_no_connection">Отсутствует подключение к сети.\nВключите Wi-Fi или мобильный интернет.</string>
     <string name="fragment_map_reconnect">Переподключиться</string>
     <string name="fragment_map_no_vehicles">Похоже, весь транспорт в парке.</string>
+    <string name="fragment_map_loading">Обновление…</string>
 </resources>

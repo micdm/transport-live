@@ -31,4 +31,15 @@
         android:id="@+id/no_vehicles"
         android:gravity="center"
         android:text="@string/fragment_map_no_vehicles"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/loading"
+        android:layout_gravity="bottom|center"
+        android:padding="5dp"
+        android:layout_margin="3dp"
+        android:background="#99000000"
+        android:textColor="#FFFFFFFF"
+        android:text="@string/fragment_map_loading"
+        android:visibility="gone"/>
 </FrameLayout>

@@ -7,7 +7,6 @@ public class Direction {
 
     public int id;
     public List<Station> stations = new ArrayList<Station>();
-    public List<Vehicle> vehicles = new ArrayList<Vehicle>();
 
     public Direction(int id) {
         this.id = id;
@@ -19,14 +18,5 @@ public class Direction {
 
     public Station getFinish() {
         return stations.get(stations.size() - 1);
-    }
-
-    public Vehicle getVehicleById(String id) {
-        for (Vehicle vehicle: vehicles) {
-            if (vehicle.id.equals(id)) {
-                return vehicle;
-            }
-        }
-        return null;
     }
 }
