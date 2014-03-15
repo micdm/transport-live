@@ -18,11 +18,7 @@
     <!-- Расшаривание -->
     <string name="share_app_text">Троллейбусы и трамваи Томска на карте онлайн. https://play.google.com/store/apps/details?id=%s</string>
     <!-- О приложении -->
-    <string name="about_app_text">По любым вопросам пишите на %s\nСделано на основе http://raspisanie.tomsk.ru/online/</string>
-    <!-- Сообщения при первой загрузке -->
-    <string name="first_loading_transports">Загружаются виды транспорта…</string>
-    <string name="first_loading_routes">Загружаются маршруты…</string>
-    <string name="first_loading_stations">Загружаются остановки…</string>
+    <string name="about_app_text">По любым вопросам пишите на %s.\nРаботает на основе http://raspisanie.tomsk.ru/online/</string>
     <!-- Фрагмент с картой -->
     <string name="fragment_map_no_route_selected">Выберите маршруты из списка.</string>
     <string name="fragment_map_no_connection">Отсутствует подключение к сети.\nВключите Wi-Fi или мобильный интернет.</string>
