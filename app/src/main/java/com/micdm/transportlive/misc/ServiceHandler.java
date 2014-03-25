@@ -1,7 +1,6 @@
 package com.micdm.transportlive.misc;
 
 import com.micdm.transportlive.data.Route;
-import com.micdm.transportlive.data.RouteInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.VehicleInfo;
@@ -27,7 +26,7 @@ public interface ServiceHandler {
 
     public Service getService();
     public boolean isRouteSelected(Transport transport, Route route);
-    public void selectRoute(RouteInfo info, boolean isSelected);
+    public void selectRoute(Transport transport, Route route, boolean isSelected);
     public void loadVehicles();
     public void setOnUnselectAllRoutesListener(OnUnselectAllRoutesListener listener);
     public void setOnLoadServiceListener(OnLoadServiceListener listener);

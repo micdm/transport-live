@@ -21,4 +21,12 @@ public class Route {
         }
         return null;
     }
+
+    public String getStart() {
+        return directions.get(0).getStart().name;
+    }
+
+    public String getFinish() {
+        return directions.get(0).getFinish().name;
+    }
 }

@@ -31,13 +31,4 @@ public class Transport {
         }
         return null;
     }
-
-    public List<RouteInfo> getAllRouteInfo() {
-        List<RouteInfo> info = new ArrayList<RouteInfo>();
-        for (Route route: routes) {
-            Direction direction = route.directions.get(0);
-            info.add(new RouteInfo(this, route, direction.getStart().name, direction.getFinish().name));
-        }
-        return info;
-    }
 }

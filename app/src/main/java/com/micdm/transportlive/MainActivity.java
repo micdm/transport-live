@@ -16,7 +16,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.micdm.transportlive.data.Route;
-import com.micdm.transportlive.data.RouteInfo;
 import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
@@ -230,14 +229,14 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
     }
 
     @Override
-    public void selectRoute(RouteInfo info, boolean isSelected) {
+    public void selectRoute(Transport transport, Route route, boolean isSelected) {
         poller.stop();
         if (isSelected) {
-            addSelectedRoute(info.transport, info.route);
+            addSelectedRoute(transport, route);
         } else {
-            removeSelectedRoute(info.transport, info.route);
+            removeSelectedRoute(transport, route);
             if (vehicles != null) {
-                removeVehicles(info.transport, info.route);
+                removeVehicles(transport, route);
             }
             if (onLoadVehiclesListener != null && vehicles != null) {
                 onLoadVehiclesListener.onLoadVehicles(vehicles);
