@@ -13,14 +13,15 @@ public class ServerConnectTask extends AsyncTask<Command, Void, Command.Result> 
 
     public static interface OnResultListener {
         public void onResult(Command.Result result);
+        public void onError();
     }
 
     private Context context;
-    private OnResultListener callback;
+    private OnResultListener listener;
 
-    public ServerConnectTask(Context context, OnResultListener callback) {
+    public ServerConnectTask(Context context, OnResultListener listener) {
         this.context = context;
-        this.callback = callback;
+        this.listener = listener;
     }
 
     @Override
@@ -44,6 +45,10 @@ public class ServerConnectTask extends AsyncTask<Command, Void, Command.Result> 
 
     @Override
     protected void onPostExecute(Command.Result result) {
-        callback.onResult(result);
+        if (result == null) {
+            listener.onError();
+        } else {
+            listener.onResult(result);
+        }
     }
 }

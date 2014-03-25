@@ -24,7 +24,6 @@ import com.micdm.transportlive.data.VehicleInfo;
 import com.micdm.transportlive.fragments.AboutFragment;
 import com.micdm.transportlive.fragments.MapFragment;
 import com.micdm.transportlive.fragments.RouteListFragment;
-import com.micdm.transportlive.misc.ConnectionHandler;
 import com.micdm.transportlive.misc.SelectedRouteStore;
 import com.micdm.transportlive.misc.ServiceHandler;
 import com.micdm.transportlive.misc.ServiceLoader;
@@ -34,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class MainActivity extends ActionBarActivity implements ConnectionHandler, ServiceHandler {
+public class MainActivity extends ActionBarActivity implements ServiceHandler {
 
     private static class CustomPagerAdapter extends FragmentPagerAdapter {
 
@@ -97,17 +96,14 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
             }
         }
         @Override
-        public void onNoConnection() {
+        public void onError() {
             poller.stop();
-            if (onNoConnectionListener != null) {
-                onNoConnectionListener.onNoConnection();
-            }
+            onLoadVehiclesListener.onError();
         }
     });
     private Service service;
     private List<VehicleInfo> vehicles;
     private List<SelectedRouteInfo> selected;
-    private OnNoConnectionListener onNoConnectionListener;
     private OnUnselectAllRoutesListener onUnselectAllRoutesListener;
     private OnLoadServiceListener onLoadServiceListener;
     private OnLoadVehiclesListener onLoadVehiclesListener;
@@ -175,7 +171,7 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
     protected void onStart() {
         super.onStart();
         if (!selected.isEmpty()) {
-            poller.start(service, selected);
+            poller.start(selected);
         }
     }
 
@@ -214,16 +210,8 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
     }
 
     @Override
-    public void reconnect() {
-        poller.start(service, selected);
-    }
-
-    @Override
-    public void setOnNoConnectionListener(OnNoConnectionListener listener) {
-        onNoConnectionListener = listener;
-        if (listener != null && !poller.isNetworkAvailable()) {
-            listener.onNoConnection();
-        }
+    public void loadVehicles() {
+        poller.start(selected);
     }
 
     @Override
@@ -248,7 +236,9 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
             addSelectedRoute(info.transport, info.route);
         } else {
             removeSelectedRoute(info.transport, info.route);
-            removeVehicles(info.transport, info.route);
+            if (vehicles != null) {
+                removeVehicles(info.transport, info.route);
+            }
             if (onLoadVehiclesListener != null && vehicles != null) {
                 onLoadVehiclesListener.onLoadVehicles(vehicles);
             }
@@ -258,7 +248,7 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
             onUnselectAllRoutesListener.onUnselectAllRoutes();
         }
         if (!selected.isEmpty()) {
-            poller.start(service, selected);
+            poller.start(selected);
         }
     }
 

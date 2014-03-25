@@ -15,6 +15,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -113,8 +114,10 @@ public class GetVehiclesCommandHandler extends CommandHandler {
             ContentHandler handler = new ContentHandler(selected);
             Xml.parse(response, handler);
             return new GetVehiclesCommand.Result(handler.vehicles);
+        } catch (IOException e) {
+            return null;
         } catch (SAXException e) {
-            throw new RuntimeException("cannot parse XML");
+            return null;
         }
     }
 

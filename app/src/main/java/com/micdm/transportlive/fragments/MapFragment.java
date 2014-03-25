@@ -19,7 +19,6 @@ import android.view.ViewGroup;
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.VehicleInfo;
 import com.micdm.transportlive.misc.AssetArchive;
-import com.micdm.transportlive.misc.ConnectionHandler;
 import com.micdm.transportlive.misc.ServiceHandler;
 
 import org.osmdroid.DefaultResourceProxyImpl;
@@ -112,14 +111,12 @@ public class MapFragment extends Fragment {
     private static final int EAST_EDGE = 85122070;
     private static final GeoPoint INITIAL_LOCATION = new GeoPoint(56484642, 84948100);
 
-    private ConnectionHandler connectionHandler;
     private ServiceHandler serviceHandler;
     private MarkerBuilder builder;
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        connectionHandler = (ConnectionHandler) getActivity();
         serviceHandler = (ServiceHandler) getActivity();
     }
 
@@ -131,7 +128,7 @@ public class MapFragment extends Fragment {
             reconnectView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    connectionHandler.reconnect();
+                    serviceHandler.loadVehicles();
                 }
             });
             MapView mapView = getMapView();
@@ -168,13 +165,6 @@ public class MapFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         hideAllViews();
-        connectionHandler.setOnNoConnectionListener(new ConnectionHandler.OnNoConnectionListener() {
-            @Override
-            public void onNoConnection() {
-                hideAllViews();
-                showView(R.id.no_connection);
-            }
-        });
         serviceHandler.setOnUnselectAllRoutesListener(new ServiceHandler.OnUnselectAllRoutesListener() {
             @Override
             public void onUnselectAllRoutes() {
@@ -194,6 +184,11 @@ public class MapFragment extends Fragment {
             @Override
             public void onLoadVehicles(List<VehicleInfo> vehicles) {
                 update(vehicles);
+            }
+            @Override
+            public void onError() {
+                hideAllViews();
+                showView(R.id.no_connection);
             }
         });
     }
@@ -252,7 +247,6 @@ public class MapFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        connectionHandler.setOnNoConnectionListener(null);
         serviceHandler.setOnUnselectAllRoutesListener(null);
         serviceHandler.setOnLoadVehiclesListener(null);
     }

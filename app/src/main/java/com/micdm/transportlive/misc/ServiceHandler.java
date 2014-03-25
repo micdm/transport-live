@@ -22,11 +22,13 @@ public interface ServiceHandler {
         public void onStart();
         public void onFinish();
         public void onLoadVehicles(List<VehicleInfo> vehicles);
+        public void onError();
     }
 
     public Service getService();
     public boolean isRouteSelected(Transport transport, Route route);
     public void selectRoute(RouteInfo info, boolean isSelected);
+    public void loadVehicles();
     public void setOnUnselectAllRoutesListener(OnUnselectAllRoutesListener listener);
     public void setOnLoadServiceListener(OnLoadServiceListener listener);
     public void setOnLoadVehiclesListener(OnLoadVehiclesListener listener);

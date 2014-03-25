@@ -3,7 +3,6 @@ package com.micdm.transportlive.misc;
 import android.content.Context;
 
 import com.micdm.transportlive.data.SelectedRouteInfo;
-import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.VehicleInfo;
 import com.micdm.transportlive.server.ServerConnectTask;
 import com.micdm.transportlive.server.commands.Command;
@@ -15,6 +14,7 @@ public class VehicleLoader {
 
     public static interface OnLoadListener {
         public void onLoad(List<VehicleInfo> vehicles);
+        public void onError();
     }
 
     public static class Task {
@@ -42,6 +42,10 @@ public class VehicleLoader {
             public void onResult(Command.Result result) {
                 List<VehicleInfo> vehicles = ((GetVehiclesCommand.Result) result).vehicles;
                 listener.onLoad(vehicles);
+            }
+            @Override
+            public void onError() {
+                listener.onError();
             }
         });
         task.execute(new GetVehiclesCommand(selected));

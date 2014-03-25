@@ -36,17 +36,13 @@ public abstract class CommandHandler {
         this.command = command;
     }
 
-    protected String sendRequest(String method, HashMap<String, String> params) {
-        try {
-            AndroidHttpClient client = AndroidHttpClient.newInstance(getUserAgent());
-            HttpGet request = new HttpGet(getRequestUri(method, params));
-            HttpResponse response = client.execute(request);
-            String content = IOUtils.toString(response.getEntity().getContent());
-            client.close();
-            return content;
-        } catch (IOException e) {
-            throw new RuntimeException("cannot send request");
-        }
+    protected String sendRequest(String method, HashMap<String, String> params) throws IOException {
+        AndroidHttpClient client = AndroidHttpClient.newInstance(getUserAgent());
+        HttpGet request = new HttpGet(getRequestUri(method, params));
+        HttpResponse response = client.execute(request);
+        String content = IOUtils.toString(response.getEntity().getContent());
+        client.close();
+        return content;
     }
 
     private String getUserAgent() {

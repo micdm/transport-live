@@ -21,7 +21,7 @@
     <string name="about_app_text">По любым вопросам пишите на %s.\nРаботает на основе http://raspisanie.tomsk.ru/online/</string>
     <!-- Фрагмент с картой -->
     <string name="fragment_map_no_route_selected">Выберите маршруты из списка.</string>
-    <string name="fragment_map_no_connection">Отсутствует подключение к сети.\nВключите Wi-Fi или мобильный интернет.</string>
+    <string name="fragment_map_no_connection">Не удаётся получить информацию о транспорте.\nПроверьте, что у вас есть доступ в Интернет.</string>
     <string name="fragment_map_reconnect">Переподключиться</string>
     <string name="fragment_map_no_vehicles">Похоже, весь транспорт в парке.</string>
     <string name="fragment_map_loading">Обновление…</string>
