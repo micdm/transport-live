@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Общее -->
+    <string name="app_name">Public transport of Tomsk</string>
+    <string name="contact_email">demerzov@gmail.com</string>
+    <string name="user_agent">transport-live %1$s on Android (mail to %2$s for discussion)</string>
+    <!-- Названия транспорта -->
+    <string name="transport_type_bus">Bus</string>
+    <string name="transport_type_trolleybus">Trolleybus</string>
+    <string name="transport_type_tram">Tram</string>
+    <string name="transport_type_taxi">Taxi</string>
+    <!-- Вкладки -->
+    <string name="tab_title_route_list">Routes</string>
+    <string name="tab_title_map">Map</string>
+    <!-- Меню -->
+    <string name="menu_item_share">Share…</string>
+    <string name="menu_item_about">About…</string>
+    <!-- Расшаривание -->
+    <string name="share_app_text">Public transport of Tomsk on the map online. https://play.google.com/store/apps/details?id=%s</string>
+    <!-- О приложении -->
+    <string name="about_app_text">Send any questions to %s.\nPowered by http://raspisanie.tomsk.ru/online/</string>
+    <!-- Фрагмент с картой -->
+    <string name="fragment_map_no_route_selected">Select some routes.</string>
+    <string name="fragment_map_no_connection">Can\'t load transport data.\nCheck your Internet access.</string>
+    <string name="fragment_map_reconnect">Try again</string>
+    <string name="fragment_map_no_vehicles">There is no transport working.</string>
+    <string name="fragment_map_loading">Updating…</string>
+</resources>
