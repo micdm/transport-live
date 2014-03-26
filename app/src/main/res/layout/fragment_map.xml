@@ -23,6 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/reconnect"
+            android:layout_marginTop="15dp"
             android:text="@string/fragment_map_reconnect"/>
     </LinearLayout>
     <TextView
