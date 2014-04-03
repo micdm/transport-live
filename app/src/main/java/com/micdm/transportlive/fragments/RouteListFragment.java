@@ -18,6 +18,7 @@ import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.misc.ServiceHandler;
+import com.micdm.transportlive.misc.Utils;
 
 public class RouteListFragment extends Fragment {
 
@@ -70,23 +71,8 @@ public class RouteListFragment extends Fragment {
             if (view == null) {
                 view = View.inflate(getActivity(), R.layout.view_route_list_title, null);
             }
-            ((TextView) view).setText(getTitle(transport));
+            ((TextView) view).setText(Utils.getTransportName(getActivity(), transport));
             return view;
-        }
-
-        private String getTitle(Transport transport) {
-            switch (transport.type) {
-                case BUS:
-                    return getString(R.string.transport_type_bus);
-                case TROLLEYBUS:
-                    return getString(R.string.transport_type_trolleybus);
-                case TRAM:
-                    return getString(R.string.transport_type_tram);
-                case TAXI:
-                    return getString(R.string.transport_type_taxi);
-                default:
-                    throw new RuntimeException("unknown transport type");
-            }
         }
 
         @Override
