@@ -44,8 +44,8 @@ android.signingConfigs.release.keyAlias p.keyAlias
 android.signingConfigs.release.keyPassword p.keyPassword
 
 dependencies {
-    compile 'com.android.support:support-v4:19.0.1'
-    compile 'com.android.support:appcompat-v7:19.0.1'
+    compile 'com.android.support:support-v4:+'
+    compile 'com.android.support:appcompat-v7:+'
     compile 'org.apache.commons:commons-io:+'
     compile 'org.apache.commons:commons-lang3:+'
     compile 'org.slf4j:slf4j-android:+'

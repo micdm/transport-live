@@ -26,4 +26,12 @@
     <string name="fragment_map_reconnect">Переподключиться</string>
     <string name="fragment_map_no_vehicles">Похоже, весь транспорт в парке.</string>
     <string name="fragment_map_loading">Обновление…</string>
+    <!-- Фрагмент с прогнозами -->
+    <string name="fragment_forecast_no_station_selected">Остановка не выбрана</string>
+    <string name="fragment_forecast_select_station">Выбрать</string>
+    <string name="fragment_forecast_loading">Обновление…</string>
+    <!-- Фрагмент выбора станции -->
+    <string name="fragment_select_station_title">Выберите остановку</string>
+    <string name="fragment_select_station_route_list_item">№ %s</string>
+    <string name="fragment_select_station_direction_list_item">%1$s → %2$s</string>
 </resources>

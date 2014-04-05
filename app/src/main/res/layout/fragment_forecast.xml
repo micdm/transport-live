@@ -1,27 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <Spinner
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/no_station_selected"
+        android:gravity="center">
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/transport_list"/>
-        <Spinner
+            android:text="@string/fragment_forecast_no_station_selected"/>
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/route_list"/>
+            android:id="@+id/select_station"
+            android:layout_marginTop="15dp"
+            android:text="@string/fragment_forecast_select_station"/>
     </LinearLayout>
-    <Spinner
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/forecast">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/station"
+                android:padding="5dp"/>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/reselect_station"
+                android:text="@string/fragment_forecast_select_station"/>
+        </LinearLayout>
+    </LinearLayout>
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/direction_list"/>
-    <Spinner
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/station_list"/>
-</LinearLayout>
+        android:id="@+id/loading"
+        android:layout_gravity="bottom|center"
+        android:padding="5dp"
+        android:layout_margin="3dp"
+        android:background="#99000000"
+        android:textColor="#FFFFFFFF"
+        android:text="@string/fragment_forecast_loading"
+        android:visibility="gone"/>
+</FrameLayout>

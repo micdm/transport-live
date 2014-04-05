@@ -17,13 +17,16 @@ import android.view.MenuItem;
 
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.SelectedRouteInfo;
+import com.micdm.transportlive.data.SelectedStationInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.VehicleInfo;
 import com.micdm.transportlive.fragments.AboutFragment;
-import com.micdm.transportlive.fragments.MapFragment;
-import com.micdm.transportlive.fragments.RouteListFragment;
+import com.micdm.transportlive.fragments.ForecastFragment;
+import com.micdm.transportlive.fragments.SelectStationFragment;
+import com.micdm.transportlive.misc.ForecastHandler;
 import com.micdm.transportlive.misc.SelectedRouteStore;
+import com.micdm.transportlive.misc.SelectedStationStore;
 import com.micdm.transportlive.misc.ServiceHandler;
 import com.micdm.transportlive.misc.ServiceLoader;
 import com.micdm.transportlive.misc.VehiclePoller;
@@ -32,7 +35,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class MainActivity extends ActionBarActivity implements ServiceHandler {
+public class MainActivity extends ActionBarActivity implements ServiceHandler, ForecastHandler {
 
     private static class CustomPagerAdapter extends FragmentPagerAdapter {
 
@@ -102,10 +105,14 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
     });
     private Service service;
     private List<VehicleInfo> vehicles;
-    private List<SelectedRouteInfo> selected;
+    private List<SelectedRouteInfo> selectedRoutes;
     private OnUnselectAllRoutesListener onUnselectAllRoutesListener;
     private OnLoadServiceListener onLoadServiceListener;
     private OnLoadVehiclesListener onLoadVehiclesListener;
+
+    private SelectedStationInfo selectedStation;
+    private OnSelectStationListener onSelectStationListener;
+    private OnLoadForecastListener onLoadForecastListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,8 +138,9 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
                     getSupportActionBar().setSelectedNavigationItem(i);
                 }
             });
-            addPage(new Page(getString(R.string.tab_title_route_list), new RouteListFragment()));
-            addPage(new Page(getString(R.string.tab_title_map), new MapFragment()));
+            //addPage(new Page(getString(R.string.tab_title_route_list), new RouteListFragment()));
+            //addPage(new Page(getString(R.string.tab_title_map), new MapFragment()));
+            addPage(new Page(getString(R.string.tab_title_forecast), new ForecastFragment()));
         }
     }
 
@@ -157,20 +165,24 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
 
     private void loadData() {
         service = (new ServiceLoader(this)).load();
-        selected = (new SelectedRouteStore(this)).load(service);
-        if (onUnselectAllRoutesListener != null && selected.isEmpty()) {
+        selectedRoutes = (new SelectedRouteStore(this)).load(service);
+        if (onUnselectAllRoutesListener != null && selectedRoutes.isEmpty()) {
             onUnselectAllRoutesListener.onUnselectAllRoutes();
         }
         if (onLoadServiceListener != null) {
             onLoadServiceListener.onLoadService(service);
+        }
+        selectedStation = (new SelectedStationStore(this)).load(service);
+        if (onSelectStationListener != null) {
+            onSelectStationListener.onSelectStation(selectedStation);
         }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if (!selected.isEmpty()) {
-            poller.start(selected);
+        if (!selectedRoutes.isEmpty()) {
+            poller.start(selectedRoutes);
         }
     }
 
@@ -210,7 +222,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
 
     @Override
     public void loadVehicles() {
-        poller.start(selected);
+        poller.start(selectedRoutes);
     }
 
     @Override
@@ -220,7 +232,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
 
     @Override
     public boolean isRouteSelected(Transport transport, Route route) {
-        for (SelectedRouteInfo info: selected) {
+        for (SelectedRouteInfo info: selectedRoutes) {
             if (info.transport.equals(transport) && info.route.equals(route)) {
                 return true;
             }
@@ -242,26 +254,26 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
                 onLoadVehiclesListener.onLoadVehicles(vehicles);
             }
         }
-        (new SelectedRouteStore(this)).put(selected);
-        if (onUnselectAllRoutesListener != null && selected.isEmpty()) {
+        (new SelectedRouteStore(this)).put(selectedRoutes);
+        if (onUnselectAllRoutesListener != null && selectedRoutes.isEmpty()) {
             onUnselectAllRoutesListener.onUnselectAllRoutes();
         }
-        if (!selected.isEmpty()) {
-            poller.start(selected);
+        if (!selectedRoutes.isEmpty()) {
+            poller.start(selectedRoutes);
         }
     }
 
     private void addSelectedRoute(Transport transport, Route route) {
         if (!isRouteSelected(transport, route)) {
-            selected.add(new SelectedRouteInfo(transport, route));
+            selectedRoutes.add(new SelectedRouteInfo(transport, route));
         }
     }
 
     private void removeSelectedRoute(Transport transport, Route route) {
         if (isRouteSelected(transport, route)) {
-            for (SelectedRouteInfo info: selected) {
+            for (SelectedRouteInfo info: selectedRoutes) {
                 if (info.transport.equals(transport) && info.route.equals(route)) {
-                    selected.remove(info);
+                    selectedRoutes.remove(info);
                     break;
                 }
             }
@@ -281,7 +293,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
     @Override
     public void setOnUnselectAllRoutesListener(OnUnselectAllRoutesListener listener) {
         onUnselectAllRoutesListener = listener;
-        if (listener != null && selected.isEmpty()) {
+        if (listener != null && selectedRoutes.isEmpty()) {
             listener.onUnselectAllRoutes();
         }
     }
@@ -300,5 +312,39 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler {
         if (listener != null && vehicles != null) {
             listener.onLoadVehicles(vehicles);
         }
+    }
+
+    @Override
+    public void requestStationSelection() {
+        FragmentManager manager = getSupportFragmentManager();
+        SelectStationFragment fragment = (SelectStationFragment) manager.findFragmentByTag("select_station");
+        if (fragment != null) {
+            fragment.dismiss();
+        }
+        (new SelectStationFragment()).show(manager, "select_station");
+    }
+
+    @Override
+    public void selectStation(SelectedStationInfo selected) {
+        selectedStation = selected;
+        (new SelectedStationStore(this)).put(selectedStation);
+        if (onSelectStationListener != null) {
+            onSelectStationListener.onSelectStation(selectedStation);
+        }
+        // TODO: запустить загрузку
+    }
+
+    @Override
+    public void setOnSelectStationListener(OnSelectStationListener listener) {
+        onSelectStationListener = listener;
+        if (listener != null) {
+            listener.onSelectStation(selectedStation);
+        }
+    }
+
+    @Override
+    public void setOnLoadForecastListener(OnLoadForecastListener listener) {
+        onLoadForecastListener = listener;
+        // TODO: если прогноз загружен, вызвать слушатель
     }
 }

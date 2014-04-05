@@ -19,4 +19,13 @@ public class Direction {
     public Station getFinish() {
         return stations.get(stations.size() - 1);
     }
+
+    public Station getStationById(int id) {
+        for (Station station: stations) {
+            if (station.id == id) {
+                return station;
+            }
+        }
+        return null;
+    }
 }
