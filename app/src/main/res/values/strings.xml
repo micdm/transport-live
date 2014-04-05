@@ -28,6 +28,7 @@
     <string name="fragment_map_loading">Обновление…</string>
     <!-- Фрагмент с прогнозами -->
     <string name="fragment_forecast_no_station_selected">Остановка не выбрана</string>
+    <string name="fragment_forecast_station">%1$s №%2$s\n%3$s → %4$s\n%5$s</string>
     <string name="fragment_forecast_select_station">Выбрать</string>
     <string name="fragment_forecast_loading">Обновление…</string>
     <!-- Фрагмент выбора станции -->

@@ -23,10 +23,10 @@ public class Route {
     }
 
     public String getStart() {
-        return directions.get(0).getStart().name;
+        return directions.get(0).getStart();
     }
 
     public String getFinish() {
-        return directions.get(0).getFinish().name;
+        return directions.get(0).getFinish();
     }
 }

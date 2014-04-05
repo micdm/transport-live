@@ -100,7 +100,7 @@ public class SelectStationFragment extends DialogFragment {
         @Override
         protected String getItemName(int position) {
             Direction direction = getItem(position);
-            return getString(R.string.fragment_select_station_direction_list_item, direction.getStart().name, direction.getFinish().name);
+            return getString(R.string.fragment_select_station_direction_list_item, direction.getStart(), direction.getFinish());
         }
     }
 

@@ -12,12 +12,12 @@ public class Direction {
         this.id = id;
     }
 
-    public Station getStart() {
-        return stations.get(0);
+    public String getStart() {
+        return stations.get(0).name;
     }
 
-    public Station getFinish() {
-        return stations.get(stations.size() - 1);
+    public String getFinish() {
+        return stations.get(stations.size() - 1).name;
     }
 
     public Station getStationById(int id) {

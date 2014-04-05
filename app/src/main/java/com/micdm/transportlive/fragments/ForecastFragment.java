@@ -54,7 +54,8 @@ public class ForecastFragment extends Fragment {
                 } else {
                     showView(R.id.forecast);
                     TextView stationView = ((TextView) getView().findViewById(R.id.station));
-                    stationView.setText(String.format("%s\n%s", Utils.getTransportName(getActivity(), selected.transport), selected.station.name));
+                    stationView.setText(getString(R.string.fragment_forecast_station, Utils.getTransportName(getActivity(), selected.transport),
+                            selected.route.number, selected.direction.getStart(), selected.direction.getFinish(), selected.station.name));
                 }
             }
         });
