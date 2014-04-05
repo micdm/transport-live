@@ -46,7 +46,7 @@ public class ServiceLoader {
                 direction = new Direction(getDirectionId(attrs));
             }
             if (localName.equals("station")) {
-                station = new Station(getStationName(attrs), getStationLatitude(attrs), getStationLongitude(attrs));
+                station = new Station(getStationId(attrs), getStationName(attrs), getStationLatitude(attrs), getStationLongitude(attrs));
             }
         }
 
@@ -81,6 +81,10 @@ public class ServiceLoader {
         }
 
         private int getDirectionId(Attributes attrs) {
+            return Integer.valueOf(attrs.getValue("id"));
+        }
+
+        private int getStationId(Attributes attrs) {
             return Integer.valueOf(attrs.getValue("id"));
         }
 
@@ -121,6 +125,8 @@ public class ServiceLoader {
         }
     }
 
+    private static final String SERVICE_ASSET_NAME = "service.xml";
+
     private Context context;
 
     public ServiceLoader(Context context) {
@@ -129,7 +135,7 @@ public class ServiceLoader {
 
     public Service load() {
         try {
-            InputStream input = context.getAssets().open("service.xml");
+            InputStream input = context.getAssets().open(SERVICE_ASSET_NAME);
             Service service = unserialize(input);
             input.close();
             return service;
