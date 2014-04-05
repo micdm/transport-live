@@ -21,4 +21,17 @@ public class Utils {
                 throw new RuntimeException("unknown transport type");
         }
     }
+
+    public static int getTransportDriveType(Transport transport) {
+        switch (transport.type) {
+            case BUS:
+            case TROLLEYBUS:
+            case TAXI:
+                return 0;
+            case TRAM:
+                return 1;
+            default:
+                throw new RuntimeException("unknown transport type");
+        }
+    }
 }

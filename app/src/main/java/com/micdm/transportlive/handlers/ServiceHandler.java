@@ -1,4 +1,4 @@
-package com.micdm.transportlive.misc;
+package com.micdm.transportlive.handlers;
 
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;

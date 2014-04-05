@@ -5,9 +5,9 @@ import android.util.Xml;
 
 import com.micdm.transportlive.data.Direction;
 import com.micdm.transportlive.data.SelectedRouteInfo;
-import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.Vehicle;
 import com.micdm.transportlive.data.VehicleInfo;
+import com.micdm.transportlive.misc.Utils;
 import com.micdm.transportlive.server.commands.GetVehiclesCommand;
 
 import org.apache.commons.lang3.StringUtils;
@@ -135,22 +135,9 @@ public class GetVehiclesCommandHandler extends CommandHandler {
         List<String> keys = new ArrayList<String>();
         for (SelectedRouteInfo info: selected) {
             for (Direction direction: info.route.directions) {
-                keys.add(String.format("%s;%s", direction.id, getTransportId(info.transport)));
+                keys.add(String.format("%s;%s", direction.id, Utils.getTransportDriveType(info.transport)));
             }
         }
         return keys;
-    }
-
-    private int getTransportId(Transport transport) {
-        switch (transport.type) {
-            case BUS:
-            case TROLLEYBUS:
-            case TAXI:
-                return 0;
-            case TRAM:
-                return 1;
-            default:
-                throw new RuntimeException("unknown transport type");
-        }
     }
 }

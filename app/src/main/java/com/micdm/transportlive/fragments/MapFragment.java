@@ -18,8 +18,8 @@ import android.view.ViewGroup;
 
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.VehicleInfo;
+import com.micdm.transportlive.handlers.ServiceHandler;
 import com.micdm.transportlive.misc.AssetArchive;
-import com.micdm.transportlive.misc.ServiceHandler;
 
 import org.osmdroid.DefaultResourceProxyImpl;
 import org.osmdroid.ResourceProxy;

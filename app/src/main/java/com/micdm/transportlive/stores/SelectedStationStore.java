@@ -1,4 +1,4 @@
-package com.micdm.transportlive.misc;
+package com.micdm.transportlive.stores;
 
 import android.content.Context;
 import android.util.Xml;

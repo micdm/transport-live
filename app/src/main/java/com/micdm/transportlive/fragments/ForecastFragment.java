@@ -9,8 +9,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.micdm.transportlive.R;
+import com.micdm.transportlive.data.Forecast;
 import com.micdm.transportlive.data.SelectedStationInfo;
-import com.micdm.transportlive.misc.ForecastHandler;
+import com.micdm.transportlive.handlers.ForecastHandler;
 import com.micdm.transportlive.misc.Utils;
 
 public class ForecastFragment extends Fragment {
@@ -61,9 +62,22 @@ public class ForecastFragment extends Fragment {
         });
         handler.setOnLoadForecastListener(new ForecastHandler.OnLoadForecastListener() {
             @Override
-            public void onLoadForecast() {
+            public void onStart() {
+                showView(R.id.loading);
+            }
+            @Override
+            public void onFinish() {
+                hideView(R.id.loading);
+            }
+            @Override
+            public void onLoadForecast(Forecast forecast) {
                 hideAllViews();
                 showView(R.id.forecast);
+            }
+            @Override
+            public void onError() {
+//                hideAllViews();
+//                showView(R.id.no_connection);
             }
         });
     }

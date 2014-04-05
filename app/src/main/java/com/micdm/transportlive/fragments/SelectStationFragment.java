@@ -20,8 +20,8 @@ import com.micdm.transportlive.data.SelectedStationInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Station;
 import com.micdm.transportlive.data.Transport;
-import com.micdm.transportlive.misc.ForecastHandler;
-import com.micdm.transportlive.misc.ServiceHandler;
+import com.micdm.transportlive.handlers.ForecastHandler;
+import com.micdm.transportlive.handlers.ServiceHandler;
 import com.micdm.transportlive.misc.Utils;
 
 import java.util.List;

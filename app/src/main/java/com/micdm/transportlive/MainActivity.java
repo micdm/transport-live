@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.micdm.transportlive.data.Forecast;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.SelectedStationInfo;
@@ -24,12 +25,13 @@ import com.micdm.transportlive.data.VehicleInfo;
 import com.micdm.transportlive.fragments.AboutFragment;
 import com.micdm.transportlive.fragments.ForecastFragment;
 import com.micdm.transportlive.fragments.SelectStationFragment;
-import com.micdm.transportlive.misc.ForecastHandler;
-import com.micdm.transportlive.misc.SelectedRouteStore;
-import com.micdm.transportlive.misc.SelectedStationStore;
-import com.micdm.transportlive.misc.ServiceHandler;
+import com.micdm.transportlive.handlers.ForecastHandler;
+import com.micdm.transportlive.handlers.ServiceHandler;
 import com.micdm.transportlive.misc.ServiceLoader;
-import com.micdm.transportlive.misc.VehiclePoller;
+import com.micdm.transportlive.server.pollers.ForecastPoller;
+import com.micdm.transportlive.server.pollers.VehiclePoller;
+import com.micdm.transportlive.stores.SelectedRouteStore;
+import com.micdm.transportlive.stores.SelectedStationStore;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -77,7 +79,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
         }
     }
 
-    private VehiclePoller poller = new VehiclePoller(this, new VehiclePoller.OnLoadListener() {
+    private VehiclePoller vehiclePoller = new VehiclePoller(this, new VehiclePoller.OnLoadListener() {
         @Override
         public void onStart() {
             if (onLoadVehiclesListener != null) {
@@ -94,23 +96,50 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
         public void onLoad(List<VehicleInfo> loaded) {
             vehicles = loaded;
             if (onLoadVehiclesListener != null) {
-                onLoadVehiclesListener.onLoadVehicles(vehicles);
+                onLoadVehiclesListener.onLoadVehicles(loaded);
             }
         }
         @Override
         public void onError() {
-            poller.stop();
+            vehiclePoller.stop();
             onLoadVehiclesListener.onError();
         }
     });
     private Service service;
-    private List<VehicleInfo> vehicles;
     private List<SelectedRouteInfo> selectedRoutes;
+    private List<VehicleInfo> vehicles;
     private OnUnselectAllRoutesListener onUnselectAllRoutesListener;
     private OnLoadServiceListener onLoadServiceListener;
     private OnLoadVehiclesListener onLoadVehiclesListener;
 
+    private ForecastPoller forecastPoller = new ForecastPoller(this, new ForecastPoller.OnLoadListener() {
+        @Override
+        public void onStart() {
+            if (onLoadForecastListener != null) {
+                onLoadForecastListener.onStart();
+            }
+        }
+        @Override
+        public void onFinish() {
+            if (onLoadForecastListener != null) {
+                onLoadForecastListener.onFinish();
+            }
+        }
+        @Override
+        public void onLoad(Forecast loaded) {
+            forecast = loaded;
+            if (onLoadForecastListener != null) {
+                onLoadForecastListener.onLoadForecast(loaded);
+            }
+        }
+        @Override
+        public void onError() {
+            forecastPoller.stop();
+            onLoadForecastListener.onError();
+        }
+    });
     private SelectedStationInfo selectedStation;
+    private Forecast forecast;
     private OnSelectStationListener onSelectStationListener;
     private OnLoadForecastListener onLoadForecastListener;
 
@@ -182,14 +211,17 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
     protected void onStart() {
         super.onStart();
         if (!selectedRoutes.isEmpty()) {
-            poller.start(selectedRoutes);
+            vehiclePoller.start(selectedRoutes);
+        }
+        if (service != null && selectedStation != null) {
+            forecastPoller.start(service, selectedStation);
         }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        poller.stop();
+        vehiclePoller.stop();
     }
 
     @Override
@@ -221,11 +253,6 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
     }
 
     @Override
-    public void loadVehicles() {
-        poller.start(selectedRoutes);
-    }
-
-    @Override
     public Service getService() {
         return service;
     }
@@ -242,7 +269,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
 
     @Override
     public void selectRoute(Transport transport, Route route, boolean isSelected) {
-        poller.stop();
+        vehiclePoller.stop();
         if (isSelected) {
             addSelectedRoute(transport, route);
         } else {
@@ -259,7 +286,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
             onUnselectAllRoutesListener.onUnselectAllRoutes();
         }
         if (!selectedRoutes.isEmpty()) {
-            poller.start(selectedRoutes);
+            vehiclePoller.start(selectedRoutes);
         }
     }
 
@@ -288,6 +315,11 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
                 iterator.remove();
             }
         }
+    }
+
+    @Override
+    public void loadVehicles() {
+        vehiclePoller.start(selectedRoutes);
     }
 
     @Override
@@ -326,12 +358,18 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
 
     @Override
     public void selectStation(SelectedStationInfo selected) {
+        forecastPoller.stop();
         selectedStation = selected;
-        (new SelectedStationStore(this)).put(selectedStation);
+        (new SelectedStationStore(this)).put(selected);
         if (onSelectStationListener != null) {
-            onSelectStationListener.onSelectStation(selectedStation);
+            onSelectStationListener.onSelectStation(selected);
         }
-        // TODO: запустить загрузку
+        forecastPoller.start(service, selected);
+    }
+
+    @Override
+    public void loadForecast() {
+        forecastPoller.start(service, selectedStation);
     }
 
     @Override
@@ -345,6 +383,8 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
     @Override
     public void setOnLoadForecastListener(OnLoadForecastListener listener) {
         onLoadForecastListener = listener;
-        // TODO: если прогноз загружен, вызвать слушатель
+        if (listener != null && forecast != null) {
+            listener.onLoadForecast(forecast);
+        }
     }
 }

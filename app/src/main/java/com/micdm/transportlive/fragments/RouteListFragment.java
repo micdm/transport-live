@@ -17,7 +17,7 @@ import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
-import com.micdm.transportlive.misc.ServiceHandler;
+import com.micdm.transportlive.handlers.ServiceHandler;
 import com.micdm.transportlive.misc.Utils;
 
 public class RouteListFragment extends Fragment {
