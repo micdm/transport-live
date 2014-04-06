@@ -20,8 +20,8 @@ import com.micdm.transportlive.data.SelectedStationInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Station;
 import com.micdm.transportlive.data.Transport;
-import com.micdm.transportlive.handlers.ForecastHandler;
-import com.micdm.transportlive.handlers.ServiceHandler;
+import com.micdm.transportlive.interfaces.ForecastHandler;
+import com.micdm.transportlive.interfaces.ServiceHandler;
 import com.micdm.transportlive.misc.Utils;
 
 import java.util.List;
@@ -117,7 +117,29 @@ public class SelectStationFragment extends DialogFragment {
     }
 
     private ServiceHandler serviceHandler;
+    private Service service;
+    private ServiceHandler.OnLoadServiceListener onLoadServiceListener = new ServiceHandler.OnLoadServiceListener() {
+        @Override
+        public void onLoadService(Service loaded) {
+            service = loaded;
+        }
+    };
+
     private ForecastHandler forecastHandler;
+    private ForecastHandler.OnSelectStationListener onSelectStationListener = new ForecastHandler.OnSelectStationListener() {
+        @Override
+        public void onSelectStation(SelectedStationInfo selected) {
+            if (selected == null) {
+                Transport transport = service.transports.get(0);
+                Route route = transport.routes.get(0);
+                Direction direction = route.directions.get(0);
+                Station station = direction.stations.get(0);
+                setupForSelectedStation(service, transport, route, direction, station);
+            } else {
+                setupForSelectedStation(service, selected.transport, selected.route, selected.direction, selected.station);
+            }
+        }
+    };
 
     @Override
     public void onAttach(Activity activity) {
@@ -163,27 +185,8 @@ public class SelectStationFragment extends DialogFragment {
     @Override
     public void onStart() {
         super.onStart();
-        serviceHandler.setOnLoadServiceListener(new ServiceHandler.OnLoadServiceListener() {
-            @Override
-            public void onLoadService(final Service service) {
-                forecastHandler.setOnSelectStationListener(new ForecastHandler.OnSelectStationListener() {
-                    @Override
-                    public void onSelectStation(SelectedStationInfo selected) {
-                        if (selected == null) {
-                            Transport transport = service.transports.get(0);
-                            Route route = transport.routes.get(0);
-                            Direction direction = route.directions.get(0);
-                            Station station = direction.stations.get(0);
-                            setupForSelectedStation(service, transport, route, direction, station);
-                        }
-                        else {
-                            setupForSelectedStation(service, selected.transport, selected.route, selected.direction, selected.station);
-                        }
-                    }
-                });
-            }
-        });
-
+        serviceHandler.addOnLoadServiceListener(onLoadServiceListener);
+        forecastHandler.addOnSelectStationListener(onSelectStationListener);
     }
 
     private void setupForSelectedStation(Service service, Transport transport, Route route, Direction direction, Station station) {
@@ -255,7 +258,7 @@ public class SelectStationFragment extends DialogFragment {
     @Override
     public void onStop() {
         super.onStop();
-        serviceHandler.setOnLoadServiceListener(null);
-        forecastHandler.setOnSelectStationListener(null);
+        serviceHandler.removeOnLoadServiceListener(onLoadServiceListener);
+        forecastHandler.removeOnSelectStationListener(onSelectStationListener);
     }
 }

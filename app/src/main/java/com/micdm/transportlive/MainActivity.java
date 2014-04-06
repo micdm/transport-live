@@ -25,8 +25,10 @@ import com.micdm.transportlive.data.VehicleInfo;
 import com.micdm.transportlive.fragments.AboutFragment;
 import com.micdm.transportlive.fragments.ForecastFragment;
 import com.micdm.transportlive.fragments.SelectStationFragment;
-import com.micdm.transportlive.handlers.ForecastHandler;
-import com.micdm.transportlive.handlers.ServiceHandler;
+import com.micdm.transportlive.interfaces.EventListener;
+import com.micdm.transportlive.interfaces.ForecastHandler;
+import com.micdm.transportlive.interfaces.ServiceHandler;
+import com.micdm.transportlive.misc.EventListenerList;
 import com.micdm.transportlive.misc.ServiceLoader;
 import com.micdm.transportlive.server.pollers.ForecastPoller;
 import com.micdm.transportlive.server.pollers.VehiclePoller;
@@ -79,69 +81,94 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
         }
     }
 
+    private EventListenerList listeners = new EventListenerList();
+
     private VehiclePoller vehiclePoller = new VehiclePoller(this, new VehiclePoller.OnLoadListener() {
         @Override
         public void onStart() {
-            if (onLoadVehiclesListener != null) {
-                onLoadVehiclesListener.onStart();
-            }
+            listeners.notify("OnLoadVehicles", new EventListenerList.OnIterateListener() {
+                @Override
+                public void onIterate(EventListener listener) {
+                    ((OnLoadVehiclesListener) listener).onStart();
+                }
+            });
         }
         @Override
         public void onFinish() {
-            if (onLoadVehiclesListener != null) {
-                onLoadVehiclesListener.onFinish();
-            }
+            listeners.notify("OnLoadVehicles", new EventListenerList.OnIterateListener() {
+                @Override
+                public void onIterate(EventListener listener) {
+                    ((OnLoadVehiclesListener) listener).onFinish();
+                }
+            });
         }
         @Override
-        public void onLoad(List<VehicleInfo> loaded) {
+        public void onLoad(final List<VehicleInfo> loaded) {
             vehicles = loaded;
-            if (onLoadVehiclesListener != null) {
-                onLoadVehiclesListener.onLoadVehicles(loaded);
-            }
+            listeners.notify("OnLoadVehicles", new EventListenerList.OnIterateListener() {
+                @Override
+                public void onIterate(EventListener listener) {
+                    ((OnLoadVehiclesListener) listener).onLoadVehicles(loaded);
+                }
+            });
         }
         @Override
         public void onError() {
             vehiclePoller.stop();
-            onLoadVehiclesListener.onError();
+            listeners.notify("OnLoadVehicles", new EventListenerList.OnIterateListener() {
+                @Override
+                public void onIterate(EventListener listener) {
+                    ((OnLoadVehiclesListener) listener).onError();
+                }
+            });
         }
     });
     private Service service;
     private List<SelectedRouteInfo> selectedRoutes;
     private List<VehicleInfo> vehicles;
-    private OnUnselectAllRoutesListener onUnselectAllRoutesListener;
-    private OnLoadServiceListener onLoadServiceListener;
-    private OnLoadVehiclesListener onLoadVehiclesListener;
 
     private ForecastPoller forecastPoller = new ForecastPoller(this, new ForecastPoller.OnLoadListener() {
         @Override
         public void onStart() {
-            if (onLoadForecastListener != null) {
-                onLoadForecastListener.onStart();
-            }
+            listeners.notify("OnLoadForecast", new EventListenerList.OnIterateListener() {
+                @Override
+                public void onIterate(EventListener listener) {
+                    ((OnLoadForecastListener) listener).onStart();
+                }
+            });
         }
         @Override
         public void onFinish() {
-            if (onLoadForecastListener != null) {
-                onLoadForecastListener.onFinish();
-            }
+            listeners.notify("OnLoadForecast", new EventListenerList.OnIterateListener() {
+                @Override
+                public void onIterate(EventListener listener) {
+                    ((OnLoadForecastListener) listener).onFinish();
+                }
+            });
         }
         @Override
-        public void onLoad(Forecast loaded) {
+        public void onLoad(final Forecast loaded) {
             forecast = loaded;
-            if (onLoadForecastListener != null) {
-                onLoadForecastListener.onLoadForecast(loaded);
-            }
+            listeners.notify("OnLoadForecast", new EventListenerList.OnIterateListener() {
+                @Override
+                public void onIterate(EventListener listener) {
+                    ((OnLoadForecastListener) listener).onLoadForecast(loaded);
+                }
+            });
         }
         @Override
         public void onError() {
             forecastPoller.stop();
-            onLoadForecastListener.onError();
+            listeners.notify("OnLoadForecast", new EventListenerList.OnIterateListener() {
+                @Override
+                public void onIterate(EventListener listener) {
+                    ((OnLoadForecastListener) listener).onError();
+                }
+            });
         }
     });
     private SelectedStationInfo selectedStation;
     private Forecast forecast;
-    private OnSelectStationListener onSelectStationListener;
-    private OnLoadForecastListener onLoadForecastListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -195,16 +222,27 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
     private void loadData() {
         service = (new ServiceLoader(this)).load();
         selectedRoutes = (new SelectedRouteStore(this)).load(service);
-        if (onUnselectAllRoutesListener != null && selectedRoutes.isEmpty()) {
-            onUnselectAllRoutesListener.onUnselectAllRoutes();
+        if (selectedRoutes.isEmpty()) {
+            listeners.notify("OnUnselectAllRoutes", new EventListenerList.OnIterateListener() {
+                @Override
+                public void onIterate(EventListener listener) {
+                    ((OnUnselectAllRoutesListener) listener).onUnselectAllRoutes();
+                }
+            });
         }
-        if (onLoadServiceListener != null) {
-            onLoadServiceListener.onLoadService(service);
-        }
+        listeners.notify("OnLoadService", new EventListenerList.OnIterateListener() {
+            @Override
+            public void onIterate(EventListener listener) {
+                ((OnLoadServiceListener) listener).onLoadService(service);
+            }
+        });
         selectedStation = (new SelectedStationStore(this)).load(service);
-        if (onSelectStationListener != null) {
-            onSelectStationListener.onSelectStation(selectedStation);
-        }
+        listeners.notify("OnSelectStation", new EventListenerList.OnIterateListener() {
+            @Override
+            public void onIterate(EventListener listener) {
+                ((OnSelectStationListener) listener).onSelectStation(selectedStation);
+            }
+        });
     }
 
     @Override
@@ -253,11 +291,6 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
     }
 
     @Override
-    public Service getService() {
-        return service;
-    }
-
-    @Override
     public boolean isRouteSelected(Transport transport, Route route) {
         for (SelectedRouteInfo info: selectedRoutes) {
             if (info.transport.equals(transport) && info.route.equals(route)) {
@@ -277,13 +310,23 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
             if (vehicles != null) {
                 removeVehicles(transport, route);
             }
-            if (onLoadVehiclesListener != null && vehicles != null) {
-                onLoadVehiclesListener.onLoadVehicles(vehicles);
+            if (vehicles != null) {
+                listeners.notify("OnLoadVehicles", new EventListenerList.OnIterateListener() {
+                    @Override
+                    public void onIterate(EventListener listener) {
+                        ((OnLoadVehiclesListener) listener).onLoadVehicles(vehicles);
+                    }
+                });
             }
         }
         (new SelectedRouteStore(this)).put(selectedRoutes);
-        if (onUnselectAllRoutesListener != null && selectedRoutes.isEmpty()) {
-            onUnselectAllRoutesListener.onUnselectAllRoutes();
+        if (selectedRoutes.isEmpty()) {
+            listeners.notify("OnUnselectAllRoutes", new EventListenerList.OnIterateListener() {
+                @Override
+                public void onIterate(EventListener listener) {
+                    ((OnUnselectAllRoutesListener) listener).onUnselectAllRoutes();
+                }
+            });
         }
         if (!selectedRoutes.isEmpty()) {
             vehiclePoller.start(selectedRoutes);
@@ -323,27 +366,40 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
     }
 
     @Override
-    public void setOnUnselectAllRoutesListener(OnUnselectAllRoutesListener listener) {
-        onUnselectAllRoutesListener = listener;
-        if (listener != null && selectedRoutes.isEmpty()) {
+    public void addOnUnselectAllRoutesListener(OnUnselectAllRoutesListener listener) {
+        listeners.add("OnUnselectAllRoutes", listener);
+        if (selectedRoutes.isEmpty()) {
             listener.onUnselectAllRoutes();
         }
     }
 
     @Override
-    public void setOnLoadServiceListener(OnLoadServiceListener listener) {
-        onLoadServiceListener = listener;
-        if (listener != null) {
-            listener.onLoadService(service);
+    public void removeOnUnselectAllRoutesListener(OnUnselectAllRoutesListener listener) {
+        listeners.remove("OnUnselectAllRoutes", listener);
+    }
+
+    @Override
+    public void addOnLoadServiceListener(OnLoadServiceListener listener) {
+        listeners.add("OnLoadService", listener);
+        listener.onLoadService(service);
+    }
+
+    @Override
+    public void removeOnLoadServiceListener(OnLoadServiceListener listener) {
+        listeners.remove("OnLoadService", listener);
+    }
+
+    @Override
+    public void addOnLoadVehiclesListener(OnLoadVehiclesListener listener) {
+        listeners.add("OnLoadVehicles", listener);
+        if (vehicles != null) {
+            listener.onLoadVehicles(vehicles);
         }
     }
 
     @Override
-    public void setOnLoadVehiclesListener(OnLoadVehiclesListener listener) {
-        onLoadVehiclesListener = listener;
-        if (listener != null && vehicles != null) {
-            listener.onLoadVehicles(vehicles);
-        }
+    public void removeOnLoadVehiclesListener(OnLoadVehiclesListener listener) {
+        listeners.remove("OnLoadVehicles", listener);
     }
 
     @Override
@@ -357,13 +413,16 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
     }
 
     @Override
-    public void selectStation(SelectedStationInfo selected) {
+    public void selectStation(final SelectedStationInfo selected) {
         forecastPoller.stop();
         selectedStation = selected;
         (new SelectedStationStore(this)).put(selected);
-        if (onSelectStationListener != null) {
-            onSelectStationListener.onSelectStation(selected);
-        }
+        listeners.notify("OnSelectStation", new EventListenerList.OnIterateListener() {
+            @Override
+            public void onIterate(EventListener listener) {
+                ((OnSelectStationListener) listener).onSelectStation(selected);
+            }
+        });
         forecastPoller.start(service, selected);
     }
 
@@ -373,18 +432,26 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
     }
 
     @Override
-    public void setOnSelectStationListener(OnSelectStationListener listener) {
-        onSelectStationListener = listener;
-        if (listener != null) {
-            listener.onSelectStation(selectedStation);
+    public void addOnSelectStationListener(OnSelectStationListener listener) {
+        listeners.add("OnSelectStation", listener);
+        listener.onSelectStation(selectedStation);
+    }
+
+    @Override
+    public void removeOnSelectStationListener(OnSelectStationListener listener) {
+        listeners.remove("OnSelectStation", listener);
+    }
+
+    @Override
+    public void addOnLoadForecastListener(OnLoadForecastListener listener) {
+        listeners.add("OnLoadForecast", listener);
+        if (forecast != null) {
+            listener.onLoadForecast(forecast);
         }
     }
 
     @Override
-    public void setOnLoadForecastListener(OnLoadForecastListener listener) {
-        onLoadForecastListener = listener;
-        if (listener != null && forecast != null) {
-            listener.onLoadForecast(forecast);
-        }
+    public void removeOnLoadForecastListener(OnLoadForecastListener listener) {
+        listeners.remove("OnLoadForecast", listener);
     }
 }
