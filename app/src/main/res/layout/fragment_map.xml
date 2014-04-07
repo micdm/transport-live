@@ -22,6 +22,11 @@
             android:gravity="center"
             android:padding="5dp"
             android:text="@string/fragment_map_no_vehicles"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/loading"
+            style="AppTheme.LoadingMessage"/>
     </FrameLayout>
     <Button
         android:layout_width="match_parent"

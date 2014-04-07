@@ -13,18 +13,15 @@
     <string name="tab_title_forecast">Расписание</string>
     <string name="tab_title_map">Карта</string>
     <!-- Меню -->
+    <string name="menu_item_reload">Обновить</string>
     <string name="menu_item_share">Поделиться…</string>
     <string name="menu_item_about">О приложении…</string>
     <!-- Расшаривание -->
     <string name="share_app_text">Троллейбусы и трамваи Томска на карте онлайн. https://play.google.com/store/apps/details?id=%s</string>
     <!-- О приложении -->
     <string name="about_app_text">По любым вопросам пишите на %s.\nРаботает на основе http://raspisanie.tomsk.ru/online/</string>
-    <!-- Фрагмент с картой -->
-    <string name="fragment_map_select_route">Выбрать маршрут…</string>
-    <string name="fragment_map_no_route_selected">Здесь на карте в реальном времени будет показан транспорт, маршрут которого вы выберете.</string>
-    <string name="fragment_map_no_vehicles">Похоже, весь транспорт в парке.</string>
-    <!-- Фрагмент выбора маршрутов -->
-    <string name="fragment_select_route_title">Выберите маршрут</string>
+    <!-- Общее для фрагментов -->
+    <string name="fragment_loading">Обновление…</string>
     <!-- Фрагмент с прогнозами -->
     <string name="fragment_forecast_select_station">Выбрать остановку…</string>
     <string name="fragment_forecast_no_station_selected">Здесь будет показано ориентировочное время прибытия транспорта на остановку, которую вы выберете.</string>
@@ -36,4 +33,10 @@
     <string name="fragment_select_station_title">Выберите остановку</string>
     <string name="fragment_select_station_route_list_item">№ %s</string>
     <string name="fragment_select_station_direction_list_item">%1$s → %2$s</string>
+    <!-- Фрагмент с картой -->
+    <string name="fragment_map_select_route">Выбрать маршрут…</string>
+    <string name="fragment_map_no_route_selected">Здесь на карте в реальном времени будет показан транспорт, маршрут которого вы выберете.</string>
+    <string name="fragment_map_no_vehicles">Похоже, весь транспорт в парке.</string>
+    <!-- Фрагмент выбора маршрутов -->
+    <string name="fragment_select_route_title">Выберите маршрут</string>
 </resources>

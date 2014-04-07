@@ -5,14 +5,14 @@
     android:orientation="horizontal"
     android:baselineAligned="false"
     tools:context="com.micdm.transportlive.MainActivity">
-    <fragment class="com.micdm.transportlive.fragments.SelectRouteFragment"
-        android:layout_width="wrap_content"
+    <fragment class="com.micdm.transportlive.fragments.ForecastFragment"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:tag="route_list"
+        android:tag="forecast"
         android:layout_weight="1"/>
     <fragment class="com.micdm.transportlive.fragments.MapFragment"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:tag="map"
-        android:layout_weight="6"/>
+        android:layout_weight="5"/>
 </LinearLayout>

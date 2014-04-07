@@ -39,11 +39,11 @@ public class ForecastFragment extends Fragment {
     private ForecastHandler.OnLoadForecastListener onLoadForecastListener = new ForecastHandler.OnLoadForecastListener() {
         @Override
         public void onStart() {
-            //showView(R.id.loading);
+            showView(R.id.loading);
         }
         @Override
         public void onFinish() {
-            //hideView(R.id.loading);
+            hideView(R.id.loading);
         }
         @Override
         public void onLoadForecast(Forecast forecast) {
@@ -51,8 +51,7 @@ public class ForecastFragment extends Fragment {
         }
         @Override
         public void onError() {
-            hideAllViews();
-            // TODO: показать кнопку для переподключения
+
         }
     };
 

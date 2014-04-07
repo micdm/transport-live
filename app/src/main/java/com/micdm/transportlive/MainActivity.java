@@ -249,12 +249,8 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
     @Override
     protected void onStart() {
         super.onStart();
-        if (!selectedRoutes.isEmpty()) {
-            vehiclePoller.start(selectedRoutes);
-        }
-        if (service != null && selectedStation != null) {
-            forecastPoller.start(service, selectedStation);
-        }
+        loadVehicles();
+        loadForecast();
     }
 
     @Override
@@ -283,6 +279,10 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.reload:
+                loadVehicles();
+                loadForecast();
+                return true;
             case R.id.about:
                 (new AboutFragment()).show(getSupportFragmentManager(), "about");
                 return true;
@@ -339,9 +339,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
                 }
             });
         }
-        if (!selectedRoutes.isEmpty()) {
-            vehiclePoller.start(selectedRoutes);
-        }
+        loadVehicles();
     }
 
     private void addSelectedRoute(Transport transport, Route route) {
@@ -373,7 +371,9 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
 
     @Override
     public void loadVehicles() {
-        vehiclePoller.start(selectedRoutes);
+        if (!selectedRoutes.isEmpty()) {
+            vehiclePoller.start(selectedRoutes);
+        }
     }
 
     @Override
@@ -434,12 +434,14 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
                 ((OnSelectStationListener) listener).onSelectStation(selected);
             }
         });
-        forecastPoller.start(service, selected);
+        loadForecast();
     }
 
     @Override
     public void loadForecast() {
-        forecastPoller.start(service, selectedStation);
+        if (service != null && selectedStation != null) {
+            forecastPoller.start(service, selectedStation);
+        }
     }
 
     @Override

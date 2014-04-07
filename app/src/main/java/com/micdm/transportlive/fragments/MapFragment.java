@@ -122,11 +122,11 @@ public class MapFragment extends Fragment {
     private ServiceHandler.OnLoadVehiclesListener onLoadVehiclesListener = new ServiceHandler.OnLoadVehiclesListener() {
         @Override
         public void onStart() {
-            //showView(R.id.loading);
+            showView(R.id.loading);
         }
         @Override
         public void onFinish() {
-            //hideView(R.id.loading);
+            hideView(R.id.loading);
         }
         @Override
         public void onLoadVehicles(List<VehicleInfo> vehicles) {
@@ -134,8 +134,7 @@ public class MapFragment extends Fragment {
         }
         @Override
         public void onError() {
-            //hideAllViews();
-            //showView(R.id.no_connection);
+
         }
     };
     private MarkerBuilder builder;
@@ -158,7 +157,7 @@ public class MapFragment extends Fragment {
                 }
             });
             MapView mapView = getMapView();
-            ((ViewGroup) view.findViewById(R.id.map_container)).addView(mapView);
+            ((ViewGroup) view.findViewById(R.id.map_container)).addView(mapView, 0);
             IMapController controller = mapView.getController();
             controller.setZoom(MAX_ZOOM);
             controller.setCenter(INITIAL_LOCATION);
@@ -205,7 +204,6 @@ public class MapFragment extends Fragment {
 
     private void hideAllViews() {
         hideView(R.id.no_route_selected);
-        //hideView(R.id.no_connection);
         hideView(R.id.no_vehicles);
         hideView(R.id.map);
     }
