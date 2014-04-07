@@ -130,6 +130,7 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
         }
         @Override
         public void onError() {
+            // TODO: игнорировать этот вызов после сворачивания приложения
             vehiclePoller.stop();
             showNoConnectionMessage();
         }
@@ -336,25 +337,19 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
     }
 
     @Override
-    public void selectRoute(Transport transport, Route route, boolean isSelected) {
+    public void selectRoutes(List<SelectedRouteInfo> selected) {
         vehiclePoller.stop();
-        if (isSelected) {
-            addSelectedRoute(transport, route);
-        } else {
-            removeSelectedRoute(transport, route);
-            if (vehicles != null) {
-                removeVehicles(transport, route);
-            }
-            if (vehicles != null) {
-                listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, new EventListenerManager.OnIterateListener() {
-                    @Override
-                    public void onIterate(EventListener listener) {
-                        ((OnLoadVehiclesListener) listener).onLoadVehicles(vehicles);
-                    }
-                });
-            }
+        selectedRoutes = selected;
+        (new SelectedRouteStore(this)).put(selected);
+        if (vehicles != null) {
+            cleanupVehicles();
+            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, new EventListenerManager.OnIterateListener() {
+                @Override
+                public void onIterate(EventListener listener) {
+                    ((OnLoadVehiclesListener) listener).onLoadVehicles(vehicles);
+                }
+            });
         }
-        (new SelectedRouteStore(this)).put(selectedRoutes);
         if (selectedRoutes.isEmpty()) {
             listeners.notify(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_ROUTES, new EventListenerManager.OnIterateListener() {
                 @Override
@@ -366,28 +361,11 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
         loadVehicles();
     }
 
-    private void addSelectedRoute(Transport transport, Route route) {
-        if (!isRouteSelected(transport, route)) {
-            selectedRoutes.add(new SelectedRouteInfo(transport, route));
-        }
-    }
-
-    private void removeSelectedRoute(Transport transport, Route route) {
-        if (isRouteSelected(transport, route)) {
-            for (SelectedRouteInfo info: selectedRoutes) {
-                if (info.transport.equals(transport) && info.route.equals(route)) {
-                    selectedRoutes.remove(info);
-                    break;
-                }
-            }
-        }
-    }
-
-    private void removeVehicles(Transport transport, Route route) {
+    private void cleanupVehicles() {
         Iterator<VehicleInfo> iterator = vehicles.iterator();
         while (iterator.hasNext()) {
             VehicleInfo info = iterator.next();
-            if (info.transport.equals(transport) && info.route.equals(route)) {
+            if (!isRouteSelected(info.transport, info.route)) {
                 iterator.remove();
             }
         }

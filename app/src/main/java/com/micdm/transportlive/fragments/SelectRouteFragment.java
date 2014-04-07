@@ -10,30 +10,48 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.Route;
+import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.interfaces.ServiceHandler;
 import com.micdm.transportlive.misc.Utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SelectRouteFragment extends DialogFragment {
 
     private class RouteListAdapter extends BaseExpandableListAdapter {
 
-        private Service service;
+        private List<Transport> transports;
+        public List<SelectedRouteInfo> selected;
 
-        public RouteListAdapter(Service service) {
-            this.service = service;
+        public RouteListAdapter(List<Transport> transports) {
+            this.transports = transports;
+            setupSelectedRoutes();
+        }
+
+        private void setupSelectedRoutes() {
+            selected = new ArrayList<SelectedRouteInfo>();
+            for (Transport transport: transports) {
+                for (Route route: transport.routes) {
+                    if (handler.isRouteSelected(transport, route)) {
+                        selected.add(new SelectedRouteInfo(transport, route));
+                    }
+                }
+            }
         }
 
         @Override
         public int getGroupCount() {
-            return service.transports.size();
+            return transports.size();
         }
 
         @Override
@@ -43,7 +61,7 @@ public class SelectRouteFragment extends DialogFragment {
 
         @Override
         public Transport getGroup(int position) {
-            return service.transports.get(position);
+            return transports.get(position);
         }
 
         @Override
@@ -84,7 +102,18 @@ public class SelectRouteFragment extends DialogFragment {
                 view = View.inflate(getActivity(), R.layout.view_select_route_list_item, null);
             }
             final CheckBox checkbox = (CheckBox) view.findViewById(R.id.is_selected);
+            checkbox.setOnCheckedChangeListener(null);
             checkbox.setChecked(handler.isRouteSelected(transport, route));
+            checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton checkbox, boolean isChecked) {
+                    if (isChecked) {
+                        addSelectedRoute(transport, route);
+                    } else {
+                        removeSelectedRoute(transport, route);
+                    }
+                }
+            });
             TextView numberView = (TextView) view.findViewById(R.id.number);
             numberView.setText(String.valueOf(route.number));
             TextView startView = (TextView) view.findViewById(R.id.start);
@@ -100,6 +129,19 @@ public class SelectRouteFragment extends DialogFragment {
             return view;
         }
 
+        private void addSelectedRoute(Transport transport, Route route) {
+            selected.add(new SelectedRouteInfo(transport, route));
+        }
+
+        private void removeSelectedRoute(Transport transport, Route route) {
+            for (SelectedRouteInfo info: selected) {
+                if (info.transport.equals(transport) && info.route.equals(route)) {
+                    selected.remove(info);
+                    break;
+                }
+            }
+        }
+
         @Override
         public boolean isChildSelectable(int groupPosition, int childPosition) {
             return false;
@@ -111,7 +153,7 @@ public class SelectRouteFragment extends DialogFragment {
         @Override
         public void onLoadService(Service service) {
             ExpandableListView listView = (ExpandableListView) getDialog().findViewById(R.id.route_list);
-            ExpandableListAdapter adapter = new RouteListAdapter(service);
+            ExpandableListAdapter adapter = new RouteListAdapter(service.transports);
             listView.setAdapter(adapter);
             for (int i = 0; i < adapter.getGroupCount(); i += 1) {
                 listView.expandGroup(i);
@@ -133,7 +175,9 @@ public class SelectRouteFragment extends DialogFragment {
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // TODO: обновить выделенные маршруты
+                ExpandableListView view = (ExpandableListView) getDialog().findViewById(R.id.route_list);
+                RouteListAdapter adapter = (RouteListAdapter) view.getExpandableListAdapter();
+                handler.selectRoutes(adapter.selected);
             }
         });
         return builder.create();
