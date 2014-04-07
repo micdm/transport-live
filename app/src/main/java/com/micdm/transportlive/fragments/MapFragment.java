@@ -18,7 +18,7 @@ import android.view.ViewGroup;
 
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.VehicleInfo;
-import com.micdm.transportlive.handlers.ServiceHandler;
+import com.micdm.transportlive.interfaces.ServiceHandler;
 import com.micdm.transportlive.misc.AssetArchive;
 
 import org.osmdroid.DefaultResourceProxyImpl;
@@ -112,6 +112,32 @@ public class MapFragment extends Fragment {
     private static final GeoPoint INITIAL_LOCATION = new GeoPoint(56484642, 84948100);
 
     private ServiceHandler serviceHandler;
+    private ServiceHandler.OnUnselectAllRoutesListener onUnselectAllRoutesListener = new ServiceHandler.OnUnselectAllRoutesListener() {
+        @Override
+        public void onUnselectAllRoutes() {
+            hideAllViews();
+            showView(R.id.no_route_selected);
+        }
+    };
+    private ServiceHandler.OnLoadVehiclesListener onLoadVehiclesListener = new ServiceHandler.OnLoadVehiclesListener() {
+        @Override
+        public void onStart() {
+            //showView(R.id.loading);
+        }
+        @Override
+        public void onFinish() {
+            //hideView(R.id.loading);
+        }
+        @Override
+        public void onLoadVehicles(List<VehicleInfo> vehicles) {
+            update(vehicles);
+        }
+        @Override
+        public void onError() {
+            //hideAllViews();
+            //showView(R.id.no_connection);
+        }
+    };
     private MarkerBuilder builder;
 
     @Override
@@ -124,15 +150,15 @@ public class MapFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, null);
         if (view != null) {
-            View reconnectView = view.findViewById(R.id.reconnect);
-            reconnectView.setOnClickListener(new View.OnClickListener() {
+            View selectRoutesView = view.findViewById(R.id.select_route);
+            selectRoutesView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    serviceHandler.loadVehicles();
+                    serviceHandler.requestRouteSelection();
                 }
             });
             MapView mapView = getMapView();
-            ((ViewGroup) view).addView(mapView, 0);
+            ((ViewGroup) view.findViewById(R.id.map_container)).addView(mapView);
             IMapController controller = mapView.getController();
             controller.setZoom(MAX_ZOOM);
             controller.setCenter(INITIAL_LOCATION);
@@ -162,35 +188,26 @@ public class MapFragment extends Fragment {
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onStart() {
+        super.onStart();
         hideAllViews();
-        serviceHandler.setOnUnselectAllRoutesListener(new ServiceHandler.OnUnselectAllRoutesListener() {
-            @Override
-            public void onUnselectAllRoutes() {
-                hideAllViews();
-                showView(R.id.no_route_selected);
-            }
-        });
-        serviceHandler.setOnLoadVehiclesListener(new ServiceHandler.OnLoadVehiclesListener() {
-            @Override
-            public void onStart() {
-                showView(R.id.loading);
-            }
-            @Override
-            public void onFinish() {
-                hideView(R.id.loading);
-            }
-            @Override
-            public void onLoadVehicles(List<VehicleInfo> vehicles) {
-                update(vehicles);
-            }
-            @Override
-            public void onError() {
-                hideAllViews();
-                showView(R.id.no_connection);
-            }
-        });
+        serviceHandler.addOnUnselectAllRoutesListener(onUnselectAllRoutesListener);
+        serviceHandler.addOnLoadVehiclesListener(onLoadVehiclesListener);
+    }
+
+    private void showView(int id) {
+        getView().findViewById(id).setVisibility(View.VISIBLE);
+    }
+
+    private void hideView(int id) {
+        getView().findViewById(id).setVisibility(View.GONE);
+    }
+
+    private void hideAllViews() {
+        hideView(R.id.no_route_selected);
+        //hideView(R.id.no_connection);
+        hideView(R.id.no_vehicles);
+        hideView(R.id.map);
     }
 
     public void update(List<VehicleInfo> vehicles) {
@@ -205,21 +222,6 @@ public class MapFragment extends Fragment {
         }
         List<OverlayItem> markers = builder.build(vehicles);
         updateMap(markers);
-    }
-
-    private void showView(int id) {
-        getView().findViewById(id).setVisibility(View.VISIBLE);
-    }
-
-    private void hideView(int id) {
-        getView().findViewById(id).setVisibility(View.GONE);
-    }
-    
-    private void hideAllViews() {
-        hideView(R.id.map);
-        hideView(R.id.no_route_selected);
-        hideView(R.id.no_connection);
-        hideView(R.id.no_vehicles);
     }
 
     private void updateMap(List<OverlayItem> markers) {
@@ -245,9 +247,9 @@ public class MapFragment extends Fragment {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        serviceHandler.setOnUnselectAllRoutesListener(null);
-        serviceHandler.setOnLoadVehiclesListener(null);
+    public void onStop() {
+        super.onStop();
+        serviceHandler.removeOnUnselectAllRoutesListener(onUnselectAllRoutesListener);
+        serviceHandler.removeOnLoadVehiclesListener(onLoadVehiclesListener);
     }
 }

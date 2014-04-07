@@ -1,90 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:id="@+id/no_station_selected"
-        android:gravity="center">
+        android:layout_height="0dp"
+        android:layout_weight="1">
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/fragment_forecast_no_station_selected"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/select_station"
-            android:layout_marginTop="15dp"
-            android:text="@string/fragment_forecast_select_station"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:id="@+id/forecast">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:id="@+id/station"
-                android:layout_weight="1"
-                android:padding="5dp">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/route"/>
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/direction"
-                    android:singleLine="true"
-                    android:ellipsize="end"/>
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/name"/>
-            </LinearLayout>
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/reselect_station"
-                android:text="@string/fragment_forecast_select_station"/>
-        </LinearLayout>
-        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/vehicle_container">
-            <LinearLayout
+            android:id="@+id/no_station_selected"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="@string/fragment_forecast_no_station_selected"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:id="@+id/forecast"
+            android:padding="5dp">
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:id="@+id/vehicle_list"/>
-        </ScrollView>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/no_vehicles"
-            android:padding="5dp"
-            android:textSize="20sp"
-            android:text="@string/fragment_forecast_no_vehicles"/>
-    </LinearLayout>
-    <TextView
-        android:layout_width="wrap_content"
+                android:id="@+id/station"/>
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/vehicle_container">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:id="@+id/vehicle_list"/>
+            </ScrollView>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/no_vehicles"
+                android:textSize="20sp"
+                android:text="@string/fragment_forecast_no_vehicles"/>
+        </LinearLayout>
+    </FrameLayout>
+    <Button
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/loading"
-        android:layout_gravity="bottom|center"
-        android:padding="5dp"
-        android:layout_margin="3dp"
-        android:background="#99000000"
-        android:textColor="#FFFFFFFF"
-        android:text="@string/fragment_forecast_loading"
-        android:visibility="gone"/>
-</FrameLayout>
+        android:id="@+id/select_station"
+        android:text="@string/fragment_forecast_select_station"/>
+</LinearLayout>

@@ -30,24 +30,20 @@ public class ForecastFragment extends Fragment {
                 showView(R.id.no_station_selected);
             } else {
                 showView(R.id.forecast);
-                View containerView = getView().findViewById(R.id.station);
-                TextView routeView = ((TextView) containerView.findViewById(R.id.route));
-                routeView.setText(getString(R.string.fragment_forecast_route, Utils.getTransportName(getActivity(), selected.transport), selected.route.number));
-                TextView directionView = ((TextView) containerView.findViewById(R.id.direction));
-                directionView.setText(getString(R.string.fragment_forecast_direction, selected.direction.getStart(), selected.direction.getFinish()));
-                TextView nameView = ((TextView) containerView.findViewById(R.id.name));
-                nameView.setText(selected.station.name);
+                TextView stationView = ((TextView) getView().findViewById(R.id.station));
+                stationView.setText(getString(R.string.fragment_forecast_station, Utils.getTransportName(getActivity(), selected.transport),
+                        selected.route.number, selected.direction.getStart(), selected.direction.getFinish(), selected.station.name));
             }
         }
     };
     private ForecastHandler.OnLoadForecastListener onLoadForecastListener = new ForecastHandler.OnLoadForecastListener() {
         @Override
         public void onStart() {
-            showView(R.id.loading);
+            //showView(R.id.loading);
         }
         @Override
         public void onFinish() {
-            hideView(R.id.loading);
+            //hideView(R.id.loading);
         }
         @Override
         public void onLoadForecast(Forecast forecast) {
@@ -69,18 +65,14 @@ public class ForecastFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_forecast, null);
-        view.findViewById(R.id.select_station).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                handler.requestStationSelection();
-            }
-        });
-        view.findViewById(R.id.reselect_station).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                handler.requestStationSelection();
-            }
-        });
+        if (view != null) {
+            view.findViewById(R.id.select_station).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    handler.requestStationSelection();
+                }
+            });
+        }
         return view;
     }
 
@@ -90,6 +82,21 @@ public class ForecastFragment extends Fragment {
         hideAllViews();
         handler.addOnSelectStationListener(onSelectStationListener);
         handler.addOnLoadForecastListener(onLoadForecastListener);
+    }
+
+    private void showView(int id) {
+        getView().findViewById(id).setVisibility(View.VISIBLE);
+    }
+
+    private void hideView(int id) {
+        getView().findViewById(id).setVisibility(View.GONE);
+    }
+
+    private void hideAllViews() {
+        hideView(R.id.no_station_selected);
+        hideView(R.id.forecast);
+        hideView(R.id.vehicle_container);
+        hideView(R.id.no_vehicles);
     }
 
     private void update(Forecast forecast) {
@@ -130,21 +137,6 @@ public class ForecastFragment extends Fragment {
 
     private String getArrivalTimeInMinutes(int arrivalTime) {
         return getString(R.string.fragment_forecast_arrival_time, (int) Math.ceil(arrivalTime / 60.0));
-    }
-
-    private void showView(int id) {
-        getView().findViewById(id).setVisibility(View.VISIBLE);
-    }
-
-    private void hideView(int id) {
-        getView().findViewById(id).setVisibility(View.GONE);
-    }
-
-    private void hideAllViews() {
-        hideView(R.id.no_station_selected);
-        hideView(R.id.forecast);
-        hideView(R.id.vehicle_container);
-        hideView(R.id.no_vehicles);
     }
 
     @Override

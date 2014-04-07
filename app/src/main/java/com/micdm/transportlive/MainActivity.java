@@ -24,6 +24,8 @@ import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.VehicleInfo;
 import com.micdm.transportlive.fragments.AboutFragment;
 import com.micdm.transportlive.fragments.ForecastFragment;
+import com.micdm.transportlive.fragments.MapFragment;
+import com.micdm.transportlive.fragments.SelectRouteFragment;
 import com.micdm.transportlive.fragments.SelectStationFragment;
 import com.micdm.transportlive.interfaces.EventListener;
 import com.micdm.transportlive.interfaces.ForecastHandler;
@@ -194,9 +196,8 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
                     getSupportActionBar().setSelectedNavigationItem(i);
                 }
             });
-            //addPage(new Page(getString(R.string.tab_title_route_list), new RouteListFragment()));
-            //addPage(new Page(getString(R.string.tab_title_map), new MapFragment()));
             addPage(new Page(getString(R.string.tab_title_forecast), new ForecastFragment()));
+            addPage(new Page(getString(R.string.tab_title_map), new MapFragment()));
         }
     }
 
@@ -288,6 +289,16 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void requestRouteSelection() {
+        FragmentManager manager = getSupportFragmentManager();
+        SelectRouteFragment fragment = (SelectRouteFragment) manager.findFragmentByTag("select_route");
+        if (fragment != null) {
+            fragment.dismiss();
+        }
+        (new SelectRouteFragment()).show(manager, "select_route");
     }
 
     @Override

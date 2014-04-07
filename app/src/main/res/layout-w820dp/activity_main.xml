@@ -5,7 +5,7 @@
     android:orientation="horizontal"
     android:baselineAligned="false"
     tools:context="com.micdm.transportlive.MainActivity">
-    <fragment class="com.micdm.transportlive.fragments.RouteListFragment"
+    <fragment class="com.micdm.transportlive.fragments.SelectRouteFragment"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:tag="route_list"

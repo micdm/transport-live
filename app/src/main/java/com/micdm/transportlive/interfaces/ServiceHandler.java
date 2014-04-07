@@ -24,6 +24,7 @@ public interface ServiceHandler {
         public void onError();
     }
 
+    public void requestRouteSelection();
     public boolean isRouteSelected(Transport transport, Route route);
     public void selectRoute(Transport transport, Route route, boolean isSelected);
     public void loadVehicles();
