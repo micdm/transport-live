@@ -18,10 +18,13 @@
     <string name="menu_item_about">О приложении…</string>
     <!-- Расшаривание -->
     <string name="share_app_text">Троллейбусы и трамваи Томска на карте онлайн. https://play.google.com/store/apps/details?id=%s</string>
-    <!-- О приложении -->
-    <string name="about_app_text">По любым вопросам пишите на %s.\nРаботает на основе http://raspisanie.tomsk.ru/online/</string>
     <!-- Общее для фрагментов -->
     <string name="fragment_loading">Обновление…</string>
+    <!-- Фрагмент о приложении -->
+    <string name="fragment_about_text">По любым вопросам пишите на %s.\nРаботает на основе http://openstreetmap.org и http://raspisanie.tomsk.ru/online/gis-online.php</string>
+    <!-- Фрагмент про ошибку сети -->
+    <string name="fragment_no_connection_text">Невозможно подключиться к серверу.\nПроверьте, есть ли у вас доступ в Интернет.</string>
+    <string name="fragment_no_connection_retry">Ещё раз</string>
     <!-- Фрагмент с прогнозами -->
     <string name="fragment_forecast_select_station">Выбрать остановку…</string>
     <string name="fragment_forecast_no_station_selected">Здесь будет показано ориентировочное время прибытия транспорта на остановку, которую вы выберете.</string>

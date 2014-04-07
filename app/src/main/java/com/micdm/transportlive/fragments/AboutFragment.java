@@ -20,7 +20,7 @@ public class AboutFragment extends DialogFragment {
 
     private View getContent() {
         TextView view = (TextView) View.inflate(getActivity(), R.layout.fragment_about, null);
-        view.setText(getString(R.string.about_app_text, getString(R.string.contact_email)));
+        view.setText(getString(R.string.fragment_about_text, getString(R.string.contact_email)));
         return view;
     }
 }

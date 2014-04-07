@@ -21,7 +21,6 @@ public interface ServiceHandler {
         public void onStart();
         public void onFinish();
         public void onLoadVehicles(List<VehicleInfo> vehicles);
-        public void onError();
     }
 
     public void requestRouteSelection();

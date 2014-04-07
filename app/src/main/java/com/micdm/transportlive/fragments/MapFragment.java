@@ -132,10 +132,6 @@ public class MapFragment extends Fragment {
         public void onLoadVehicles(List<VehicleInfo> vehicles) {
             update(vehicles);
         }
-        @Override
-        public void onError() {
-
-        }
     };
     private MarkerBuilder builder;
 

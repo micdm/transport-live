@@ -13,7 +13,6 @@ public interface ForecastHandler {
         public void onStart();
         public void onFinish();
         public void onLoadForecast(Forecast forecast);
-        public void onError();
     }
 
     public void requestStationSelection();

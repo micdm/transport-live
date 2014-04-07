@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-public class EventListenerList {
+public class EventListenerManager {
 
     public static interface OnIterateListener {
         public void onIterate(EventListener listener);

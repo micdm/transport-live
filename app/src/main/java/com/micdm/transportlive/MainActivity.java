@@ -25,12 +25,14 @@ import com.micdm.transportlive.data.VehicleInfo;
 import com.micdm.transportlive.fragments.AboutFragment;
 import com.micdm.transportlive.fragments.ForecastFragment;
 import com.micdm.transportlive.fragments.MapFragment;
+import com.micdm.transportlive.fragments.NoConnectionFragment;
 import com.micdm.transportlive.fragments.SelectRouteFragment;
 import com.micdm.transportlive.fragments.SelectStationFragment;
+import com.micdm.transportlive.interfaces.ConnectionHandler;
 import com.micdm.transportlive.interfaces.EventListener;
 import com.micdm.transportlive.interfaces.ForecastHandler;
 import com.micdm.transportlive.interfaces.ServiceHandler;
-import com.micdm.transportlive.misc.EventListenerList;
+import com.micdm.transportlive.misc.EventListenerManager;
 import com.micdm.transportlive.misc.ServiceLoader;
 import com.micdm.transportlive.server.pollers.ForecastPoller;
 import com.micdm.transportlive.server.pollers.VehiclePoller;
@@ -41,10 +43,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class MainActivity extends ActionBarActivity implements ServiceHandler, ForecastHandler {
+public class MainActivity extends ActionBarActivity implements ConnectionHandler, ServiceHandler, ForecastHandler {
 
     private static class CustomPagerAdapter extends FragmentPagerAdapter {
 
+        public static class Page {
+
+            public String title;
+            public Fragment fragment;
+
+            public Page(String title, Fragment fragment) {
+                this.title = title;
+                this.fragment = fragment;
+            }
+        }
+        
         private List<Page> pages = new ArrayList<Page>();
 
         public CustomPagerAdapter(FragmentManager fm) {
@@ -72,23 +85,23 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
         }
     }
 
-    private static class Page {
+    private static final String FRAGMENT_ABOUT_TAG = "about";
+    private static final String FRAGMENT_NO_CONNECTION_TAG = "no_connection";
+    private static final String FRAGMENT_SELECT_STATION_TAG = "select_station";
+    private static final String FRAGMENT_SELECT_ROUTE_TAG = "select_route";
 
-        public String title;
-        public Fragment fragment;
+    private static final String EVENT_LISTENER_KEY_ON_UNSELECT_ALL_ROUTES = "OnUnselectAllRoutes";
+    private static final String EVENT_LISTENER_KEY_ON_LOAD_SERVICE = "OnLoadService";
+    private static final String EVENT_LISTENER_KEY_ON_LOAD_VEHICLES = "OnLoadVehicles";
+    private static final String EVENT_LISTENER_KEY_ON_SELECT_STATION = "OnSelectStation";
+    private static final String EVENT_LISTENER_KEY_ON_LOAD_FORECAST = "OnLoadForecast";
 
-        public Page(String title, Fragment fragment) {
-            this.title = title;
-            this.fragment = fragment;
-        }
-    }
-
-    private EventListenerList listeners = new EventListenerList();
+    private EventListenerManager listeners = new EventListenerManager();
 
     private VehiclePoller vehiclePoller = new VehiclePoller(this, new VehiclePoller.OnLoadListener() {
         @Override
         public void onStart() {
-            listeners.notify("OnLoadVehicles", new EventListenerList.OnIterateListener() {
+            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, new EventListenerManager.OnIterateListener() {
                 @Override
                 public void onIterate(EventListener listener) {
                     ((OnLoadVehiclesListener) listener).onStart();
@@ -97,7 +110,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
         }
         @Override
         public void onFinish() {
-            listeners.notify("OnLoadVehicles", new EventListenerList.OnIterateListener() {
+            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, new EventListenerManager.OnIterateListener() {
                 @Override
                 public void onIterate(EventListener listener) {
                     ((OnLoadVehiclesListener) listener).onFinish();
@@ -106,8 +119,9 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
         }
         @Override
         public void onLoad(final List<VehicleInfo> loaded) {
+            hideNoConnectionMessage();
             vehicles = loaded;
-            listeners.notify("OnLoadVehicles", new EventListenerList.OnIterateListener() {
+            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, new EventListenerManager.OnIterateListener() {
                 @Override
                 public void onIterate(EventListener listener) {
                     ((OnLoadVehiclesListener) listener).onLoadVehicles(loaded);
@@ -117,12 +131,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
         @Override
         public void onError() {
             vehiclePoller.stop();
-            listeners.notify("OnLoadVehicles", new EventListenerList.OnIterateListener() {
-                @Override
-                public void onIterate(EventListener listener) {
-                    ((OnLoadVehiclesListener) listener).onError();
-                }
-            });
+            showNoConnectionMessage();
         }
     });
     private Service service;
@@ -132,7 +141,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
     private ForecastPoller forecastPoller = new ForecastPoller(this, new ForecastPoller.OnLoadListener() {
         @Override
         public void onStart() {
-            listeners.notify("OnLoadForecast", new EventListenerList.OnIterateListener() {
+            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_FORECAST, new EventListenerManager.OnIterateListener() {
                 @Override
                 public void onIterate(EventListener listener) {
                     ((OnLoadForecastListener) listener).onStart();
@@ -141,7 +150,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
         }
         @Override
         public void onFinish() {
-            listeners.notify("OnLoadForecast", new EventListenerList.OnIterateListener() {
+            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_FORECAST, new EventListenerManager.OnIterateListener() {
                 @Override
                 public void onIterate(EventListener listener) {
                     ((OnLoadForecastListener) listener).onFinish();
@@ -150,8 +159,9 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
         }
         @Override
         public void onLoad(final Forecast loaded) {
+            hideNoConnectionMessage();
             forecast = loaded;
-            listeners.notify("OnLoadForecast", new EventListenerList.OnIterateListener() {
+            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_FORECAST, new EventListenerManager.OnIterateListener() {
                 @Override
                 public void onIterate(EventListener listener) {
                     ((OnLoadForecastListener) listener).onLoadForecast(loaded);
@@ -161,12 +171,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
         @Override
         public void onError() {
             forecastPoller.stop();
-            listeners.notify("OnLoadForecast", new EventListenerList.OnIterateListener() {
-                @Override
-                public void onIterate(EventListener listener) {
-                    ((OnLoadForecastListener) listener).onError();
-                }
-            });
+            showNoConnectionMessage();
         }
     });
     private SelectedStationInfo selectedStation;
@@ -196,12 +201,12 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
                     getSupportActionBar().setSelectedNavigationItem(i);
                 }
             });
-            addPage(new Page(getString(R.string.tab_title_forecast), new ForecastFragment()));
-            addPage(new Page(getString(R.string.tab_title_map), new MapFragment()));
+            addPage(new CustomPagerAdapter.Page(getString(R.string.tab_title_forecast), new ForecastFragment()));
+            addPage(new CustomPagerAdapter.Page(getString(R.string.tab_title_map), new MapFragment()));
         }
     }
 
-    private void addPage(Page page) {
+    private void addPage(CustomPagerAdapter.Page page) {
         final CustomViewPager pager = (CustomViewPager) findViewById(R.id.pager);
         ((CustomPagerAdapter) pager.getAdapter()).add(page);
         ActionBar actionBar = getSupportActionBar();
@@ -224,21 +229,21 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
         service = (new ServiceLoader(this)).load();
         selectedRoutes = (new SelectedRouteStore(this)).load(service);
         if (selectedRoutes.isEmpty()) {
-            listeners.notify("OnUnselectAllRoutes", new EventListenerList.OnIterateListener() {
+            listeners.notify(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_ROUTES, new EventListenerManager.OnIterateListener() {
                 @Override
                 public void onIterate(EventListener listener) {
                     ((OnUnselectAllRoutesListener) listener).onUnselectAllRoutes();
                 }
             });
         }
-        listeners.notify("OnLoadService", new EventListenerList.OnIterateListener() {
+        listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_SERVICE, new EventListenerManager.OnIterateListener() {
             @Override
             public void onIterate(EventListener listener) {
                 ((OnLoadServiceListener) listener).onLoadService(service);
             }
         });
         selectedStation = (new SelectedStationStore(this)).load(service);
-        listeners.notify("OnSelectStation", new EventListenerList.OnIterateListener() {
+        listeners.notify(EVENT_LISTENER_KEY_ON_SELECT_STATION, new EventListenerManager.OnIterateListener() {
             @Override
             public void onIterate(EventListener listener) {
                 ((OnSelectStationListener) listener).onSelectStation(selectedStation);
@@ -284,21 +289,40 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
                 loadForecast();
                 return true;
             case R.id.about:
-                (new AboutFragment()).show(getSupportFragmentManager(), "about");
+                (new AboutFragment()).show(getSupportFragmentManager(), FRAGMENT_ABOUT_TAG);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    @Override
-    public void requestRouteSelection() {
+    private void showNoConnectionMessage() {
         FragmentManager manager = getSupportFragmentManager();
-        SelectRouteFragment fragment = (SelectRouteFragment) manager.findFragmentByTag("select_route");
+        if (manager.findFragmentByTag(FRAGMENT_NO_CONNECTION_TAG) == null) {
+            (new NoConnectionFragment()).show(manager, FRAGMENT_NO_CONNECTION_TAG);
+        }
+    }
+
+    private void hideNoConnectionMessage() {
+        FragmentManager manager = getSupportFragmentManager();
+        NoConnectionFragment fragment = (NoConnectionFragment) manager.findFragmentByTag(FRAGMENT_NO_CONNECTION_TAG);
         if (fragment != null) {
             fragment.dismiss();
         }
-        (new SelectRouteFragment()).show(manager, "select_route");
+    }
+
+    @Override
+    public void requestReconnect() {
+        loadVehicles();
+        loadForecast();
+    }
+
+    @Override
+    public void requestRouteSelection() {
+        FragmentManager manager = getSupportFragmentManager();
+        if (manager.findFragmentByTag(FRAGMENT_SELECT_ROUTE_TAG) == null) {
+            (new SelectRouteFragment()).show(manager, FRAGMENT_SELECT_ROUTE_TAG);
+        }
     }
 
     @Override
@@ -322,7 +346,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
                 removeVehicles(transport, route);
             }
             if (vehicles != null) {
-                listeners.notify("OnLoadVehicles", new EventListenerList.OnIterateListener() {
+                listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, new EventListenerManager.OnIterateListener() {
                     @Override
                     public void onIterate(EventListener listener) {
                         ((OnLoadVehiclesListener) listener).onLoadVehicles(vehicles);
@@ -332,7 +356,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
         }
         (new SelectedRouteStore(this)).put(selectedRoutes);
         if (selectedRoutes.isEmpty()) {
-            listeners.notify("OnUnselectAllRoutes", new EventListenerList.OnIterateListener() {
+            listeners.notify(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_ROUTES, new EventListenerManager.OnIterateListener() {
                 @Override
                 public void onIterate(EventListener listener) {
                     ((OnUnselectAllRoutesListener) listener).onUnselectAllRoutes();
@@ -378,7 +402,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
 
     @Override
     public void addOnUnselectAllRoutesListener(OnUnselectAllRoutesListener listener) {
-        listeners.add("OnUnselectAllRoutes", listener);
+        listeners.add(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_ROUTES, listener);
         if (selectedRoutes.isEmpty()) {
             listener.onUnselectAllRoutes();
         }
@@ -386,23 +410,23 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
 
     @Override
     public void removeOnUnselectAllRoutesListener(OnUnselectAllRoutesListener listener) {
-        listeners.remove("OnUnselectAllRoutes", listener);
+        listeners.remove(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_ROUTES, listener);
     }
 
     @Override
     public void addOnLoadServiceListener(OnLoadServiceListener listener) {
-        listeners.add("OnLoadService", listener);
+        listeners.add(EVENT_LISTENER_KEY_ON_LOAD_SERVICE, listener);
         listener.onLoadService(service);
     }
 
     @Override
     public void removeOnLoadServiceListener(OnLoadServiceListener listener) {
-        listeners.remove("OnLoadService", listener);
+        listeners.remove(EVENT_LISTENER_KEY_ON_LOAD_SERVICE, listener);
     }
 
     @Override
     public void addOnLoadVehiclesListener(OnLoadVehiclesListener listener) {
-        listeners.add("OnLoadVehicles", listener);
+        listeners.add(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, listener);
         if (vehicles != null) {
             listener.onLoadVehicles(vehicles);
         }
@@ -410,17 +434,15 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
 
     @Override
     public void removeOnLoadVehiclesListener(OnLoadVehiclesListener listener) {
-        listeners.remove("OnLoadVehicles", listener);
+        listeners.remove(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, listener);
     }
 
     @Override
     public void requestStationSelection() {
         FragmentManager manager = getSupportFragmentManager();
-        SelectStationFragment fragment = (SelectStationFragment) manager.findFragmentByTag("select_station");
-        if (fragment != null) {
-            fragment.dismiss();
+        if (manager.findFragmentByTag(FRAGMENT_SELECT_STATION_TAG) == null) {
+            (new SelectStationFragment()).show(manager, FRAGMENT_SELECT_STATION_TAG);
         }
-        (new SelectStationFragment()).show(manager, "select_station");
     }
 
     @Override
@@ -428,7 +450,7 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
         forecastPoller.stop();
         selectedStation = selected;
         (new SelectedStationStore(this)).put(selected);
-        listeners.notify("OnSelectStation", new EventListenerList.OnIterateListener() {
+        listeners.notify(EVENT_LISTENER_KEY_ON_SELECT_STATION, new EventListenerManager.OnIterateListener() {
             @Override
             public void onIterate(EventListener listener) {
                 ((OnSelectStationListener) listener).onSelectStation(selected);
@@ -446,18 +468,18 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
 
     @Override
     public void addOnSelectStationListener(OnSelectStationListener listener) {
-        listeners.add("OnSelectStation", listener);
+        listeners.add(EVENT_LISTENER_KEY_ON_SELECT_STATION, listener);
         listener.onSelectStation(selectedStation);
     }
 
     @Override
     public void removeOnSelectStationListener(OnSelectStationListener listener) {
-        listeners.remove("OnSelectStation", listener);
+        listeners.remove(EVENT_LISTENER_KEY_ON_SELECT_STATION, listener);
     }
 
     @Override
     public void addOnLoadForecastListener(OnLoadForecastListener listener) {
-        listeners.add("OnLoadForecast", listener);
+        listeners.add(EVENT_LISTENER_KEY_ON_LOAD_FORECAST, listener);
         if (forecast != null) {
             listener.onLoadForecast(forecast);
         }
@@ -465,6 +487,6 @@ public class MainActivity extends ActionBarActivity implements ServiceHandler, F
 
     @Override
     public void removeOnLoadForecastListener(OnLoadForecastListener listener) {
-        listeners.remove("OnLoadForecast", listener);
+        listeners.remove(EVENT_LISTENER_KEY_ON_LOAD_FORECAST, listener);
     }
 }

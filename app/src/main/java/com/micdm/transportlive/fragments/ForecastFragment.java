@@ -49,10 +49,6 @@ public class ForecastFragment extends Fragment {
         public void onLoadForecast(Forecast forecast) {
             update(forecast);
         }
-        @Override
-        public void onError() {
-
-        }
     };
 
     @Override
