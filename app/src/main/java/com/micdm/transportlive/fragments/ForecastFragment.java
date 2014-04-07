@@ -131,7 +131,7 @@ public class ForecastFragment extends Fragment {
     }
 
     private String getArrivalTimeInMinutes(int arrivalTime) {
-        return getString(R.string.fragment_forecast_arrival_time, (int) Math.ceil(arrivalTime / 60.0));
+        return getString(R.string.fragment_forecast_arrival_time, (int) Math.max(Math.ceil(arrivalTime / 60.0), 1));
     }
 
     @Override
