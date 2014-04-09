@@ -2,7 +2,15 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <CheckBoxPreference
         android:key="pref_use_external_map"
+        android:defaultValue="false"
         android:title="@string/fragment_settings_use_external_map_title"
-        android:summary="@string/fragment_settings_use_external_map_summary"
-        android:defaultValue="false"/>
+        android:summary="@string/fragment_settings_use_external_map_summary"/>
+    <Preference
+        android:key="pref_share"
+        android:title="@string/fragment_settings_share_title"
+        android:summary="@string/fragment_settings_share_summary"/>
+    <Preference
+        android:key="pref_about"
+        android:title="@string/fragment_settings_about_title"
+        android:summary="@string/fragment_settings_about_summary"/>
 </PreferenceScreen>

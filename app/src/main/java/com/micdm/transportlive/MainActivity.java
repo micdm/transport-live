@@ -2,15 +2,15 @@ package com.micdm.transportlive;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.MenuItemCompat;
+import android.support.v4.preference.PreferenceFragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.ShareActionProvider;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class MainActivity extends ActionBarActivity implements ConnectionHandler, ServiceHandler, ForecastHandler {
+public class MainActivity extends ActionBarActivity implements PreferenceFragment.OnPreferenceStartFragmentCallback, ConnectionHandler, ServiceHandler, ForecastHandler {
 
     private static class CustomPagerAdapter extends FragmentPagerAdapter {
 
@@ -90,6 +90,9 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
     private static final String FRAGMENT_NO_CONNECTION_TAG = "no_connection";
     private static final String FRAGMENT_SELECT_STATION_TAG = "select_station";
     private static final String FRAGMENT_SELECT_ROUTE_TAG = "select_route";
+
+    private static final String PREF_KEY_SHARE = "pref_share";
+    private static final String PREF_KEY_ABOUT = "pref_about";
 
     private static final String EVENT_LISTENER_KEY_ON_UNSELECT_ALL_ROUTES = "OnUnselectAllRoutes";
     private static final String EVENT_LISTENER_KEY_ON_LOAD_SERVICE = "OnLoadService";
@@ -189,6 +192,7 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
 
     private void setupActionBar() {
         ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
     }
 
@@ -271,17 +275,7 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.common, menu);
-        setupShareMenuItem(menu);
         return true;
-    }
-
-    private void setupShareMenuItem(Menu menu) {
-        MenuItem item = menu.findItem(R.id.share);
-        ShareActionProvider provider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("plain/text");
-        intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_text, getPackageName()));
-        provider.setShareIntent(intent);
     }
 
     @Override
@@ -291,11 +285,39 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
                 loadVehicles();
                 loadForecast();
                 return true;
-            case R.id.about:
-                (new AboutFragment()).show(getSupportFragmentManager(), FRAGMENT_ABOUT_TAG);
-                return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public boolean onPreferenceStartFragment(PreferenceFragment fragment, Preference pref) {
+        String key = pref.getKey();
+        if (key == null) {
+            return false;
+        }
+        if (key.equals(PREF_KEY_SHARE)) {
+            showShareMessage();
+            return true;
+        }
+        if (key.equals(PREF_KEY_ABOUT)) {
+            showAboutMessage();
+            return true;
+        }
+        return false;
+    }
+
+    private void showShareMessage() {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("plain/text");
+        intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_text, getPackageName()));
+        startActivity(intent);
+    }
+
+    private void showAboutMessage() {
+        FragmentManager manager = getSupportFragmentManager();
+        if (manager.findFragmentByTag(FRAGMENT_ABOUT_TAG) == null) {
+            (new AboutFragment()).show(manager, FRAGMENT_ABOUT_TAG);
         }
     }
 

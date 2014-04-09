@@ -127,9 +127,9 @@ public class MapFragment extends Fragment {
             containerView.removeView(oldMapView);
             containerView.addView(newMapView, 0);
             setupMapController(newMapView);
-            Overlay overlay = oldMapView.getOverlays().get(0);
-            if (overlay != null) {
-                newMapView.getOverlays().add(overlay);
+            List<Overlay> overlays = oldMapView.getOverlays();
+            if (!overlays.isEmpty()) {
+                newMapView.getOverlays().add(overlays.get(0));
             }
         }
     };

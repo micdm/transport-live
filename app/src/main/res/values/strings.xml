@@ -15,8 +15,6 @@
     <string name="tab_title_settings">Настройки</string>
     <!-- Меню -->
     <string name="menu_item_reload">Обновить</string>
-    <string name="menu_item_share">Поделиться…</string>
-    <string name="menu_item_about">О приложении…</string>
     <!-- Расшаривание -->
     <string name="share_app_text">Троллейбусы и трамваи Томска на карте онлайн. https://play.google.com/store/apps/details?id=%s</string>
     <!-- Общее для фрагментов -->
@@ -45,5 +43,9 @@
     <string name="fragment_select_route_title">Выберите маршрут</string>
     <!-- Фрагмент с настройками -->
     <string name="fragment_settings_use_external_map_title">Дополнительные карты</string>
-    <string name="fragment_settings_use_external_map_summary">Вы сможете изменять масштаб карты, но это потребует больше Интернет-трафика</string>
+    <string name="fragment_settings_use_external_map_summary">Вы сможете изменять масштаб, но это потребует больше Интернет-трафика</string>
+    <string name="fragment_settings_share_title">Поделиться…</string>
+    <string name="fragment_settings_share_summary">Расскажите знакомым в соцсетях об этом приложении</string>
+    <string name="fragment_settings_about_title">О приложении…</string>
+    <string name="fragment_settings_about_summary">Немного об авторах и технологиях</string>
 </resources>
