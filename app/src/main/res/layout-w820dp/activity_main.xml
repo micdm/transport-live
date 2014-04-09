@@ -15,4 +15,9 @@
         android:layout_height="match_parent"
         android:tag="map"
         android:layout_weight="5"/>
+    <fragment class="com.micdm.transportlive.fragments.SettingsFragment"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:tag="settings"
+        android:layout_weight="1"/>
 </LinearLayout>

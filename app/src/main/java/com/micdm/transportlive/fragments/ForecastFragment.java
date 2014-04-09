@@ -61,6 +61,12 @@ public class ForecastFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_forecast, null);
         if (view != null) {
+            view.findViewById(R.id.station).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    handler.requestStationSelection();
+                }
+            });
             view.findViewById(R.id.select_station).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

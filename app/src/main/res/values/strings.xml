@@ -30,10 +30,10 @@
     <string name="fragment_forecast_station">%1$s №%2$s\n%3$s → %4$s\n%5$s</string>
     <string name="fragment_forecast_route">%1$s №%2$s</string>
     <string name="fragment_forecast_arrival_time">%s мин.</string>
-    <string name="fragment_forecast_no_vehicles">Пока ничего не едет</string>
+    <string name="fragment_forecast_no_vehicles">К остановке пока ничего не едет.</string>
     <!-- Фрагмент выбора станции -->
     <string name="fragment_select_station_title">Выберите остановку</string>
-    <string name="fragment_select_station_route_list_item">№ %s</string>
+    <string name="fragment_select_station_route_list_item">№%s</string>
     <string name="fragment_select_station_direction_list_item">%1$s → %2$s</string>
     <!-- Фрагмент с картой -->
     <string name="fragment_map_select_route">Выбрать маршрут…</string>
