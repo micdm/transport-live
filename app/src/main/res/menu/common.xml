@@ -3,7 +3,8 @@
     <item
         android:id="@+id/reload"
         android:icon="@android:drawable/ic_menu_rotate"
-        android:title="@string/menu_item_reload"/>
+        android:title="@string/menu_item_reload"
+        custom:showAsAction="ifRoom"/>
     <item
         android:id="@+id/share"
         android:icon="@android:drawable/ic_menu_share"

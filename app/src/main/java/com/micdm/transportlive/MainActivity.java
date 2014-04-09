@@ -28,6 +28,7 @@ import com.micdm.transportlive.fragments.MapFragment;
 import com.micdm.transportlive.fragments.NoConnectionFragment;
 import com.micdm.transportlive.fragments.SelectRouteFragment;
 import com.micdm.transportlive.fragments.SelectStationFragment;
+import com.micdm.transportlive.fragments.SettingsFragment;
 import com.micdm.transportlive.interfaces.ConnectionHandler;
 import com.micdm.transportlive.interfaces.EventListener;
 import com.micdm.transportlive.interfaces.ForecastHandler;
@@ -130,7 +131,6 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
         }
         @Override
         public void onError() {
-            // TODO: игнорировать этот вызов после сворачивания приложения
             vehiclePoller.stop();
             showNoConnectionMessage();
         }
@@ -204,6 +204,7 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
             });
             addPage(new CustomPagerAdapter.Page(getString(R.string.tab_title_forecast), new ForecastFragment()));
             addPage(new CustomPagerAdapter.Page(getString(R.string.tab_title_map), new MapFragment()));
+            addPage(new CustomPagerAdapter.Page(getString(R.string.tab_title_settings), new SettingsFragment()));
         }
     }
 
@@ -263,6 +264,7 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
     protected void onStop() {
         super.onStop();
         vehiclePoller.stop();
+        forecastPoller.stop();
     }
 
     @Override
@@ -373,6 +375,7 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
 
     @Override
     public void loadVehicles() {
+        vehiclePoller.stop();
         if (!selectedRoutes.isEmpty()) {
             vehiclePoller.start(selectedRoutes);
         }
@@ -439,6 +442,7 @@ public class MainActivity extends ActionBarActivity implements ConnectionHandler
 
     @Override
     public void loadForecast() {
+        forecastPoller.stop();
         if (service != null && selectedStation != null) {
             forecastPoller.start(service, selectedStation);
         }

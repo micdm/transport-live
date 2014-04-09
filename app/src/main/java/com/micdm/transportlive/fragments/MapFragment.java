@@ -1,6 +1,7 @@
 package com.micdm.transportlive.fragments;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,6 +12,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -102,6 +104,7 @@ public class MapFragment extends Fragment {
         }
     }
 
+    private static final String PREF_KEY_USE_EXTERNAL_MAP = "pref_use_external_map";
     private static final int TILE_SIZE = 256;
     private static final int MIN_ZOOM = 14;
     private static final int MAX_ZOOM = 15;
@@ -110,6 +113,26 @@ public class MapFragment extends Fragment {
     private static final int SOUTH_EDGE = 56438204;
     private static final int EAST_EDGE = 85122070;
     private static final GeoPoint INITIAL_LOCATION = new GeoPoint(56484642, 84948100);
+
+    private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+            if (!key.equals(PREF_KEY_USE_EXTERNAL_MAP)) {
+                return;
+            }
+            ViewGroup containerView = ((ViewGroup) getView().findViewById(R.id.map_container));
+            MapView oldMapView = (MapView) containerView.getChildAt(0);
+            MapView newMapView = getMapView(needUseExternalMap());
+            newMapView.setVisibility(oldMapView.getVisibility());
+            containerView.removeView(oldMapView);
+            containerView.addView(newMapView, 0);
+            setupMapController(newMapView);
+            Overlay overlay = oldMapView.getOverlays().get(0);
+            if (overlay != null) {
+                newMapView.getOverlays().add(overlay);
+            }
+        }
+    };
 
     private ServiceHandler serviceHandler;
     private ServiceHandler.OnUnselectAllRoutesListener onUnselectAllRoutesListener = new ServiceHandler.OnUnselectAllRoutesListener() {
@@ -133,6 +156,7 @@ public class MapFragment extends Fragment {
             update(vehicles);
         }
     };
+
     private MarkerBuilder builder;
 
     @Override
@@ -152,26 +176,39 @@ public class MapFragment extends Fragment {
                     serviceHandler.requestRouteSelection();
                 }
             });
-            MapView mapView = getMapView();
+            MapView mapView = getMapView(needUseExternalMap());
+            mapView.setVisibility(View.GONE);
             ((ViewGroup) view.findViewById(R.id.map_container)).addView(mapView, 0);
-            IMapController controller = mapView.getController();
-            controller.setZoom(MAX_ZOOM);
-            controller.setCenter(INITIAL_LOCATION);
+            setupMapController(mapView);
         }
         return view;
     }
 
-    private MapView getMapView() {
+    private SharedPreferences getSharedPreferences() {
+        return PreferenceManager.getDefaultSharedPreferences(getActivity());
+    }
+
+    private boolean needUseExternalMap() {
+        return getSharedPreferences().getBoolean(PREF_KEY_USE_EXTERNAL_MAP, false);
+    }
+
+    private MapView getMapView(boolean needUseExternalMap) {
         ResourceProxy proxy = new DefaultResourceProxyImpl(getActivity());
-        MapTileProviderArray providers = getTileProviders();
-        MapView mapView = new MapView(getActivity(), TILE_SIZE, proxy, providers);
+        MapView mapView = new MapView(getActivity(), TILE_SIZE, proxy, needUseExternalMap ? null : getTileProviders());
         mapView.setId(R.id.map);
-        mapView.setVisibility(View.GONE);
-        mapView.setMinZoomLevel(MIN_ZOOM);
-        mapView.setMaxZoomLevel(MAX_ZOOM);
+        if (!needUseExternalMap) {
+            mapView.setMinZoomLevel(MIN_ZOOM);
+            mapView.setMaxZoomLevel(MAX_ZOOM);
+        }
         mapView.setScrollableAreaLimit(new BoundingBoxE6(NORTH_EDGE, EAST_EDGE, SOUTH_EDGE, WEST_EDGE));
         mapView.setMultiTouchControls(true);
         return mapView;
+    }
+
+    private void setupMapController(MapView view) {
+        IMapController controller = view.getController();
+        controller.setZoom(MAX_ZOOM);
+        controller.setCenter(INITIAL_LOCATION);
     }
 
     private MapTileProviderArray getTileProviders() {
@@ -186,6 +223,7 @@ public class MapFragment extends Fragment {
     public void onStart() {
         super.onStart();
         hideAllViews();
+        getSharedPreferences().registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
         serviceHandler.addOnUnselectAllRoutesListener(onUnselectAllRoutesListener);
         serviceHandler.addOnLoadVehiclesListener(onLoadVehiclesListener);
     }
@@ -243,6 +281,7 @@ public class MapFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
+        getSharedPreferences().unregisterOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
         serviceHandler.removeOnUnselectAllRoutesListener(onUnselectAllRoutesListener);
         serviceHandler.removeOnLoadVehiclesListener(onLoadVehiclesListener);
     }

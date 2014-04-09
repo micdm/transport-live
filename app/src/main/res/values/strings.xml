@@ -12,6 +12,7 @@
     <!-- Вкладки -->
     <string name="tab_title_forecast">Расписание</string>
     <string name="tab_title_map">Карта</string>
+    <string name="tab_title_settings">Настройки</string>
     <!-- Меню -->
     <string name="menu_item_reload">Обновить</string>
     <string name="menu_item_share">Поделиться…</string>
@@ -42,4 +43,7 @@
     <string name="fragment_map_no_vehicles">Похоже, весь транспорт в парке.</string>
     <!-- Фрагмент выбора маршрутов -->
     <string name="fragment_select_route_title">Выберите маршрут</string>
+    <!-- Фрагмент с настройками -->
+    <string name="fragment_settings_use_external_map_title">Дополнительные карты</string>
+    <string name="fragment_settings_use_external_map_summary">Вы сможете изменять масштаб карты, но это потребует больше Интернет-трафика</string>
 </resources>

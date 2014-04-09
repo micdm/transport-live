@@ -54,7 +54,6 @@ public class ForecastPoller {
                 onLoadListener.onFinish();
                 onLoadListener.onLoad(forecast);
             }
-
             @Override
             public void onError() {
                 currentTask = null;
