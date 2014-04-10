@@ -36,7 +36,9 @@ public class GetForecastCommandHandler extends CommandHandler {
                 Transport transport = service.getTransportByCode(getTransportCode(attrs));
                 Route route = transport.getRouteByNumber(getRouteNumber(attrs));
                 int arrivalTime = getArrivalTime(attrs);
-                forecast.vehicles.add(new ForecastVehicle(transport, route, arrivalTime));
+                if (!isVehicleAlreadyAdded(transport, route, arrivalTime)) {
+                    forecast.vehicles.add(new ForecastVehicle(transport, route, arrivalTime));
+                }
             }
         }
 
@@ -50,6 +52,15 @@ public class GetForecastCommandHandler extends CommandHandler {
 
         private int getArrivalTime(Attributes attrs) {
             return Integer.valueOf(attrs.getValue("", "arr_time"));
+        }
+
+        private boolean isVehicleAlreadyAdded(Transport transport, Route route, int arrivalTime) {
+            for (ForecastVehicle vehicle: forecast.vehicles) {
+                if (vehicle.transport.equals(transport) && vehicle.route.equals(route) && vehicle.arrivalTime == arrivalTime) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
