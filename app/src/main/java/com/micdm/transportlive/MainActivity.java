@@ -1,5 +1,6 @@
 package com.micdm.transportlive;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -198,18 +199,16 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
 
     private void setupPager() {
         CustomViewPager pager = (CustomViewPager) findViewById(R.id.pager);
-        if (pager != null) {
-            pager.setAdapter(new CustomPagerAdapter(getSupportFragmentManager()));
-            pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-                @Override
-                public void onPageSelected(int i) {
-                    getSupportActionBar().setSelectedNavigationItem(i);
-                }
-            });
-            addPage(new CustomPagerAdapter.Page(getString(R.string.tab_title_forecast), new ForecastFragment()));
-            addPage(new CustomPagerAdapter.Page(getString(R.string.tab_title_map), new MapFragment()));
-            addPage(new CustomPagerAdapter.Page(getString(R.string.tab_title_settings), new SettingsFragment()));
-        }
+        pager.setAdapter(new CustomPagerAdapter(getSupportFragmentManager()));
+        pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int i) {
+                getSupportActionBar().setSelectedNavigationItem(i);
+            }
+        });
+        addPage(new CustomPagerAdapter.Page(getString(R.string.tab_title_forecast), new ForecastFragment()));
+        addPage(new CustomPagerAdapter.Page(getString(R.string.tab_title_map), new MapFragment()));
+        addPage(new CustomPagerAdapter.Page(getString(R.string.tab_title_settings), new SettingsFragment()));
     }
 
     private void addPage(CustomPagerAdapter.Page page) {
@@ -311,7 +310,11 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("plain/text");
         intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_text, getPackageName()));
-        startActivity(intent);
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+
+        }
     }
 
     private void showAboutMessage() {
@@ -395,8 +398,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         }
     }
 
-    @Override
-    public void loadVehicles() {
+    private void loadVehicles() {
         vehiclePoller.stop();
         if (!selectedRoutes.isEmpty()) {
             vehiclePoller.start(selectedRoutes);
@@ -462,8 +464,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         loadForecast();
     }
 
-    @Override
-    public void loadForecast() {
+    private void loadForecast() {
         forecastPoller.stop();
         if (service != null && selectedStation != null) {
             forecastPoller.start(service, selectedStation);

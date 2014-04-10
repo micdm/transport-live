@@ -27,7 +27,6 @@ public interface ServiceHandler {
     public void requestRouteSelection();
     public boolean isRouteSelected(Transport transport, Route route);
     public void selectRoutes(List<SelectedRouteInfo> selected);
-    public void loadVehicles();
     public void addOnUnselectAllRoutesListener(OnUnselectAllRoutesListener listener);
     public void removeOnUnselectAllRoutesListener(OnUnselectAllRoutesListener listener);
     public void addOnLoadServiceListener(OnLoadServiceListener listener);

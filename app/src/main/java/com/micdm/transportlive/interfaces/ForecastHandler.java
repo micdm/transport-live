@@ -17,7 +17,6 @@ public interface ForecastHandler {
 
     public void requestStationSelection();
     public void selectStation(SelectedStationInfo selected);
-    public void loadForecast();
     public void addOnSelectStationListener(OnSelectStationListener listener);
     public void removeOnSelectStationListener(OnSelectStationListener listener);
     public void addOnLoadForecastListener(OnLoadForecastListener listener);
