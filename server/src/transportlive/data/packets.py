@@ -6,7 +6,17 @@ class LoginPacket(object):
         self.login = login
         self.password = password
 
+class LoginAnswerPacket(object):
+
+    STATUS_OK = 0
+
+    def __init__(self, status):
+        self.status = status
+
 class PingPacket(object):
+    pass
+
+class PingAnswerPacket(object):
     pass
 
 class DataPacket(object):
@@ -18,3 +28,10 @@ class DataPacket(object):
         self.longitude = longitude
         self.speed = speed
         self.course = course
+
+class DataAnswerPacket(object):
+
+    STATUS_OK = 0
+
+    def __init__(self, status):
+        self.status = status

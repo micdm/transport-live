@@ -1,11 +1,11 @@
 # coding=utf-8
 
 from logging import getLogger
-import re
 
 from tornado.tcpserver import TCPServer
 
-from transportlive.data.packet_builder import PacketBuilder
+from transportlive.data.packet_utils import PacketSerializer, PacketUnserializer, PacketBuilder
+from transportlive.data.packets import LoginPacket, LoginAnswerPacket, PingPacket, PingAnswerPacket, DataPacket, DataAnswerPacket
 
 logger = getLogger(__name__)
 
@@ -15,9 +15,12 @@ class DataServer(TCPServer):
 
     def __init__(self):
         super(DataServer, self).__init__()
+        self._packet_serializer = PacketSerializer()
+        self._packet_unserializer = PacketUnserializer()
         self._packet_builder = PacketBuilder()
         self._stream = None
         self._buffer = ""
+        self._session = None
 
     def handle_stream(self, stream, address):
         logger.info("New connection from %s:%s", *address)
@@ -37,22 +40,66 @@ class DataServer(TCPServer):
 
     def _on_close_stream(self):
         logger.info("Connection closed")
-        self._stream = None
+        self._cleanup()
 
     def _parse_packets(self):
         while True:
             packet = self._parse_packet()
             if not packet:
                 break
-            logger.info("New packet of type %s available", packet.__class__.__name__)
+            if isinstance(packet, LoginPacket):
+                self._handle_login_packet(packet)
+            if isinstance(packet, PingPacket):
+                self._handle_ping_packet(packet)
+            if isinstance(packet, DataPacket):
+                self._handle_data_packet(packet)
 
     def _parse_packet(self):
-        matched = re.match("#([A-Z]+)#([^\r]*?)\r\n", self._buffer)
-        if not matched:
+        if not self._buffer:
             return None
-        length = len(matched.group(0))
+        packet_info = self._packet_unserializer.unserialize(self._buffer)
+        if not packet_info:
+            return None
+        length, packet_type, parts = packet_info
         self._buffer = self._buffer[length:]
-        return self._packet_builder.build(matched.group(1), matched.group(2).split(";"))
+        return self._packet_builder.build(packet_type, parts)
+
+    def _handle_login_packet(self, packet):
+        logger.info("Login packet received")
+        if self._session:
+            logger.warning("Session already started, closing connection...")
+            self._stream.close()
+        else:
+            logger.info("Starting new session...")
+            answer_packet = LoginAnswerPacket(LoginAnswerPacket.STATUS_OK)
+            self._stream.write(self._packet_serializer.serialize(answer_packet))
+            self._session = Session(packet.login)
+
+    def _handle_ping_packet(self, packet):
+        logger.info("Ping packet received")
+        answer_packet = PingAnswerPacket()
+        self._stream.write(self._packet_serializer.serialize(answer_packet))
+
+    def _handle_data_packet(self, packet):
+        logger.info("Data packet received")
+        if not self._session:
+            logger.warning("No session started, closing connection...")
+            self._stream.close()
+        else:
+            answer_packet = DataAnswerPacket(DataAnswerPacket.STATUS_OK)
+            self._stream.write(self._packet_serializer.serialize(answer_packet))
+            # TODO: передавать данные дальше
+
+    def _cleanup(self):
+        if self._stream:
+            self._stream = None
+        if self._session:
+            self._session = None
+
+class Session(object):
+
+    def __init__(self, login):
+        self.login = login
 
 def start_data_server(options):
     host = options.DATA_SERVER["host"]

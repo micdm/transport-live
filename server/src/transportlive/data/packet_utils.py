@@ -2,8 +2,40 @@
 
 from datetime import datetime
 from decimal import Decimal
+import re
 
-from transportlive.data.packets import LoginPacket, PingPacket, DataPacket
+from transportlive.data.packets import LoginPacket, LoginAnswerPacket, PingPacket, PingAnswerPacket, DataPacket, DataAnswerPacket
+
+class PacketSerializer(object):
+
+    def serialize(self, packet):
+        return "#%s#%s\r\n"%(self._get_type(packet), self._get_status(packet))
+
+    def _get_type(self, packet):
+        if isinstance(packet, LoginAnswerPacket):
+            return "AL"
+        if isinstance(packet, PingAnswerPacket):
+            return "AP"
+        if isinstance(packet, DataAnswerPacket):
+            return "AD"
+
+    def _get_status(self, packet):
+        if isinstance(packet, LoginAnswerPacket):
+            if packet.status == LoginAnswerPacket.STATUS_OK:
+                return "1"
+        if isinstance(packet, PingAnswerPacket):
+            return ""
+        if isinstance(packet, DataAnswerPacket):
+            if packet.status == DataAnswerPacket.STATUS_OK:
+                return "1"
+
+class PacketUnserializer(object):
+
+    def unserialize(self, string):
+        matched = re.match("#([A-Z]+)#([^\r]*?)\r\n", string)
+        if not matched:
+            return None
+        return len(matched.group(0)), matched.group(1), matched.group(2).split(";")
 
 class PacketBuilder(object):
 
