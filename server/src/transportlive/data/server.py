@@ -91,10 +91,9 @@ class DataServer(TCPServer):
             # TODO: передавать данные дальше
 
     def _cleanup(self):
-        if self._stream:
-            self._stream = None
-        if self._session:
-            self._session = None
+        self._stream = None
+        self._buffer = ""
+        self._session = None
 
 class Session(object):
 
