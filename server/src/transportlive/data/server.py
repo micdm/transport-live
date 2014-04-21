@@ -13,7 +13,7 @@ class DataServer(TCPServer):
 
     MAX_BUFFER_SIZE = 1024
 
-    def __init__(self):
+    def __init__(self, login, password):
         super(DataServer, self).__init__()
         self._packet_serializer = PacketSerializer()
         self._packet_unserializer = PacketUnserializer()
@@ -21,8 +21,11 @@ class DataServer(TCPServer):
         self._stream = None
         self._buffer = ""
         self._session = None
+        self._login = login
+        self._password = password
 
     def handle_stream(self, stream, address):
+        # TODO: запускать таймер и обрывать соединение, если не пришел пакет логина
         logger.info("New connection from %s:%s", *address)
         if self._stream:
             logger.warning("Cannot handle connection, there is another one active already")
@@ -32,6 +35,7 @@ class DataServer(TCPServer):
 
     def _on_stream_data(self, data):
         logger.debug("New data on connection of length %s", len(data))
+        logger.debug(data)
         self._buffer += data
         self._parse_packets()
         if len(self._buffer) > self.MAX_BUFFER_SIZE:
@@ -60,9 +64,9 @@ class DataServer(TCPServer):
         packet_info = self._packet_unserializer.unserialize(self._buffer)
         if not packet_info:
             return None
-        length, packet_type, parts = packet_info
+        length, packet_type, parts, params = packet_info
         self._buffer = self._buffer[length:]
-        return self._packet_builder.build(packet_type, parts)
+        return self._packet_builder.build(packet_type, parts, params)
 
     def _handle_login_packet(self, packet):
         logger.info("Login packet received")
@@ -70,10 +74,14 @@ class DataServer(TCPServer):
             logger.warning("Session already started, closing connection...")
             self._stream.close()
         else:
-            logger.info("Starting new session...")
-            answer_packet = LoginAnswerPacket(LoginAnswerPacket.STATUS_OK)
-            self._stream.write(self._packet_serializer.serialize(answer_packet))
-            self._session = Session(packet.login)
+            if packet.login != self._login or packet.password != self._password:
+                logger.warning("Wrong login (%s) or password, closing connection...", packet.login)
+                self._stream.close()
+            else:
+                logger.info("Starting new session...")
+                answer_packet = LoginAnswerPacket(LoginAnswerPacket.STATUS_OK)
+                self._stream.write(self._packet_serializer.serialize(answer_packet))
+                self._session = Session(packet.login)
 
     def _handle_ping_packet(self, packet):
         logger.info("Ping packet received")
@@ -100,9 +108,7 @@ class Session(object):
     def __init__(self, login):
         self.login = login
 
-def start_data_server(options):
-    host = options.DATA_SERVER["host"]
-    port = options.DATA_SERVER["port"]
+def start_data_server(host, port, login, password):
     logger.info("Starting data server on %s:%s...", host, port)
-    server = DataServer()
+    server = DataServer(login, password)
     server.listen(port, host)

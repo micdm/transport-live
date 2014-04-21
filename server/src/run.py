@@ -21,5 +21,6 @@ def _setup_logger():
 
 _setup_settings()
 _setup_logger()
-start_data_server(options)
+start_data_server(options.DATA_SERVER["host"], options.DATA_SERVER["port"], options.DATA_SERVER["login"],
+                  options.DATA_SERVER["password"])
 IOLoop.instance().start()

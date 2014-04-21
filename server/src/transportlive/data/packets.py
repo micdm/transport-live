@@ -21,13 +21,14 @@ class PingAnswerPacket(object):
 
 class DataPacket(object):
 
-    def __init__(self, imei, datetime, latitude, longitude, speed, course):
+    def __init__(self, imei, datetime, latitude, longitude, speed, course, params):
         self.imei = imei
         self.datetime = datetime
         self.latitude = latitude
         self.longitude = longitude
         self.speed = speed
         self.course = course
+        self.params = params
 
 class DataAnswerPacket(object):
 

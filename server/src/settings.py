@@ -26,7 +26,9 @@ LOGGING = {
 
 DATA_SERVER = {
     "host": "localhost",
-    "port": 8000
+    "port": 8000,
+    "login": None,
+    "password": None
 }
 
 try:

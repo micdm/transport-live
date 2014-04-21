@@ -41,7 +41,10 @@ class PacketBuilder(object):
 
     VALUE_NOT_AVAILABLE = "NA"
 
-    def build(self, packet_type, parts):
+    PARAM_TYPE_INT = "1"
+    PARAM_TYPE_FLOAT = "2"
+
+    def build(self, packet_type, parts, params):
         if packet_type == "L":
             return self._build_login_packet(parts)
         if packet_type == "P":
@@ -63,7 +66,8 @@ class PacketBuilder(object):
 
     def _build_data_packet(self, parts):
         return DataPacket(self._get_id(parts[0]), self._get_datetime(parts[1], parts[2]), self._get_coordinate(parts[3]),
-                          self._get_coordinate(parts[5]), self._get_speed(parts[7]), self._get_course(parts[8]))
+                          self._get_coordinate(parts[5]), self._get_speed(parts[7]), self._get_course(parts[8]),
+                          self._get_params(parts[9]))
 
     def _get_id(self, id_string):
         return id_string
@@ -84,3 +88,17 @@ class PacketBuilder(object):
 
     def _get_course(self, course_string):
         return None if course_string == self.VALUE_NOT_AVAILABLE else int(course_string)
+
+    def _get_params(self, params_string):
+        return dict(map(self._get_param, params_string.split(",")))
+
+    def _get_param(self, param_string):
+        parts = param_string.split(":")
+        return parts[0], self._get_param_value(parts[1], parts[2])
+
+    def _get_param_value(self, param_type, param_value):
+        if param_type == self.PARAM_TYPE_INT:
+            return int(param_value)
+        if param_type == self.PARAM_TYPE_FLOAT:
+            return float(param_value)
+        return param_value
