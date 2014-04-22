@@ -44,7 +44,7 @@ class PacketBuilder(object):
     PARAM_TYPE_INT = "1"
     PARAM_TYPE_FLOAT = "2"
 
-    def build(self, packet_type, parts, params):
+    def build(self, packet_type, parts):
         if packet_type == "L":
             return self._build_login_packet(parts)
         if packet_type == "P":
@@ -67,7 +67,7 @@ class PacketBuilder(object):
     def _build_data_packet(self, parts):
         return DataPacket(self._get_id(parts[0]), self._get_datetime(parts[1], parts[2]), self._get_coordinate(parts[3]),
                           self._get_coordinate(parts[5]), self._get_speed(parts[7]), self._get_course(parts[8]),
-                          self._get_params(parts[9]))
+                          self._get_params(parts[11]))
 
     def _get_id(self, id_string):
         return id_string
@@ -81,7 +81,7 @@ class PacketBuilder(object):
         if nmea_string == self.VALUE_NOT_AVAILABLE:
             return None
         nmea_value = Decimal(nmea_string)
-        return (nmea_value / 100).quantize(Decimal(1)) + (nmea_value % 100) / 60
+        return ((nmea_value / 100).quantize(Decimal(1)) + (nmea_value % 100) / 60).quantize(Decimal("0.000001"))
 
     def _get_speed(self, speed_string):
         return None if speed_string == self.VALUE_NOT_AVAILABLE else int(speed_string)

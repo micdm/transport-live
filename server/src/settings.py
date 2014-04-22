@@ -1,5 +1,7 @@
 # coding=utf-8
 
+DEBUG = False
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -29,6 +31,11 @@ DATA_SERVER = {
     "port": 8000,
     "login": None,
     "password": None
+}
+
+WEB_SERVER = {
+    "host": "localhost",
+    "port": 8001
 }
 
 try:
