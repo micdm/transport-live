@@ -14,7 +14,7 @@ public class CityConfig {
     }
 
     public static CityConfig CITY_RYAZAN = new CityConfig("ryazan", new Backend("78.31.72.3", "/bus/common/map6/%s.php"));
-    public static CityConfig CITY_TOMSK = new CityConfig("tomsk", new Backend("83.137.52.160", "/bus/common/map6/%s.php"));
+    public static CityConfig CITY_TOMSK = new CityConfig("tomsk", new Backend("83.222.106.126", "/bus/common/map6/%s.php"));
 
     public String id;
     public Backend backend;
