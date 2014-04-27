@@ -6,7 +6,7 @@ from tornado.web import RequestHandler
 
 logger = getLogger(__name__)
 
-class CoordsHandler(RequestHandler):
+class VehicleHandler(RequestHandler):
 
     def initialize(self, datastore):
         self._datastore = datastore
@@ -26,6 +26,7 @@ class CoordsHandler(RequestHandler):
             for vehicle in self._datastore.get_vehicles(transport, route):
                 result[transport][route].append({
                     "lat": str(vehicle.latitude),
-                    "lon": str(vehicle.longitude)
+                    "lon": str(vehicle.longitude),
+                    "dir": str(vehicle.course)
                 })
         return result

@@ -9,7 +9,7 @@ class VehicleBuilder(object):
         transport, route = self._get_transport_and_route(packet)
         if transport is None or route is None:
             return None
-        return Vehicle(packet.imei, transport, route, packet.latitude, packet.longitude, packet.speed, packet.course)
+        return Vehicle(packet.imei, transport, route, packet.latitude, packet.longitude, packet.speed, packet.course, packet.datetime)
 
     def _get_transport_and_route(self, packet):
         info = packet.params.get("num")

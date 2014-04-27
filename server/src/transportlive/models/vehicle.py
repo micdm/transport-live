@@ -2,7 +2,7 @@
 
 class Vehicle(object):
 
-    def __init__(self, vehicle_id, transport, route, latitude, longitude, speed, course):
+    def __init__(self, vehicle_id, transport, route, latitude, longitude, speed, course, last_update):
         self.id = vehicle_id
         self.transport = transport
         self.route = route
@@ -10,3 +10,4 @@ class Vehicle(object):
         self.longitude = longitude
         self.speed = speed
         self.course = course
+        self.last_update = last_update
