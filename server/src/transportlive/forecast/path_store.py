@@ -12,10 +12,22 @@ class PathStore(object):
     def __init__(self):
         self._paths = None
 
-    def load(self):
-        self._paths = json_decode(open(self.PATH_DATA_FILE).read())
+    def _load(self):
+        data = json_decode(open(self.PATH_DATA_FILE).read())
+        return self._load_transports(data["transports"])
+
+    def _load_transports(self, data):
+        return dict((item["type"], self._load_routes(item["routes"])) for item in data)
+
+    def _load_routes(self, data):
+        return dict((item["number"], self._load_points(item["points"])) for item in data)
+
+    def _load_points(self, data):
+        return list((item["lat"], item["lon"]) for item in data)
 
     def get(self, transport, route):
+        if self._paths is None:
+            self._paths = self._load()
         if transport not in self._paths:
             raise PathError("cannot find path for transport %s"%transport)
         if route not in self._paths[transport]:
