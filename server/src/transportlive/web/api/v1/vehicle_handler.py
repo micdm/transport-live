@@ -25,8 +25,8 @@ class VehicleHandler(RequestHandler):
                 result[transport][route] = []
             for vehicle in self._datastore.get_vehicles(transport, route):
                 result[transport][route].append({
-                    "lat": str(vehicle.latitude),
-                    "lon": str(vehicle.longitude),
-                    "dir": str(vehicle.course)
+                    "lat": vehicle.latitude,
+                    "lon": vehicle.longitude,
+                    "dir": vehicle.course
                 })
         return result

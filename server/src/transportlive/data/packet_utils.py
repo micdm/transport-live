@@ -81,7 +81,8 @@ class PacketBuilder(object):
         if nmea_string == self.VALUE_NOT_AVAILABLE:
             return None
         nmea_value = Decimal(nmea_string)
-        return ((nmea_value / 100).quantize(Decimal(1)) + (nmea_value % 100) / 60).quantize(Decimal("0.000001"))
+        decimal_value = ((nmea_value / 100).quantize(Decimal(1)) + (nmea_value % 100) / 60).quantize(Decimal("0.000001"))
+        return int(decimal_value)
 
     def _get_speed(self, speed_string):
         return None if speed_string == self.VALUE_NOT_AVAILABLE else int(speed_string)

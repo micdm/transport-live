@@ -10,7 +10,7 @@ from tornado.tcpserver import TCPServer
 from transportlive.data.packet_utils import PacketSerializer, PacketUnserializer, PacketBuilder
 from transportlive.data.packets import LoginPacket, LoginAnswerPacket, PingPacket, PingAnswerPacket, DataPacket,\
     DataAnswerPacket
-from transportlive.vehicle_builder import VehicleBuilder
+from transportlive.data.vehicle_builder import VehicleBuilder
 
 logger = getLogger(__name__)
 

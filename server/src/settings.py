@@ -1,6 +1,11 @@
 # coding=utf-8
 
+import os.path
+
 DEBUG = False
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DATA_ROOT = os.path.join(PROJECT_ROOT, "data")
 
 LOGGING = {
     "version": 1,
