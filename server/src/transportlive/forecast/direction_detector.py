@@ -2,16 +2,27 @@
 
 import math
 
-from transportlive.forecast.path_store import PathStore
+from transportlive.forecast.service_builder import ServiceBuilder
 
 class DirectionDetector(object):
 
     def __init__(self):
-        self._path_store = PathStore()
+        self._service = None
 
-    def is_straight(self, transport, route, point1, point2):
-        path = self._path_store.get(transport, route)
-        return self._get_point_position(path, point1) > self._get_point_position(path, point2)
+    def get_direction(self, transport_type, route_number, point1, point2):
+        route = self._get_route(transport_type, route_number)
+        is_straight = self._get_point_position(route.points, point1) > self._get_point_position(route.points, point2)
+        return route.directions[0] if is_straight else route.directions[1]
+
+    def _get_route(self, transport_type, route_number):
+        service = self._get_service()
+        transport = service.get_transport_by_type(transport_type)
+        return transport.get_route_by_number(route_number)
+
+    def _get_service(self):
+        if not self._service:
+            self._service = ServiceBuilder().build()
+        return self._service
 
     def _get_point_position(self, path, point):
         i = 0
@@ -27,4 +38,4 @@ class DirectionDetector(object):
         return result
 
     def _get_distance(self, point1, point2):
-        return math.hypot(point1[0] - point2[0], point1[1] - point2[1])
+        return math.hypot(point1.latitude - point2.latitude, point1.longitude - point2.longitude)

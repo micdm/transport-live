@@ -24,9 +24,10 @@ class VehicleHandler(RequestHandler):
             if route not in result[transport]:
                 result[transport][route] = []
             for vehicle in self._datastore.get_vehicles(transport, route):
+                last_mark = vehicle.last_mark
                 result[transport][route].append({
-                    "lat": vehicle.latitude,
-                    "lon": vehicle.longitude,
-                    "dir": vehicle.course
+                    "lat": last_mark.latitude,
+                    "lon": last_mark.longitude,
+                    "course": last_mark.course
                 })
         return result

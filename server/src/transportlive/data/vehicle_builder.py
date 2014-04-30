@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from transportlive.models.transport import Transport
-from transportlive.models.vehicle import Vehicle
+from transportlive.models.mark import Mark
 
 class VehicleBuilder(object):
 
@@ -9,7 +9,7 @@ class VehicleBuilder(object):
         transport, route = self._get_transport_and_route(packet)
         if transport is None or route is None:
             return None
-        return Vehicle(packet.imei, transport, route, packet.latitude, packet.longitude, packet.speed, packet.course, packet.datetime)
+        return packet.imei, transport, route, Mark(packet.datetime, packet.latitude, packet.longitude, packet.speed, packet.course)
 
     def _get_transport_and_route(self, packet):
         info = packet.params.get("num")

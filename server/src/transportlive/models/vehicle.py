@@ -2,12 +2,12 @@
 
 class Vehicle(object):
 
-    def __init__(self, vehicle_id, transport, route, latitude, longitude, speed, course, last_update):
+    def __init__(self, vehicle_id):
         self.id = vehicle_id
-        self.transport = transport
-        self.route = route
-        self.latitude = latitude
-        self.longitude = longitude
-        self.speed = speed
-        self.course = course
-        self.last_update = last_update
+        self.transport = None
+        self.route = None
+        self.marks = []
+
+    @property
+    def last_mark(self):
+        return self.marks[-1] if len(self.marks) else None

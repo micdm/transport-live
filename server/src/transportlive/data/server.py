@@ -8,8 +8,7 @@ from tornado.options import options
 from tornado.tcpserver import TCPServer
 
 from transportlive.data.packet_utils import PacketSerializer, PacketUnserializer, PacketBuilder
-from transportlive.data.packets import LoginPacket, LoginAnswerPacket, PingPacket, PingAnswerPacket, DataPacket,\
-    DataAnswerPacket
+from transportlive.data.packets import LoginPacket, LoginAnswerPacket, PingPacket, PingAnswerPacket, DataPacket, DataAnswerPacket
 from transportlive.data.vehicle_builder import VehicleBuilder
 
 logger = getLogger(__name__)
@@ -28,11 +27,11 @@ class DataServer(TCPServer):
         StreamHandler(self._stream_count, stream, self._handle_data_packet).run()
 
     def _handle_data_packet(self, packet):
-        vehicle = self._vehicle_builder.build(packet)
-        if not vehicle:
+        vehicle_info = self._vehicle_builder.build(packet)
+        if not vehicle_info:
             logger.info("Cannot build vehicle, skipping packet...")
         else:
-            self._datastore.add_vehicle(vehicle)
+            self._datastore.add_vehicle(*vehicle_info)
 
 class StreamHandler(object):
 
