@@ -1,5 +1,6 @@
 # coding=utf-8
 
+from decimal import Decimal
 import os.path
 import xml.etree.ElementTree as etree
 
@@ -31,7 +32,7 @@ class ServiceBuilder(object):
         return service
 
     def _build_station(self, node):
-        return Station(int(node.attrib["id"]), int(node.attrib["lat"]), int(node.attrib["lon"]), node.attrib["name"])
+        return Station(int(node.attrib["id"]), Decimal(node.attrib["lat"]), Decimal(node.attrib["lon"]), node.attrib["name"])
 
     def _build_transport(self, node):
         transport = Transport(int(node.attrib["type"]))
@@ -54,7 +55,7 @@ class ServiceBuilder(object):
         return direction
 
     def _build_point(self, node):
-        return Point(int(node.attrib["lat"]), int(node.attrib["lon"]))
+        return Point(Decimal(node.attrib["lat"]), Decimal(node.attrib["lon"]))
 
     def _add_stations_to_directions(self, service):
         for transport in service.transports:

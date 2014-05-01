@@ -40,8 +40,8 @@ class VehicleHandler(RequestHandler):
     def _vehicle_to_dict(self, vehicle):
         last_mark = vehicle.last_mark
         return {
-            "lat": last_mark.latitude,
-            "lon": last_mark.longitude,
+            "lat": str(last_mark.latitude),
+            "lon": str(last_mark.longitude),
             "course": last_mark.course
         }
 

@@ -1,5 +1,6 @@
 # coding=utf-8
 
+from decimal import Decimal
 import unittest
 
 from transportlive.forecast.direction_detector import DirectionDetector
@@ -11,6 +12,6 @@ class DirectionDetectorTest(unittest.TestCase):
         self._detector = DirectionDetector()
 
     def test_get_direction(self):
-        point1, point2 = Point(56509104, 84981986), Point(56511612, 84975506)
+        point1, point2 = Point(Decimal("56.509104"), Decimal("84.981986")), Point(Decimal("56.511612"), Decimal("84.975506"))
         self.assertEqual(self._detector.get_direction(0, 4, point1, point2).id, 8)
         self.assertEqual(self._detector.get_direction(0, 4, point2, point1).id, 9)
