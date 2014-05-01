@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+from decimal import Decimal
 import json
 import sys
 import xml.etree.ElementTree as etree
@@ -14,8 +15,8 @@ def _get_all_stations(xml):
             continue
         stations.append({
             "id": station_id,
-            "lat": int(node.attrib["lat"]),
-            "lon": int(node.attrib["lon"]),
+            "lat": Decimal(node.attrib["lat"]) / 1000000,
+            "lon": Decimal(node.attrib["lon"]) / 1000000,
             "name": node.attrib["name"]
         })
     stations.sort(key=lambda item: item["id"])
@@ -66,8 +67,8 @@ def _get_points(xml):
     points = []
     for node in xml.findall(".//point"):
         points.append({
-            "lat": int(node.attrib["lat"]),
-            "lon": int(node.attrib["lon"])
+            "lat": Decimal(node.attrib["lat"]) / 1000000,
+            "lon": Decimal(node.attrib["lon"]) / 1000000
         })
     return points
 
