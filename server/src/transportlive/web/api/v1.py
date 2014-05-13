@@ -39,9 +39,10 @@ class VehicleHandler(RequestHandler):
 
     def _vehicle_to_dict(self, vehicle):
         last_mark = vehicle.last_mark
+        coords = last_mark.coords
         return {
-            "lat": str(last_mark.latitude),
-            "lon": str(last_mark.longitude),
+            "lat": str(coords.latitude),
+            "lon": str(coords.longitude),
             "course": last_mark.course
         }
 
@@ -75,7 +76,7 @@ class ForecastHandler(RequestHandler):
 
     def _vehicle_to_dict(self, vehicle):
         return {
-            "transport": vehicle.transport,
-            "route": vehicle.route,
+            "transport": vehicle.transport.type,
+            "route": vehicle.route.number,
             "time": vehicle.time
         }

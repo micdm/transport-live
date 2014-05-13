@@ -5,13 +5,8 @@ import os.path
 import xml.etree.ElementTree as etree
 
 from tornado.options import options
-from transportlive.models.direction import Direction
-from transportlive.models.point import Point
 
-from transportlive.models.route import Route
-from transportlive.models.service import Service
-from transportlive.models.station import Station
-from transportlive.models.transport import Transport
+from transportlive.models import Service, Station, Transport, Route, Direction, Coords
 
 class ServiceBuilder(object):
 
@@ -32,7 +27,8 @@ class ServiceBuilder(object):
         return service
 
     def _build_station(self, node):
-        return Station(int(node.attrib["id"]), Decimal(node.attrib["lat"]), Decimal(node.attrib["lon"]), node.attrib["name"])
+        coords = Coords(Decimal(node.attrib["lat"]), Decimal(node.attrib["lon"]))
+        return Station(int(node.attrib["id"]), coords, node.attrib["name"])
 
     def _build_transport(self, node):
         transport = Transport(int(node.attrib["type"]))
@@ -49,13 +45,13 @@ class ServiceBuilder(object):
         return route
 
     def _build_direction(self, node):
-        direction = Direction(int(node.attrib["id"]))
+        direction = Direction(int(node.attrib["id"]), bool(int(node.attrib["is_straight"])))
         for child in node.findall("./stations/station"):
             direction.stations.append(int(child.attrib["id"]))
         return direction
 
     def _build_point(self, node):
-        return Point(Decimal(node.attrib["lat"]), Decimal(node.attrib["lon"]))
+        return Coords(Decimal(node.attrib["lat"]), Decimal(node.attrib["lon"]))
 
     def _add_stations_to_directions(self, service):
         for transport in service.transports:

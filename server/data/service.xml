@@ -174,7 +174,7 @@
             <routes>
                 <route number="1">
                     <directions>
-                        <direction id="1">
+                        <direction id="1" is_straight="1">
                             <stations>
                                 <station id="4"/>
                                 <station id="5"/>
@@ -205,7 +205,7 @@
                                 <station id="55"/>
                             </stations>
                         </direction>
-                        <direction id="2">
+                        <direction id="2" is_straight="0">
                             <stations>
                                 <station id="55"/>
                                 <station id="54"/>
@@ -448,7 +448,7 @@
                 </route>
                 <route number="2">
                     <directions>
-                        <direction id="3">
+                        <direction id="3" is_straight="1">
                             <stations>
                                 <station id="2"/>
                                 <station id="57"/>
@@ -474,7 +474,7 @@
                                 <station id="88"/>
                             </stations>
                         </direction>
-                        <direction id="4">
+                        <direction id="4" is_straight="0">
                             <stations>
                                 <station id="88"/>
                                 <station id="89"/>
@@ -600,7 +600,7 @@
                 </route>
                 <route number="3">
                     <directions>
-                        <direction id="6">
+                        <direction id="6" is_straight="1">
                             <stations>
                                 <station id="90"/>
                                 <station id="91"/>
@@ -636,7 +636,7 @@
                                 <station id="123"/>
                             </stations>
                         </direction>
-                        <direction id="7">
+                        <direction id="7" is_straight="0">
                             <stations>
                                 <station id="123"/>
                                 <station id="122"/>
@@ -915,7 +915,7 @@
                 </route>
                 <route number="4">
                     <directions>
-                        <direction id="8">
+                        <direction id="8" is_straight="1">
                             <stations>
                                 <station id="124"/>
                                 <station id="125"/>
@@ -941,7 +941,7 @@
                                 <station id="145"/>
                             </stations>
                         </direction>
-                        <direction id="9">
+                        <direction id="9" is_straight="0">
                             <stations>
                                 <station id="145"/>
                                 <station id="143"/>
@@ -1120,7 +1120,7 @@
                 </route>
                 <route number="5">
                     <directions>
-                        <direction id="11">
+                        <direction id="11" is_straight="0">
                             <stations>
                                 <station id="167"/>
                                 <station id="164"/>
@@ -1139,7 +1139,7 @@
                                 <station id="124"/>
                             </stations>
                         </direction>
-                        <direction id="10">
+                        <direction id="10" is_straight="1">
                             <stations>
                                 <station id="124"/>
                                 <station id="125"/>
@@ -1301,7 +1301,7 @@
                 </route>
                 <route number="6">
                     <directions>
-                        <direction id="12">
+                        <direction id="12" is_straight="1">
                             <stations>
                                 <station id="2"/>
                                 <station id="57"/>
@@ -1331,7 +1331,7 @@
                                 <station id="167"/>
                             </stations>
                         </direction>
-                        <direction id="13">
+                        <direction id="13" is_straight="0">
                             <stations>
                                 <station id="167"/>
                                 <station id="164"/>
@@ -1515,7 +1515,7 @@
                 </route>
                 <route number="7">
                     <directions>
-                        <direction id="14">
+                        <direction id="14" is_straight="1">
                             <stations>
                                 <station id="124"/>
                                 <station id="125"/>
@@ -1540,7 +1540,7 @@
                                 <station id="55"/>
                             </stations>
                         </direction>
-                        <direction id="15">
+                        <direction id="15" is_straight="0">
                             <stations>
                                 <station id="55"/>
                                 <station id="54"/>
@@ -1759,7 +1759,7 @@
                 </route>
                 <route number="8">
                     <directions>
-                        <direction id="16">
+                        <direction id="16" is_straight="1">
                             <stations>
                                 <station id="90"/>
                                 <station id="91"/>
@@ -1788,7 +1788,7 @@
                                 <station id="167"/>
                             </stations>
                         </direction>
-                        <direction id="17">
+                        <direction id="17" is_straight="0">
                             <stations>
                                 <station id="167"/>
                                 <station id="164"/>
@@ -2007,7 +2007,7 @@
             <routes>
                 <route number="1">
                     <directions>
-                        <direction id="1">
+                        <direction id="1" is_straight="1">
                             <stations>
                                 <station id="59"/>
                                 <station id="58"/>
@@ -2041,7 +2041,7 @@
                                 <station id="1"/>
                             </stations>
                         </direction>
-                        <direction id="2">
+                        <direction id="2" is_straight="0">
                             <stations>
                                 <station id="1"/>
                                 <station id="3"/>
@@ -2358,7 +2358,7 @@
                 </route>
                 <route number="2">
                     <directions>
-                        <direction id="3">
+                        <direction id="3" is_straight="1">
                             <stations>
                                 <station id="37"/>
                                 <station id="36"/>
@@ -2375,7 +2375,7 @@
                                 <station id="60"/>
                             </stations>
                         </direction>
-                        <direction id="4">
+                        <direction id="4" is_straight="0">
                             <stations>
                                 <station id="60"/>
                                 <station id="62"/>
@@ -2522,7 +2522,7 @@
                 </route>
                 <route number="3">
                     <directions>
-                        <direction id="5">
+                        <direction id="5" is_straight="1">
                             <stations>
                                 <station id="37"/>
                                 <station id="36"/>
@@ -2539,7 +2539,7 @@
                                 <station id="1"/>
                             </stations>
                         </direction>
-                        <direction id="6">
+                        <direction id="6" is_straight="0">
                             <stations>
                                 <station id="1"/>
                                 <station id="3"/>
@@ -2681,7 +2681,7 @@
                 </route>
                 <route number="4">
                     <directions>
-                        <direction id="7">
+                        <direction id="7" is_straight="1">
                             <stations>
                                 <station id="60"/>
                                 <station id="62"/>
@@ -2700,7 +2700,7 @@
                                 <station id="1"/>
                             </stations>
                         </direction>
-                        <direction id="8">
+                        <direction id="8" is_straight="0">
                             <stations>
                                 <station id="1"/>
                                 <station id="3"/>
