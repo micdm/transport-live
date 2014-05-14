@@ -20,34 +20,34 @@ class ServiceBuilder(object):
 
     def _build_service(self, node):
         service = Service()
-        for child in node.findall("./stations/station"):
-            service.stations.append(self._build_station(child))
         for child in node.findall("./transports/transport"):
             service.transports.append(self._build_transport(child))
         return service
+
+    def _build_transport(self, node):
+        transport = Transport(int(node.attrib["type"]))
+        for child in node.findall("./stations/station"):
+            transport.stations.append(self._build_station(child))
+        for child in node.findall("./routes/route"):
+            transport.routes.append(self._build_route(child))
+        return transport
 
     def _build_station(self, node):
         coords = Coords(Decimal(node.attrib["lat"]), Decimal(node.attrib["lon"]))
         return Station(int(node.attrib["id"]), coords, node.attrib["name"])
 
-    def _build_transport(self, node):
-        transport = Transport(int(node.attrib["type"]))
-        for child in node.findall("./routes/route"):
-            transport.routes.append(self._build_route(child))
-        return transport
-
     def _build_route(self, node):
         route = Route(int(node.attrib["number"]))
         for child in node.findall("./directions/direction"):
             route.directions.append(self._build_direction(child))
-        for child in node.findall("./points/point"):
-            route.points.append(self._build_point(child))
         return route
 
     def _build_direction(self, node):
-        direction = Direction(int(node.attrib["id"]), bool(int(node.attrib["is_straight"])))
+        direction = Direction(int(node.attrib["id"]))
         for child in node.findall("./stations/station"):
             direction.stations.append(int(child.attrib["id"]))
+        for child in node.findall("./points/point"):
+            direction.points.append(self._build_point(child))
         return direction
 
     def _build_point(self, node):
@@ -57,4 +57,4 @@ class ServiceBuilder(object):
         for transport in service.transports:
             for route in transport.routes:
                 for direction in route.directions:
-                    direction.stations = map(service.get_station_by_id, direction.stations)
+                    direction.stations = map(transport.get_station_by_id, direction.stations)

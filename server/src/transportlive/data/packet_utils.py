@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, ROUND_FLOOR
 import re
 
 from transportlive.data.packets import LoginPacket, LoginAnswerPacket, PingPacket, PingAnswerPacket, DataPacket, DataAnswerPacket
@@ -81,7 +81,7 @@ class PacketBuilder(object):
         if nmea_string == self.VALUE_NOT_AVAILABLE:
             return None
         nmea_value = Decimal(nmea_string)
-        return ((nmea_value / 100).quantize(Decimal(1)) + (nmea_value % 100) / 60).quantize(Decimal("0.000001"))
+        return ((nmea_value / 100).quantize(Decimal(1), ROUND_FLOOR) + (nmea_value % 100) / 60).quantize(Decimal("0.000001"))
 
     def _get_speed(self, speed_string):
         return None if speed_string == self.VALUE_NOT_AVAILABLE else int(speed_string)

@@ -8,7 +8,7 @@ class VehicleBuilder(object):
         transport, route = self._get_transport_and_route(packet)
         if transport is None or route is None:
             return None
-        mark = Mark(packet.datetime, Coords(packet.latitude, packet.longitude), packet.speed, packet.course)
+        mark = Mark(packet.datetime, Coords(packet.latitude, packet.longitude), self._get_normalized_speed(packet.speed), packet.course)
         return packet.imei, transport, route, mark
 
     def _get_transport_and_route(self, packet):
@@ -26,6 +26,9 @@ class VehicleBuilder(object):
         if type_string == "трамв":
             return Transport.TYPE_TRAM
         raise IncorrectPacketError('unknown transport type "%s"'%type_string)
+
+    def _get_normalized_speed(self, speed):
+        return float(speed) * 1000 / 3600
 
 class IncorrectPacketError(Exception):
     pass

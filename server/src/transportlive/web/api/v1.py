@@ -14,10 +14,10 @@ class VehicleHandler(RequestHandler):
 
     def _get_vehicles(self, request):
         vehicles = {}
-        for transport, route in map(lambda item: map(int, item.split("-")), request):
-            if transport not in vehicles:
-                vehicles[transport] = {}
-            vehicles[transport][route] = self._datastore.get_vehicles(transport, route)
+        for transport_type, route_number in map(lambda item: map(int, item.split("-")), request):
+            if transport_type not in vehicles:
+                vehicles[transport_type] = {}
+            vehicles[transport_type][route_number] = self._datastore.get_vehicles(transport_type, route_number)
         return vehicles
 
     def _result_to_dict(self, result):
@@ -52,14 +52,14 @@ class ForecastHandler(RequestHandler):
         self._datastore = datastore
 
     def get(self):
-        request = self.get_arguments("id")
+        request = self.get_arguments("station")
         forecasts = self._get_forecasts(request)
         self.finish(self._result_to_dict(forecasts))
 
     def _get_forecasts(self, request):
         forecasts = []
-        for station_id in map(int, request):
-            forecast = self._datastore.get_forecast(station_id)
+        for transport_type, station_id in map(lambda item: map(int, item.split("-")), request):
+            forecast = self._datastore.get_forecast(transport_type, station_id)
             forecasts.append(forecast)
         return forecasts
 
@@ -70,6 +70,7 @@ class ForecastHandler(RequestHandler):
 
     def _forecast_to_dict(self, forecast):
         return {
+            "transport": forecast.transport.type,
             "id": forecast.station.id,
             "vehicles": map(self._vehicle_to_dict, forecast.vehicles)
         }

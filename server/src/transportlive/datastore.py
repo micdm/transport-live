@@ -29,11 +29,11 @@ class DataStore(object):
         vehicle.marks.append(mark)
         vehicle.marks = vehicle.marks[-self.MAX_MARK_COUNT:]
 
-    def get_vehicles(self, transport, route):
-        return self._vehicles.get_by_transport_and_route(transport, route)
+    def get_vehicles(self, transport_type, route_number):
+        return self._vehicles.get_by_transport_and_route(transport_type, route_number)
 
-    def get_forecast(self, station_id):
-        return self._forecast_calculator.get_forecast(station_id)
+    def get_forecast(self, transport_type, station_id):
+        return self._forecast_calculator.get_forecast(transport_type, station_id)
 
     def cleanup(self):
         logger.info("Cleaning up datastore...")
