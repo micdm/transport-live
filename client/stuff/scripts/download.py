@@ -7,7 +7,7 @@ import urllib
 import xml.etree.ElementTree as etree
 
 FIRST_BACKEND = {"host": "bus62.ru", "url": "/tomsk/php/%s.php"}
-SECOND_BACKEND = {"host": "83.137.52.160", "url": "/bus/common/map6/%s.php"}
+SECOND_BACKEND = {"host": "83.222.106.126", "url": "/bus/common/map6/%s.php"}
 
 def _send_request(backend, method, params=None):
     if not params:
@@ -20,10 +20,22 @@ def _send_request(backend, method, params=None):
     connection.close()
     return body
 
+def _response_to_xml(response):
+    return etree.XML(response, etree.XMLParser(encoding="utf-8"))
+
+def _load_all():
+    transports = _load_transports()
+    _load_routes(transports)
+    for transport in transports:
+        for route in transport["routes"]:
+            _load_stations(transport, route)
+            _load_points(transport, route)
+    return transports
+
 def _load_transports():
     response = json.loads(_send_request(FIRST_BACKEND, "searchAllRouteTypes"))
     return [{
-        "id": item["typeId"],
+        "id": int(item["typeId"]),
         "name": item["typeName"],
         "code": item["typeShName"]
     } for item in response]
@@ -44,17 +56,6 @@ def _load_routes(transports):
             })
         transport["routes"] = routes
 
-def _load_points(transport, route):
-    response = etree.XML(_send_request(SECOND_BACKEND, "getSubRoutePolyline", {
-        "type": _get_transport_drive_type(transport),
-        "id1": route["directions"][0]["id"],
-        "id2": route["directions"][1]["id"]
-    }))
-    route["points"] = [{
-        "lat": int(item.attrib["lat"]),
-        "lon": int(item.attrib["lon"])
-    } for item in response.findall("node")]
-
 def _get_transport_drive_type(transport):
     if transport["id"] == 2:
         return 0
@@ -62,7 +63,7 @@ def _get_transport_drive_type(transport):
         return 1
 
 def _load_stations(transport, route):
-    response = etree.XML(_send_request(SECOND_BACKEND, "getRouteStations", {
+    response = _response_to_xml(_send_request(SECOND_BACKEND, "getRouteStations", {
         "type": _get_transport_drive_type(transport),
         "id1": route["directions"][0]["id"],
         "id2": route["directions"][1]["id"]
@@ -86,14 +87,25 @@ def _load_stations(transport, route):
         else:
             direction["stations"].append(station)
 
-def _load_all():
-    transports = _load_transports()
-    _load_routes(transports)
-    for transport in transports:
-        for route in transport["routes"]:
-            _load_points(transport, route)
-            _load_stations(transport, route)
-    return transports
+def _load_points(transport, route):
+    response = _response_to_xml(_send_request(SECOND_BACKEND, "getSubRoutePolyline", {
+        "type": _get_transport_drive_type(transport),
+        "id1": route["directions"][0]["id"],
+        "id2": route["directions"][1]["id"]
+    }))
+    direction = route["directions"][0]
+    prev_point = None
+    for i, item in enumerate(response.findall("node")):
+        point = {
+            "lat": int(item.attrib["lat"]),
+            "lon": int(item.attrib["lon"])
+        }
+        if prev_point and point["lat"] == prev_point["lat"] and point["lon"] == prev_point["lon"] and i != 1:
+            direction = route["directions"][1]
+        if "points" not in direction:
+            direction["points"] = []
+        direction["points"].append(point)
+        prev_point = point
 
 def _build_xml(transports):
     node = etree.Element("service")
@@ -124,19 +136,7 @@ def _build_route_xml(route, parent):
     node = etree.SubElement(parent, "route", {
         "number": str(route["number"])
     })
-    _build_points_xml(route["points"], node)
     _build_directions_xml(route["directions"], node)
-
-def _build_points_xml(points, parent):
-    node = etree.SubElement(parent, "points")
-    for point in points:
-        _build_point_xml(point, node)
-
-def _build_point_xml(point, parent):
-    etree.SubElement(parent, "point", {
-        "lat": str(point["lat"]),
-        "lon": str(point["lon"])
-    })
 
 def _build_directions_xml(directions, parent):
     node = etree.SubElement(parent, "directions")
@@ -148,6 +148,7 @@ def _build_direction_xml(direction, parent):
         "id": str(direction["id"])
     })
     _build_stations_xml(direction["stations"], node)
+    _build_points_xml(direction["points"], node)
 
 def _build_stations_xml(stations, parent):
     node = etree.SubElement(parent, "stations")
@@ -162,7 +163,18 @@ def _build_station_xml(station, parent):
         "lon": str(station["lon"])
     })
 
+def _build_points_xml(points, parent):
+    node = etree.SubElement(parent, "points")
+    for point in points:
+        _build_point_xml(point, node)
+
+def _build_point_xml(point, parent):
+    etree.SubElement(parent, "point", {
+        "lat": str(point["lat"]),
+        "lon": str(point["lon"])
+    })
+
 transports = _load_all()
 xml = _build_xml(transports)
-print '<?xml version="1.0" encoding="UTF-8" ?>'
+print '<?xml version="1.0" encoding="UTF-8"?>'
 print etree.tostring(xml, "utf-8")

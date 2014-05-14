@@ -1,11 +1,23 @@
 #!/usr/bin/python
+# coding=utf-8
 
 from decimal import Decimal
 import json
+import re
 import sys
 import xml.etree.ElementTree as etree
 
 xml = etree.parse(sys.argv[1]).getroot()
+
+def _get_transports(xml):
+    transports = []
+    for node in xml.findall(".//transport"):
+        transports.append({
+            "type": int(node.attrib["id"]),
+            "stations": _get_all_stations(node),
+            "routes": _get_routes(node)
+        })
+    return transports
 
 def _get_all_stations(xml):
     stations = []
@@ -17,7 +29,7 @@ def _get_all_stations(xml):
             "id": station_id,
             "lat": Decimal(node.attrib["lat"]) / 1000000,
             "lon": Decimal(node.attrib["lon"]) / 1000000,
-            "name": node.attrib["name"]
+            "name": _get_normalized_station_name(node.attrib["name"])
         })
     stations.sort(key=lambda item: item["id"])
     return stations
@@ -28,31 +40,31 @@ def _is_station_exist(stations, station_id):
             return True
     return False
 
-def _get_transports(xml):
-    transports = []
-    for node in xml.findall(".//transport"):
-        transports.append({
-            "type": int(node.attrib["id"]),
-            "routes": _get_routes(node)
-        })
-    return transports
+def _get_normalized_station_name(name):
+    name = re.sub("(.)\.([^ ])", "\\1. \\2", name)
+    name = re.sub("(.)\\((.)", "\\1 (\\2", name)
+    name = name.replace(u"Главпочтамп", u"Главпочтамт")
+    name = name.replace(u"Сурова", u"Суворова")
+    name = name.replace(u"Агенство", u"Агентство")
+    name = name.replace(u"Киевкая", u"Киевская")
+    return name
 
 def _get_routes(xml):
     routes = []
     for node in xml.findall(".//route"):
         routes.append({
             "number": int(node.attrib["number"]),
-            "directions": _get_directions(node),
-            "points": _get_points(node)
+            "directions": _get_directions(node)
         })
     return routes
 
 def _get_directions(xml):
     directions = []
-    for node in xml.findall(".//direction"):
+    for i, node in enumerate(xml.findall(".//direction")):
         directions.append({
             "id": int(node.attrib["id"]),
-            "stations": _get_stations(node)
+            "stations": _get_stations(node),
+            "points": _get_points(node)
         })
     return directions
 
@@ -65,18 +77,39 @@ def _get_stations(xml):
 
 def _get_points(xml):
     points = []
+    prev_point = None
     for node in xml.findall(".//point"):
-        points.append({
+        point = {
             "lat": Decimal(node.attrib["lat"]) / 1000000,
             "lon": Decimal(node.attrib["lon"]) / 1000000
-        })
+        }
+        if not prev_point or point["lat"] != prev_point["lat"] or point["lon"] != prev_point["lon"]:
+            points.append(point)
+        prev_point = point
     return points
 
 def _build_xml(data):
     node = etree.Element("service")
-    _build_all_stations_xml(data["stations"], node)
     _build_transports_xml(data["transports"], node)
     return node
+
+def _build_transports_xml(transports, parent):
+    node = etree.SubElement(parent, "transports")
+    for transport in transports:
+        _build_transport_xml(transport, node)
+
+def _build_transport_xml(transport, parent):
+    node = etree.SubElement(parent, "transport", {
+        "type": str(_get_transport_type(transport["type"]))
+    })
+    _build_all_stations_xml(transport["stations"], node)
+    _build_routes_xml(transport["routes"], node)
+
+def _get_transport_type(transport_type):
+    if transport_type == 2:
+        return 0
+    if transport_type == 3:
+        return 1
 
 def _build_all_stations_xml(stations, parent):
     node = etree.SubElement(parent, "stations")
@@ -91,23 +124,6 @@ def _build_station_data_xml(station, parent):
         "name": station["name"]
     })
 
-def _build_transports_xml(transports, parent):
-    node = etree.SubElement(parent, "transports")
-    for transport in transports:
-        _build_transport_xml(transport, node)
-
-def _build_transport_xml(transport, parent):
-    node = etree.SubElement(parent, "transport", {
-        "type": str(_get_transport_type(transport["type"]))
-    })
-    _build_routes_xml(transport["routes"], node)
-
-def _get_transport_type(transport_type):
-    if transport_type == 2:
-        return 0
-    if transport_type == 3:
-        return 1
-
 def _build_routes_xml(routes, parent):
     node = etree.SubElement(parent, "routes")
     for route in routes:
@@ -118,7 +134,6 @@ def _build_route_xml(route, parent):
         "number": str(route["number"])
     })
     _build_directions_xml(route["directions"], node)
-    _build_points_xml(route["points"], node)
 
 def _build_directions_xml(directions, parent):
     node = etree.SubElement(parent, "directions")
@@ -130,6 +145,7 @@ def _build_direction_xml(direction, parent):
         "id": str(direction["id"])
     })
     _build_stations_xml(direction["stations"], node)
+    _build_points_xml(direction["points"], node)
 
 def _build_stations_xml(stations, parent):
     node = etree.SubElement(parent, "stations")
@@ -153,9 +169,8 @@ def _build_point_xml(point, parent):
     })
 
 data = {
-    "stations": _get_all_stations(xml),
     "transports": _get_transports(xml)
 }
 xml = _build_xml(data)
-print '<?xml version="1.0" encoding="UTF-8" ?>'
+print '<?xml version="1.0" encoding="UTF-8"?>'
 print etree.tostring(xml, "utf-8")
