@@ -1,10 +1,10 @@
 # coding=utf-8
 
-from decimal import Decimal
 import unittest
 
 from transportlive.forecast.forecast_calculator import _get_projection, _is_point_inside_segment
 from transportlive.misc.dataproviders import use_dataproviders, dataprovider
+from transportlive.misc.decimal_impl import Decimal
 from transportlive.models import Coords
 
 @use_dataproviders
