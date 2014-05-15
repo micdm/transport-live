@@ -11,13 +11,13 @@ logger = getLogger(__name__)
 
 class DataStore(object):
 
-    MAX_MARK_COUNT = 10
+    MAX_MARK_COUNT = 30
     VEHICLE_OUTDATE_INTERVAL = timedelta(minutes=1)
 
     def __init__(self):
         self._service = ServiceBuilder().build()
-        self._vehicles = VehicleCollection()
-        self._forecast_calculator = ForecastCalculator(self._service, self._vehicles)
+        self._vehicles = {}
+        self._forecast_calculator = ForecastCalculator(self._service)
 
     def add_vehicle(self, vehicle_id, transport_type, route_number, mark):
         vehicle = self._vehicles.get(vehicle_id)
@@ -27,9 +27,12 @@ class DataStore(object):
         vehicle.transport = self._service.get_transport_by_type(transport_type)
         vehicle.route = vehicle.transport.get_route_by_number(route_number)
         vehicle.marks.append(mark)
+        self._forecast_calculator.update_vehicle(vehicle)
 
     def get_vehicles(self, transport_type, route_number):
-        return self._vehicles.get_by_transport_and_route(transport_type, route_number)
+        transport = self._service.get_transport_by_type(transport_type)
+        route = transport.get_route_by_number(route_number)
+        return filter(lambda vehicle: vehicle.transport == transport and vehicle.route == route, self._vehicles.values())
 
     def get_forecast(self, transport_type, station_id):
         return self._forecast_calculator.get_forecast(transport_type, station_id)
@@ -45,6 +48,7 @@ class DataStore(object):
         count = 0
         for vehicle_id, vehicle in dict(self._vehicles).items():
             if vehicle.last_mark.datetime < time:
+                self._forecast_calculator.remove_vehicle(vehicle)
                 del self._vehicles[vehicle_id]
                 count += 1
         logger.info("Removed %s vehicles", count)
@@ -57,8 +61,3 @@ class DataStore(object):
             count += len(vehicle.marks) - len(marks)
             vehicle.marks = marks
         logger.info("Removed %s marks", count)
-
-class VehicleCollection(dict):
-
-    def get_by_transport_and_route(self, transport, route):
-        return filter(lambda vehicle: vehicle.transport == transport and vehicle.route == route, self.values())
