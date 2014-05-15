@@ -27,7 +27,6 @@ class DataStore(object):
         vehicle.transport = self._service.get_transport_by_type(transport_type)
         vehicle.route = vehicle.transport.get_route_by_number(route_number)
         vehicle.marks.append(mark)
-        vehicle.marks = vehicle.marks[-self.MAX_MARK_COUNT:]
 
     def get_vehicles(self, transport_type, route_number):
         return self._vehicles.get_by_transport_and_route(transport_type, route_number)
@@ -38,6 +37,7 @@ class DataStore(object):
     def cleanup(self):
         logger.info("Cleaning up datastore...")
         self._remove_outdated_vehicles()
+        self._remove_unnecessary_vehicle_marks()
 
     def _remove_outdated_vehicles(self):
         time = datetime.utcnow() - self.VEHICLE_OUTDATE_INTERVAL
@@ -48,6 +48,15 @@ class DataStore(object):
                 del self._vehicles[vehicle_id]
                 count += 1
         logger.info("Removed %s vehicles", count)
+
+    def _remove_unnecessary_vehicle_marks(self):
+        logger.info("Removing unnecessary vehicle marks...")
+        count = 0
+        for vehicle in self._vehicles.values():
+            marks = vehicle.marks[-self.MAX_MARK_COUNT:]
+            count += len(vehicle.marks) - len(marks)
+            vehicle.marks = marks
+        logger.info("Removed %s marks", count)
 
 class VehicleCollection(dict):
 
