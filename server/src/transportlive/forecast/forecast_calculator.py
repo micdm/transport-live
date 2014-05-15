@@ -63,16 +63,13 @@ class ForecastCalculator(object):
         station = transport.get_station_by_id(station_id)
         logger.info('Building forecast for station "%s" (%s-%s)...', station.name, transport_type, station.id)
         forecast = Forecast(transport, station)
-        vehicles = {}
         for route, vehicle, distance in self._get_vehicles(station):
             speed = self._get_vehicle_speed(vehicle)
             if not speed:
                 continue
+            # TODO: возвращать время в секундах
             time = int(distance / speed) / 60
-            key = "%s-%s"%(transport, route)
-            if key not in vehicles or vehicles[key].time > time:
-                vehicles[key] = ForecastVehicle(transport, route, time)
-        forecast.vehicles.extend(vehicles.values())
+            forecast.vehicles.append(ForecastVehicle(transport, route, time))
         return forecast
 
     def _get_vehicles(self, station):
