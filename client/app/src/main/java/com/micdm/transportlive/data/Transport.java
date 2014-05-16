@@ -10,8 +10,8 @@ public class Transport {
         TRAM
     }
 
-    public int id;
-    public List<Route> routes = new ArrayList<Route>();
+    public final int id;
+    public final List<Route> routes = new ArrayList<Route>();
 
     public Transport(int id) {
         this.id = id;

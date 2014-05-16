@@ -51,8 +51,8 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
 
         public static class Page {
 
-            public String title;
-            public Fragment fragment;
+            public final String title;
+            public final Fragment fragment;
 
             public Page(String title, Fragment fragment) {
                 this.title = title;
@@ -60,7 +60,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
             }
         }
         
-        private List<Page> pages = new ArrayList<Page>();
+        private final List<Page> pages = new ArrayList<Page>();
 
         public CustomPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -101,9 +101,9 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     private static final String EVENT_LISTENER_KEY_ON_SELECT_STATION = "OnSelectStation";
     private static final String EVENT_LISTENER_KEY_ON_LOAD_FORECAST = "OnLoadForecast";
 
-    private EventListenerManager listeners = new EventListenerManager();
+    private final EventListenerManager listeners = new EventListenerManager();
 
-    private VehiclePoller vehiclePoller = new VehiclePoller(this, new VehiclePoller.OnLoadListener() {
+    private final VehiclePoller vehiclePoller = new VehiclePoller(this, new VehiclePoller.OnLoadListener() {
         @Override
         public void onStart() {
             listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, new EventListenerManager.OnIterateListener() {
@@ -143,7 +143,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     private List<SelectedRouteInfo> selectedRoutes;
     private List<VehicleInfo> vehicles;
 
-    private ForecastPoller forecastPoller = new ForecastPoller(this, new ForecastPoller.OnLoadListener() {
+    private final ForecastPoller forecastPoller = new ForecastPoller(this, new ForecastPoller.OnLoadListener() {
         @Override
         public void onStart() {
             listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_FORECAST, new EventListenerManager.OnIterateListener() {

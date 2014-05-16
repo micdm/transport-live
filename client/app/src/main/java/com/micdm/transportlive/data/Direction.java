@@ -5,8 +5,8 @@ import java.util.List;
 
 public class Direction {
 
-    public int id;
-    public List<Station> stations = new ArrayList<Station>();
+    public final int id;
+    public final List<Station> stations = new ArrayList<Station>();
 
     public Direction(int id) {
         this.id = id;

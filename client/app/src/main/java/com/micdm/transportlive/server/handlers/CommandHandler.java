@@ -35,8 +35,8 @@ public abstract class CommandHandler {
     private static final String SERVER_HOST = "transport-live.tom.ru";
     private static final String SERVER_PATH = "/api/v1/%s";
 
-    private Context context;
-    protected Command command;
+    private final Context context;
+    protected final Command command;
 
     public CommandHandler(Context context, Command command) {
         this.context = context;

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.Xml;
 
 import com.micdm.transportlive.data.Direction;
-import com.micdm.transportlive.data.Point;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Station;
@@ -24,7 +23,6 @@ public class ServiceLoader {
         public Service service;
         private Transport transport;
         private Route route;
-        private Point point;
         private Direction direction;
         private Station station;
 
@@ -39,14 +37,11 @@ public class ServiceLoader {
             if (localName.equals("route")) {
                 route = new Route(getRouteNumber(attrs));
             }
-            if (localName.equals("point")) {
-                point = new Point(getPointLatitude(attrs), getPointLongitude(attrs));
-            }
             if (localName.equals("course")) {
                 direction = new Direction(getDirectionId(attrs));
             }
             if (localName.equals("station")) {
-                station = new Station(getStationId(attrs), getStationName(attrs), getStationLatitude(attrs), getStationLongitude(attrs));
+                station = new Station(getStationId(attrs), getStationName(attrs));
             }
         }
 
@@ -56,14 +51,6 @@ public class ServiceLoader {
 
         private int getRouteNumber(Attributes attrs) {
             return Integer.valueOf(attrs.getValue("number"));
-        }
-
-        private int getPointLatitude(Attributes attrs) {
-            return Integer.valueOf(attrs.getValue("lat"));
-        }
-
-        private int getPointLongitude(Attributes attrs) {
-            return Integer.valueOf(attrs.getValue("lon"));
         }
 
         private int getDirectionId(Attributes attrs) {
@@ -78,14 +65,6 @@ public class ServiceLoader {
             return attrs.getValue("name");
         }
 
-        private int getStationLatitude(Attributes attrs) {
-            return Integer.valueOf(attrs.getValue("lat"));
-        }
-
-        private int getStationLongitude(Attributes attrs) {
-            return Integer.valueOf(attrs.getValue("lon"));
-        }
-
         @Override
         public void endElement(String uri, String localName, String qName) {
             if (localName.equals("station")) {
@@ -95,10 +74,6 @@ public class ServiceLoader {
             if (localName.equals("course")) {
                 route.directions.add(direction);
                 direction = null;
-            }
-            if (localName.equals("point")) {
-                route.points.add(point);
-                point = null;
             }
             if (localName.equals("route")) {
                 transport.routes.add(route);
@@ -113,7 +88,7 @@ public class ServiceLoader {
 
     private static final String SERVICE_ASSET_NAME = "service.xml";
 
-    private Context context;
+    private final Context context;
 
     public ServiceLoader(Context context) {
         this.context = context;

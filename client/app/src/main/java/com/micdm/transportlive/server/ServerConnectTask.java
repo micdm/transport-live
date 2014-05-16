@@ -17,8 +17,8 @@ public class ServerConnectTask extends AsyncTask<Command, Void, Command.Result> 
         public void onError();
     }
 
-    private Context context;
-    private OnResultListener listener;
+    private final Context context;
+    private final OnResultListener listener;
 
     public ServerConnectTask(Context context, OnResultListener listener) {
         this.context = context;

@@ -12,7 +12,7 @@ public class EventListenerManager {
         public void onIterate(EventListener listener);
     }
 
-    private Hashtable<String, List<EventListener>> listeners = new Hashtable<String, List<EventListener>>();
+    private final Hashtable<String, List<EventListener>> listeners = new Hashtable<String, List<EventListener>>();
 
     public void add(String key, EventListener listener) {
         if (!listeners.containsKey(key)) {

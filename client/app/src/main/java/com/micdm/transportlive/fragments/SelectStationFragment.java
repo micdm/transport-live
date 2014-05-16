@@ -30,7 +30,7 @@ public class SelectStationFragment extends DialogFragment {
 
     private abstract class ListAdapter<ItemType> extends BaseAdapter {
 
-        private List<ItemType> items;
+        private final List<ItemType> items;
 
         public ListAdapter(List<ItemType> items) {
             this.items = items;
@@ -118,7 +118,7 @@ public class SelectStationFragment extends DialogFragment {
 
     private ServiceHandler serviceHandler;
     private Service service;
-    private ServiceHandler.OnLoadServiceListener onLoadServiceListener = new ServiceHandler.OnLoadServiceListener() {
+    private final ServiceHandler.OnLoadServiceListener onLoadServiceListener = new ServiceHandler.OnLoadServiceListener() {
         @Override
         public void onLoadService(Service loaded) {
             service = loaded;
@@ -126,7 +126,7 @@ public class SelectStationFragment extends DialogFragment {
     };
 
     private ForecastHandler forecastHandler;
-    private ForecastHandler.OnSelectStationListener onSelectStationListener = new ForecastHandler.OnSelectStationListener() {
+    private final ForecastHandler.OnSelectStationListener onSelectStationListener = new ForecastHandler.OnSelectStationListener() {
         @Override
         public void onSelectStation(SelectedStationInfo selected) {
             if (selected == null) {

@@ -9,14 +9,14 @@ public class GetVehiclesCommand implements Command {
 
     public static class Result implements Command.Result {
 
-        public List<VehicleInfo> vehicles;
+        public final List<VehicleInfo> vehicles;
 
         public Result(List<VehicleInfo> vehicles) {
             this.vehicles = vehicles;
         }
     }
 
-    public List<SelectedRouteInfo> selected;
+    public final List<SelectedRouteInfo> selected;
 
     public GetVehiclesCommand(List<SelectedRouteInfo> selected) {
         this.selected = selected;

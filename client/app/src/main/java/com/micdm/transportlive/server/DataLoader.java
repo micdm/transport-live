@@ -27,7 +27,7 @@ public class DataLoader {
 
     public static class Task {
 
-        private ServerConnectTask task;
+        private final ServerConnectTask task;
 
         public Task(ServerConnectTask task) {
             this.task = task;
@@ -38,7 +38,7 @@ public class DataLoader {
         }
     }
 
-    private Context context;
+    private final Context context;
 
     public DataLoader(Context context) {
         this.context = context;

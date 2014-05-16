@@ -2,15 +2,11 @@ package com.micdm.transportlive.data;
 
 public class Station {
 
-    public int id;
-    public String name;
-    public int latitude;
-    public int longitude;
+    public final int id;
+    public final String name;
 
-    public Station(int id, String name, int latitude, int longitude) {
+    public Station(int id, String name) {
         this.id = id;
         this.name = name;
-        this.latitude = latitude;
-        this.longitude = longitude;
     }
 }

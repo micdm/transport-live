@@ -5,9 +5,8 @@ import java.util.List;
 
 public class Route {
 
-    public int number;
-    public List<Point> points = new ArrayList<Point>();
-    public List<Direction> directions = new ArrayList<Direction>();
+    public final int number;
+    public final List<Direction> directions = new ArrayList<Direction>();
 
     public Route(int number) {
         this.number = number;

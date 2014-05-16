@@ -2,9 +2,9 @@ package com.micdm.transportlive.data;
 
 public class VehicleInfo {
 
-    public Transport transport;
-    public Route route;
-    public Vehicle vehicle;
+    public final Transport transport;
+    public final Route route;
+    public final Vehicle vehicle;
 
     public VehicleInfo(Transport transport, Route route, Vehicle vehicle) {
         this.transport = transport;

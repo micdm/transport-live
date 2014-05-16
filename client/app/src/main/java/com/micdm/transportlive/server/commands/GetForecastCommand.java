@@ -8,15 +8,15 @@ public class GetForecastCommand implements Command {
 
     public static class Result implements Command.Result {
 
-        public Forecast forecast;
+        public final Forecast forecast;
 
         public Result(Forecast forecast) {
             this.forecast = forecast;
         }
     }
 
-    public Service service;
-    public SelectedStationInfo selected;
+    public final Service service;
+    public final SelectedStationInfo selected;
 
     public GetForecastCommand(Service service, SelectedStationInfo selected) {
         this.service = service;

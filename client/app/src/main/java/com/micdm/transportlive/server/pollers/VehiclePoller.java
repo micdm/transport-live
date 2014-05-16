@@ -22,9 +22,9 @@ public class VehiclePoller {
 
     private Handler handler;
     private Runnable load;
-    private DataLoader loader;
+    private final DataLoader loader;
     private DataLoader.Task currentTask;
-    private OnLoadListener onLoadListener;
+    private final OnLoadListener onLoadListener;
 
     public VehiclePoller(Context context, final OnLoadListener onLoadListener) {
         this.loader = new DataLoader(context);

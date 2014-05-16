@@ -48,25 +48,26 @@ public class MapFragment extends Fragment {
 
     private static class MarkerBuilder {
 
-        private Resources resources;
-        private Bitmap original;
-        private Paint paint;
+        private final Resources resources;
+        private final Bitmap original;
+        private final Paint paint;
 
         public MarkerBuilder(Resources resources) {
             this.resources = resources;
-            setupOriginalBitmap();
-            setupPaint();
+            this.original = setupOriginalBitmap();
+            this.paint = setupPaint();
         }
 
-        private void setupOriginalBitmap() {
-            original = BitmapFactory.decodeResource(resources, R.drawable.vehicle);
+        private Bitmap setupOriginalBitmap() {
+            return BitmapFactory.decodeResource(resources, R.drawable.vehicle);
         }
 
-        private void setupPaint() {
-            paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private Paint setupPaint() {
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
             paint.setColor(Color.BLACK);
             paint.setStyle(Paint.Style.FILL);
             paint.setTextSize(original.getWidth() / 2);
+            return paint;
         }
 
         public List<OverlayItem> build(List<VehicleInfo> vehicles) {
@@ -116,7 +117,7 @@ public class MapFragment extends Fragment {
     private static final int EAST_EDGE = 85122070;
     private static final GeoPoint INITIAL_LOCATION = new GeoPoint(56484642, 84948100);
 
-    private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+    private final SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
             if (!key.equals(PREF_KEY_USE_EXTERNAL_MAP)) {
@@ -137,14 +138,14 @@ public class MapFragment extends Fragment {
     };
 
     private ServiceHandler serviceHandler;
-    private ServiceHandler.OnUnselectAllRoutesListener onUnselectAllRoutesListener = new ServiceHandler.OnUnselectAllRoutesListener() {
+    private final ServiceHandler.OnUnselectAllRoutesListener onUnselectAllRoutesListener = new ServiceHandler.OnUnselectAllRoutesListener() {
         @Override
         public void onUnselectAllRoutes() {
             hideAllViews();
             showView(R.id.no_route_selected);
         }
     };
-    private ServiceHandler.OnLoadVehiclesListener onLoadVehiclesListener = new ServiceHandler.OnLoadVehiclesListener() {
+    private final ServiceHandler.OnLoadVehiclesListener onLoadVehiclesListener = new ServiceHandler.OnLoadVehiclesListener() {
         @Override
         public void onStart() {
             showView(R.id.loading);

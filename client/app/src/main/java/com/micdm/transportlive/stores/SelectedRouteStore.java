@@ -24,8 +24,8 @@ public class SelectedRouteStore {
 
     private static class ContentHandler extends DefaultHandler {
 
-        private Service service;
-        public List<SelectedRouteInfo> selected = new ArrayList<SelectedRouteInfo>();
+        private final Service service;
+        public final List<SelectedRouteInfo> selected = new ArrayList<SelectedRouteInfo>();
 
         public ContentHandler(Service service) {
             this.service = service;
@@ -51,7 +51,7 @@ public class SelectedRouteStore {
 
     private static final String FILE_NAME = "selected_routes.xml";
 
-    private Context context;
+    private final Context context;
 
     public SelectedRouteStore(Context context) {
         this.context = context;

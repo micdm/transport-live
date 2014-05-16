@@ -14,7 +14,6 @@ import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class GetVehiclesCommandHandler extends CommandHandler {
@@ -79,8 +78,6 @@ public class GetVehiclesCommandHandler extends CommandHandler {
         BigDecimal latitude = new BigDecimal(vehicleJson.getString("lat"));
         BigDecimal longitude = new BigDecimal(vehicleJson.getString("lon"));
         int course = vehicleJson.getInt("course");
-        // TODO: дата последнего обновления
-        Date lastUpdate = new Date();
-        return new Vehicle(number, latitude, longitude, course, lastUpdate);
+        return new Vehicle(number, latitude, longitude, course);
     }
 }

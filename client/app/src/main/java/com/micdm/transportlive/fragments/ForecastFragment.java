@@ -22,7 +22,7 @@ import java.util.Comparator;
 public class ForecastFragment extends Fragment {
 
     private ForecastHandler handler;
-    private ForecastHandler.OnSelectStationListener onSelectStationListener = new ForecastHandler.OnSelectStationListener() {
+    private final ForecastHandler.OnSelectStationListener onSelectStationListener = new ForecastHandler.OnSelectStationListener() {
         @Override
         public void onSelectStation(SelectedStationInfo selected) {
             hideAllViews();
@@ -36,7 +36,7 @@ public class ForecastFragment extends Fragment {
             }
         }
     };
-    private ForecastHandler.OnLoadForecastListener onLoadForecastListener = new ForecastHandler.OnLoadForecastListener() {
+    private final ForecastHandler.OnLoadForecastListener onLoadForecastListener = new ForecastHandler.OnLoadForecastListener() {
         @Override
         public void onStart() {
             showView(R.id.loading);

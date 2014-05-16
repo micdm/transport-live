@@ -15,7 +15,7 @@ public class AssetArchive implements IArchiveFile {
         return new AssetArchive(context);
     }
 
-    private Context context;
+    private final Context context;
 
     private AssetArchive(Context context) {
         this.context = context;

@@ -24,7 +24,7 @@ public class SelectedStationStore {
 
     private static class ContentHandler extends DefaultHandler {
 
-        private Service service;
+        private final Service service;
         public SelectedStationInfo selected;
 
         public ContentHandler(Service service) {
@@ -61,7 +61,7 @@ public class SelectedStationStore {
 
     private static final String FILE_NAME = "selected_station.xml";
 
-    private Context context;
+    private final Context context;
 
     public SelectedStationStore(Context context) {
         this.context = context;

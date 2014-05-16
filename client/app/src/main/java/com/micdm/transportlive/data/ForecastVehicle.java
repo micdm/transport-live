@@ -2,9 +2,9 @@ package com.micdm.transportlive.data;
 
 public class ForecastVehicle {
 
-    public Transport transport;
-    public Route route;
-    public int arrivalTime;
+    public final Transport transport;
+    public final Route route;
+    public final int arrivalTime;
 
     public ForecastVehicle(Transport transport, Route route, int arrivalTime) {
         this.transport = transport;

@@ -30,16 +30,16 @@ public class SelectRouteFragment extends DialogFragment {
 
     private class RouteListAdapter extends BaseExpandableListAdapter {
 
-        private List<Transport> transports;
-        public List<SelectedRouteInfo> selected;
+        private final List<Transport> transports;
+        public final List<SelectedRouteInfo> selected;
 
         public RouteListAdapter(List<Transport> transports) {
             this.transports = transports;
-            setupSelectedRoutes();
+            this.selected = setupSelectedRoutes();
         }
 
-        private void setupSelectedRoutes() {
-            selected = new ArrayList<SelectedRouteInfo>();
+        private List<SelectedRouteInfo> setupSelectedRoutes() {
+            List<SelectedRouteInfo> selected = new ArrayList<SelectedRouteInfo>();
             for (Transport transport: transports) {
                 for (Route route: transport.routes) {
                     if (handler.isRouteSelected(transport, route)) {
@@ -47,6 +47,7 @@ public class SelectRouteFragment extends DialogFragment {
                     }
                 }
             }
+            return selected;
         }
 
         @Override
@@ -149,7 +150,7 @@ public class SelectRouteFragment extends DialogFragment {
     }
 
     private ServiceHandler handler;
-    private ServiceHandler.OnLoadServiceListener onLoadServiceListener = new ServiceHandler.OnLoadServiceListener() {
+    private final ServiceHandler.OnLoadServiceListener onLoadServiceListener = new ServiceHandler.OnLoadServiceListener() {
         @Override
         public void onLoadService(Service service) {
             ExpandableListView listView = (ExpandableListView) getDialog().findViewById(R.id.route_list);
