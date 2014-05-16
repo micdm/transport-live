@@ -19,7 +19,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.micdm.transportlive.R;
-import com.micdm.transportlive.data.VehicleInfo;
+import com.micdm.transportlive.data.Route;
+import com.micdm.transportlive.data.RouteInfo;
+import com.micdm.transportlive.data.Vehicle;
 import com.micdm.transportlive.interfaces.ServiceHandler;
 import com.micdm.transportlive.misc.AssetArchive;
 
@@ -70,31 +72,33 @@ public class MapFragment extends Fragment {
             return paint;
         }
 
-        public List<OverlayItem> build(List<VehicleInfo> vehicles) {
+        public List<OverlayItem> build(List<RouteInfo> routes) {
             List<OverlayItem> markers = new ArrayList<OverlayItem>();
-            for (VehicleInfo info: vehicles) {
+            for (RouteInfo info: routes) {
                 // TODO: учитывать lastUpdate
-                markers.add(getMarker(info));
+                for (Vehicle vehicle: info.vehicles) {
+                    markers.add(getMarker(info.route, vehicle));
+                }
             }
             return markers;
         }
 
-        private OverlayItem getMarker(VehicleInfo info) {
-            GeoPoint coords = new GeoPoint(info.vehicle.latitude.doubleValue(), info.vehicle.longitude.doubleValue());
-            OverlayItem marker = new OverlayItem(info.vehicle.number, "", coords);
-            Bitmap bitmap = getBitmap(info);
+        private OverlayItem getMarker(Route route, Vehicle vehicle) {
+            GeoPoint coords = new GeoPoint(vehicle.latitude.doubleValue(), vehicle.longitude.doubleValue());
+            OverlayItem marker = new OverlayItem(vehicle.number, "", coords);
+            Bitmap bitmap = getBitmap(route, vehicle);
             marker.setMarker(new BitmapDrawable(resources, bitmap));
             marker.setMarkerHotspot(OverlayItem.HotspotPlace.CENTER);
             return marker;
         }
 
-        private Bitmap getBitmap(VehicleInfo info) {
+        private Bitmap getBitmap(Route route, Vehicle vehicle) {
             Bitmap result = Bitmap.createBitmap(original.getWidth(), original.getHeight(), original.getConfig());
             Canvas canvas = new Canvas(result);
             Matrix matrix = new Matrix();
-            matrix.setRotate(info.vehicle.course, original.getWidth() / 2, original.getHeight() / 2);
+            matrix.setRotate(vehicle.course, original.getWidth() / 2, original.getHeight() / 2);
             canvas.drawBitmap(original, matrix, null);
-            String text = String.valueOf(info.route.number);
+            String text = String.valueOf(route.number);
             Rect bounds = getTextBounds(text);
             canvas.drawText(text, canvas.getWidth() / 2 - bounds.width() / 2, canvas.getHeight() / 2 + bounds.height() / 2, paint);
             return result;
@@ -155,7 +159,7 @@ public class MapFragment extends Fragment {
             hideView(R.id.loading);
         }
         @Override
-        public void onLoadVehicles(List<VehicleInfo> vehicles) {
+        public void onLoadVehicles(List<RouteInfo> vehicles) {
             update(vehicles);
         }
     };
@@ -245,7 +249,7 @@ public class MapFragment extends Fragment {
         hideView(R.id.map);
     }
 
-    public void update(List<VehicleInfo> vehicles) {
+    public void update(List<RouteInfo> vehicles) {
         hideAllViews();
         if (vehicles.size() == 0) {
             showView(R.id.no_vehicles);

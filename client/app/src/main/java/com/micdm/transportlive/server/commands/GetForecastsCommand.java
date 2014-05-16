@@ -4,21 +4,23 @@ import com.micdm.transportlive.data.Forecast;
 import com.micdm.transportlive.data.SelectedStationInfo;
 import com.micdm.transportlive.data.Service;
 
-public class GetForecastCommand implements Command {
+import java.util.List;
+
+public class GetForecastsCommand implements Command {
 
     public static class Result implements Command.Result {
 
-        public final Forecast forecast;
+        public final List<Forecast> forecasts;
 
-        public Result(Forecast forecast) {
-            this.forecast = forecast;
+        public Result(List<Forecast> forecasts) {
+            this.forecasts = forecasts;
         }
     }
 
     public final Service service;
-    public final SelectedStationInfo selected;
+    public final List<SelectedStationInfo> selected;
 
-    public GetForecastCommand(Service service, SelectedStationInfo selected) {
+    public GetForecastsCommand(Service service, List<SelectedStationInfo> selected) {
         this.service = service;
         this.selected = selected;
     }

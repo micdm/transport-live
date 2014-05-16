@@ -55,8 +55,9 @@ class Direction(object):
 
 class Vehicle(object):
 
-    def __init__(self, vehicle_id):
+    def __init__(self, vehicle_id, number):
         self.id = vehicle_id
+        self.number = number
         self.transport = None
         self.route = None
         self.marks = []

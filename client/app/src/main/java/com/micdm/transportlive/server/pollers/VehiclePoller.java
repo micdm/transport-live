@@ -3,8 +3,8 @@ package com.micdm.transportlive.server.pollers;
 import android.content.Context;
 import android.os.Handler;
 
+import com.micdm.transportlive.data.RouteInfo;
 import com.micdm.transportlive.data.SelectedRouteInfo;
-import com.micdm.transportlive.data.VehicleInfo;
 import com.micdm.transportlive.server.DataLoader;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public class VehiclePoller {
     public static interface OnLoadListener {
         public void onStart();
         public void onFinish();
-        public void onLoad(List<VehicleInfo> vehicles);
+        public void onLoad(List<RouteInfo> vehicles);
         public void onError();
     }
 
@@ -50,7 +50,7 @@ public class VehiclePoller {
         onLoadListener.onStart();
         currentTask = loader.loadVehicles(selected, new DataLoader.OnLoadVehiclesListener() {
             @Override
-            public void onLoad(List<VehicleInfo> vehicles) {
+            public void onLoad(List<RouteInfo> vehicles) {
                 currentTask = null;
                 onLoadListener.onFinish();
                 onLoadListener.onLoad(vehicles);

@@ -8,12 +8,14 @@ import com.micdm.transportlive.data.SelectedStationInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.server.DataLoader;
 
+import java.util.List;
+
 public class ForecastPoller {
 
     public static interface OnLoadListener {
         public void onStart();
         public void onFinish();
-        public void onLoad(Forecast forecast);
+        public void onLoad(List<Forecast> forecasts);
         public void onError();
     }
 
@@ -30,7 +32,7 @@ public class ForecastPoller {
         this.onLoadListener = onLoadListener;
     }
 
-    public void start(final Service service, final SelectedStationInfo selected) {
+    public void start(final Service service, final List<SelectedStationInfo> selected) {
         if (handler != null) {
             return;
         }
@@ -44,15 +46,15 @@ public class ForecastPoller {
         load.run();
     }
 
-    private void load(Service service, SelectedStationInfo selected) {
+    private void load(Service service, List<SelectedStationInfo> selected) {
         handler.postDelayed(load, UPDATE_INTERVAL * 1000);
         onLoadListener.onStart();
         currentTask = loader.loadForecast(service, selected, new DataLoader.OnLoadForecastListener() {
             @Override
-            public void onLoad(Forecast forecast) {
+            public void onLoad(List<Forecast> forecasts) {
                 currentTask = null;
                 onLoadListener.onFinish();
-                onLoadListener.onLoad(forecast);
+                onLoadListener.onLoad(forecasts);
             }
             @Override
             public void onError() {

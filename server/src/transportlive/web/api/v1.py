@@ -13,27 +13,22 @@ class VehicleHandler(RequestHandler):
         self.finish(self._result_to_dict(vehicles))
 
     def _get_vehicles(self, request):
-        vehicles = {}
+        result = []
         for transport_type, route_number in map(lambda item: map(int, item.split("-")), request):
-            if transport_type not in vehicles:
-                vehicles[transport_type] = {}
-            vehicles[transport_type][route_number] = self._datastore.get_vehicles(transport_type, route_number)
-        return vehicles
+            vehicles = self._datastore.get_vehicles(transport_type, route_number)
+            if vehicles:
+                result.append(vehicles)
+        return result
 
     def _result_to_dict(self, result):
         return {
-            "transports": map(self._transport_to_dict, result.keys(), result.values())
+            "result": map(self._vehicles_to_dict, result)
         }
 
-    def _transport_to_dict(self, transport_type, routes):
+    def _vehicles_to_dict(self, vehicles):
         return {
-            "type": transport_type,
-            "routes": map(self._route_to_dict, routes.keys(), routes.values())
-        }
-
-    def _route_to_dict(self, route_number, vehicles):
-        return {
-            "number": route_number,
+            "transport": vehicles[0].transport.type,
+            "route": vehicles[0].route.number,
             "vehicles": map(self._vehicle_to_dict, vehicles)
         }
 
@@ -41,6 +36,7 @@ class VehicleHandler(RequestHandler):
         last_mark = vehicle.last_mark
         coords = last_mark.coords
         return {
+            "number": vehicle.number,
             "lat": str(coords.latitude),
             "lon": str(coords.longitude),
             "course": last_mark.course
@@ -65,13 +61,13 @@ class ForecastHandler(RequestHandler):
 
     def _result_to_dict(self, result):
         return {
-            "stations": map(self._forecast_to_dict, result)
+            "result": map(self._forecast_to_dict, result)
         }
 
     def _forecast_to_dict(self, forecast):
         return {
             "transport": forecast.transport.type,
-            "id": forecast.station.id,
+            "station": forecast.station.id,
             "vehicles": map(self._vehicle_to_dict, forecast.vehicles)
         }
 

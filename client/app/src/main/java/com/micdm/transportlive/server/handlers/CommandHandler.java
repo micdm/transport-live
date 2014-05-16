@@ -32,7 +32,8 @@ public abstract class CommandHandler {
     }
 
     private static final String SERVER_PROTOCOL = "http";
-    private static final String SERVER_HOST = "transport-live.tom.ru";
+    //private static final String SERVER_HOST = "transport-live.tom.ru";
+    private static final String SERVER_HOST = "192.168.1.5:8001";
     private static final String SERVER_PATH = "/api/v1/%s";
 
     private final Context context;
@@ -78,7 +79,8 @@ public abstract class CommandHandler {
     private String getRequestUri(String method, List<RequestParam> params) {
         Uri.Builder builder = new Uri.Builder();
         builder.scheme(SERVER_PROTOCOL);
-        builder.authority(SERVER_HOST);
+        // TODO: порт
+        builder.encodedAuthority(SERVER_HOST);
         builder.path(String.format(SERVER_PATH, method));
         if (params != null) {
             for (RequestParam param: params) {

@@ -26,6 +26,7 @@ android {
             jniDebugBuild true
             runProguard false
             zipAlign false
+            packageNameSuffix 'dev'
         }
     }
     packagingOptions {

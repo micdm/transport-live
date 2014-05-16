@@ -1,10 +1,10 @@
 package com.micdm.transportlive.interfaces;
 
 import com.micdm.transportlive.data.Route;
+import com.micdm.transportlive.data.RouteInfo;
 import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
-import com.micdm.transportlive.data.VehicleInfo;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ public interface ServiceHandler {
     public static interface OnLoadVehiclesListener extends EventListener {
         public void onStart();
         public void onFinish();
-        public void onLoadVehicles(List<VehicleInfo> vehicles);
+        public void onLoadVehicles(List<RouteInfo> vehicles);
     }
 
     public void requestRouteSelection();

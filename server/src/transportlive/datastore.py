@@ -19,10 +19,10 @@ class DataStore(object):
         self._vehicles = {}
         self._forecast_calculator = ForecastCalculator(self._service)
 
-    def add_vehicle(self, vehicle_id, transport_type, route_number, mark):
+    def add_vehicle(self, vehicle_id, number, transport_type, route_number, mark):
         vehicle = self._vehicles.get(vehicle_id)
         if not vehicle:
-            vehicle = Vehicle(vehicle_id)
+            vehicle = Vehicle(vehicle_id, number)
             self._vehicles[vehicle_id] = vehicle
         vehicle.transport = self._service.get_transport_by_type(transport_type)
         vehicle.route = vehicle.transport.get_route_by_number(route_number)

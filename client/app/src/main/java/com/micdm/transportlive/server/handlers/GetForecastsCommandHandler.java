@@ -9,44 +9,46 @@ import com.micdm.transportlive.data.SelectedStationInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.server.commands.Command;
-import com.micdm.transportlive.server.commands.GetForecastCommand;
+import com.micdm.transportlive.server.commands.GetForecastsCommand;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-public class GetForecastCommandHandler extends CommandHandler {
+public class GetForecastsCommandHandler extends CommandHandler {
 
     private static final String API_METHOD = "forecasts";
 
-    public GetForecastCommandHandler(Context context, Command command) {
+    public GetForecastsCommandHandler(Context context, Command command) {
         super(context, command);
     }
 
     @Override
-    public GetForecastCommand.Result handle() {
-        SelectedStationInfo selected = ((GetForecastCommand) command).selected;
+    public GetForecastsCommand.Result handle() {
+        List<SelectedStationInfo> selected = ((GetForecastsCommand) command).selected;
         List<RequestParam> params = getRequestParams(selected);
         JSONObject response = sendRequest(API_METHOD, params);
         if (response == null) {
             return null;
         }
-        Service service = ((GetForecastCommand) command).service;
+        // TODO: не использовать сервис
+        Service service = ((GetForecastsCommand) command).service;
         try {
-            List<Forecast> forecasts = getForecasts(response.getJSONArray("stations"), service);
-            return new GetForecastCommand.Result(forecasts.get(0));
+            List<Forecast> forecasts = getForecasts(response.getJSONArray("result"), service);
+            return new GetForecastsCommand.Result(forecasts);
         } catch (JSONException e) {
             return null;
         }
     }
 
-    private List<RequestParam> getRequestParams(SelectedStationInfo selected) {
+    private List<RequestParam> getRequestParams(List<SelectedStationInfo> selected) {
         List<RequestParam> params = new ArrayList<RequestParam>();
-        params.add(new RequestParam("station", String.format("%s-%s", selected.transport.id, selected.station.id)));
+        for (SelectedStationInfo info: selected) {
+            params.add(new RequestParam("station", String.format("%s-%s", info.transport.id, info.station.id)));
+        }
         return params;
     }
 
@@ -61,8 +63,9 @@ public class GetForecastCommandHandler extends CommandHandler {
 
     private Forecast getForecast(JSONObject forecastJson, Service service) throws JSONException {
         Forecast forecast = new Forecast();
-        List<ForecastVehicle> vehicles = getForecastVehicles(forecastJson.getJSONArray("vehicles"), service);
-        Collections.copy(forecast.vehicles, vehicles);
+        for (ForecastVehicle vehicle: getForecastVehicles(forecastJson.getJSONArray("vehicles"), service)) {
+            forecast.vehicles.add(vehicle);
+        }
         return forecast;
     }
 

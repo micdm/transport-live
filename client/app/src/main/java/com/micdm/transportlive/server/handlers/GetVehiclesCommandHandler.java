@@ -2,9 +2,9 @@ package com.micdm.transportlive.server.handlers;
 
 import android.content.Context;
 
+import com.micdm.transportlive.data.RouteInfo;
 import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.Vehicle;
-import com.micdm.transportlive.data.VehicleInfo;
 import com.micdm.transportlive.server.commands.Command;
 import com.micdm.transportlive.server.commands.GetVehiclesCommand;
 
@@ -33,8 +33,8 @@ public class GetVehiclesCommandHandler extends CommandHandler {
             return null;
         }
         try {
-            List<VehicleInfo> vehicles = getVehicles(response.getJSONArray("vehicles"), selected);
-            return new GetVehiclesCommand.Result(vehicles);
+            List<RouteInfo> routes = getRoutesInfo(response.getJSONArray("result"), selected);
+            return new GetVehiclesCommand.Result(routes);
         } catch (JSONException e) {
             return null;
         }
@@ -48,20 +48,24 @@ public class GetVehiclesCommandHandler extends CommandHandler {
         return params;
     }
 
-    private List<VehicleInfo> getVehicles(JSONArray vehicleListJson, List<SelectedRouteInfo> selected) throws JSONException {
-        List<VehicleInfo> vehicles = new ArrayList<VehicleInfo>();
-        for (int i = 0; i < vehicleListJson.length(); i += 1) {
-            JSONObject vehicleJson = vehicleListJson.getJSONObject(i);
-            vehicles.add(getVehicleInfo(vehicleJson, selected));
+    private List<RouteInfo> getRoutesInfo(JSONArray routeListJson, List<SelectedRouteInfo> selected) throws JSONException {
+        List<RouteInfo> routes = new ArrayList<RouteInfo>();
+        for (int i = 0; i < routeListJson.length(); i += 1) {
+            JSONObject routeJson = routeListJson.getJSONObject(i);
+            routes.add(getRouteInfo(routeJson, selected));
         }
-        return vehicles;
+        return routes;
     }
 
-    private VehicleInfo getVehicleInfo(JSONObject vehicleJson, List<SelectedRouteInfo> selected) throws JSONException {
-        int transportId = vehicleJson.getInt("transport");
-        int routeNumber = vehicleJson.getInt("route");
+    private RouteInfo getRouteInfo(JSONObject routeJson, List<SelectedRouteInfo> selected) throws JSONException {
+        int transportId = routeJson.getInt("transport");
+        int routeNumber = routeJson.getInt("route");
         SelectedRouteInfo info = getSelectedRouteInfo(transportId, routeNumber, selected);
-        return new VehicleInfo(info.transport, info.route, getVehicle(vehicleJson));
+        RouteInfo route = new RouteInfo(info.transport, info.route);
+        for (Vehicle vehicle: getVehicles(routeJson.getJSONArray("vehicles"))) {
+            route.vehicles.add(vehicle);
+        }
+        return route;
     }
 
     private SelectedRouteInfo getSelectedRouteInfo(int transportId, int routeNumber, List<SelectedRouteInfo> selected) {
@@ -71,6 +75,15 @@ public class GetVehiclesCommandHandler extends CommandHandler {
             }
         }
         throw new RuntimeException("cannot find route info");
+    }
+
+    private List<Vehicle> getVehicles(JSONArray vehicleListJson) throws JSONException {
+        List<Vehicle> vehicles = new ArrayList<Vehicle>();
+        for (int i = 0; i < vehicleListJson.length(); i += 1) {
+            JSONObject vehicleJson = vehicleListJson.getJSONObject(i);
+            vehicles.add(getVehicle(vehicleJson));
+        }
+        return vehicles;
     }
 
     private Vehicle getVehicle(JSONObject vehicleJson) throws JSONException {

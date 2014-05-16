@@ -18,11 +18,11 @@ import android.view.MenuItem;
 
 import com.micdm.transportlive.data.Forecast;
 import com.micdm.transportlive.data.Route;
+import com.micdm.transportlive.data.RouteInfo;
 import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.SelectedStationInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
-import com.micdm.transportlive.data.VehicleInfo;
 import com.micdm.transportlive.fragments.AboutFragment;
 import com.micdm.transportlive.fragments.ForecastFragment;
 import com.micdm.transportlive.fragments.MapFragment;
@@ -123,7 +123,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
             });
         }
         @Override
-        public void onLoad(final List<VehicleInfo> loaded) {
+        public void onLoad(final List<RouteInfo> loaded) {
             hideNoConnectionMessage();
             vehicles = loaded;
             listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, new EventListenerManager.OnIterateListener() {
@@ -141,7 +141,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     });
     private Service service;
     private List<SelectedRouteInfo> selectedRoutes;
-    private List<VehicleInfo> vehicles;
+    private List<RouteInfo> vehicles;
 
     private final ForecastPoller forecastPoller = new ForecastPoller(this, new ForecastPoller.OnLoadListener() {
         @Override
@@ -163,13 +163,14 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
             });
         }
         @Override
-        public void onLoad(final Forecast loaded) {
+        public void onLoad(final List<Forecast> loaded) {
             hideNoConnectionMessage();
-            forecast = loaded;
+            // TODO
+            forecast = loaded.get(0);
             listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_FORECAST, new EventListenerManager.OnIterateListener() {
                 @Override
                 public void onIterate(EventListener listener) {
-                    ((OnLoadForecastListener) listener).onLoadForecast(loaded);
+                    ((OnLoadForecastListener) listener).onLoadForecast(forecast);
                 }
             });
         }
@@ -387,9 +388,9 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     }
 
     private void cleanupVehicles() {
-        Iterator<VehicleInfo> iterator = vehicles.iterator();
+        Iterator<RouteInfo> iterator = vehicles.iterator();
         while (iterator.hasNext()) {
-            VehicleInfo info = iterator.next();
+            RouteInfo info = iterator.next();
             if (!isRouteSelected(info.transport, info.route)) {
                 iterator.remove();
             }
@@ -465,7 +466,10 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     private void loadForecast() {
         forecastPoller.stop();
         if (service != null && selectedStation != null) {
-            forecastPoller.start(service, selectedStation);
+            // TODO
+            List<SelectedStationInfo> selected = new ArrayList<SelectedStationInfo>();
+            selected.add(selectedStation);
+            forecastPoller.start(service, selected);
         }
     }
 

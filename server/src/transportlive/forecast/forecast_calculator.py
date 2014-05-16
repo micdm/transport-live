@@ -110,6 +110,7 @@ class _DirectionCalculator(object):
         self._vehicles = {}
 
     def get_vehicles(self, direction):
+        # TODO: может быть пустое
         return self._vehicles.get(direction)
 
     def update_vehicle(self, vehicle):

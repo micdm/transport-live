@@ -9,7 +9,7 @@ class VehicleBuilder(object):
         if transport is None or route is None:
             return None
         mark = Mark(packet.datetime, Coords(packet.latitude, packet.longitude), self._get_normalized_speed(packet.speed), packet.course)
-        return packet.imei, transport, route, mark
+        return packet.imei, self._get_number(packet), transport, route, mark
 
     def _get_transport_and_route(self, packet):
         info = packet.params.get("num")
@@ -29,6 +29,9 @@ class VehicleBuilder(object):
 
     def _get_normalized_speed(self, speed):
         return float(speed) * 1000 / 3600
+
+    def _get_number(self, packet):
+        return packet.params.get("gosnum")
 
 class IncorrectPacketError(Exception):
     pass

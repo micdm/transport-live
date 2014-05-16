@@ -37,7 +37,7 @@ public class ServiceLoader {
             if (localName.equals("route")) {
                 route = new Route(getRouteNumber(attrs));
             }
-            if (localName.equals("course")) {
+            if (localName.equals("direction")) {
                 direction = new Direction(getDirectionId(attrs));
             }
             if (localName.equals("station")) {
@@ -71,7 +71,7 @@ public class ServiceLoader {
                 direction.stations.add(station);
                 station = null;
             }
-            if (localName.equals("course")) {
+            if (localName.equals("direction")) {
                 route.directions.add(direction);
                 direction = null;
             }
