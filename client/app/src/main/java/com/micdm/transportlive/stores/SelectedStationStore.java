@@ -51,7 +51,7 @@ public class SelectedStationStore {
         }
 
         private int getDirectionId(Attributes attrs) {
-            return Integer.valueOf(attrs.getValue("direction"));
+            return Integer.valueOf(attrs.getValue("course"));
         }
 
         private int getStationId(Attributes attrs) {
@@ -105,7 +105,7 @@ public class SelectedStationStore {
         serializer.startTag("", "station");
         serializer.attribute("", "transport", String.valueOf(selected.transport.id));
         serializer.attribute("", "route", String.valueOf(selected.route.number));
-        serializer.attribute("", "direction", String.valueOf(selected.direction.id));
+        serializer.attribute("", "course", String.valueOf(selected.direction.id));
         serializer.attribute("", "station", String.valueOf(selected.station.id));
         serializer.endTag("", "station");
         serializer.endDocument();

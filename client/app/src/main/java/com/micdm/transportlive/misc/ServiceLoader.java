@@ -34,7 +34,7 @@ public class ServiceLoader {
                 service = new Service();
             }
             if (localName.equals("transport")) {
-                transport = new Transport(getTransportId(attrs), getTransportType(attrs), getTransportCode(attrs));
+                transport = new Transport(getTransportId(attrs));
             }
             if (localName.equals("route")) {
                 route = new Route(getRouteNumber(attrs));
@@ -42,7 +42,7 @@ public class ServiceLoader {
             if (localName.equals("point")) {
                 point = new Point(getPointLatitude(attrs), getPointLongitude(attrs));
             }
-            if (localName.equals("direction")) {
+            if (localName.equals("course")) {
                 direction = new Direction(getDirectionId(attrs));
             }
             if (localName.equals("station")) {
@@ -52,20 +52,6 @@ public class ServiceLoader {
 
         private int getTransportId(Attributes attrs) {
             return Integer.valueOf(attrs.getValue("id"));
-        }
-
-        private Transport.Type getTransportType(Attributes attrs) {
-            String value = attrs.getValue("type");
-            for (Transport.Type type: Transport.Type.values()) {
-                if (value.equals(type.toString())) {
-                    return type;
-                }
-            }
-            throw new RuntimeException("unknown transport type");
-        }
-
-        private String getTransportCode(Attributes attrs) {
-            return attrs.getValue("code");
         }
 
         private int getRouteNumber(Attributes attrs) {
@@ -106,7 +92,7 @@ public class ServiceLoader {
                 direction.stations.add(station);
                 station = null;
             }
-            if (localName.equals("direction")) {
+            if (localName.equals("course")) {
                 route.directions.add(direction);
                 direction = null;
             }

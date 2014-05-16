@@ -5,10 +5,8 @@
     <string name="contact_email">demerzov@gmail.com</string>
     <string name="user_agent">transport-live %1$s on Android (mail to %2$s for discussion)</string>
     <!-- Названия транспорта -->
-    <string name="transport_type_bus">Автобус</string>
     <string name="transport_type_trolleybus">Троллейбус</string>
     <string name="transport_type_tram">Трамвай</string>
-    <string name="transport_type_taxi">Маршрутное такси</string>
     <!-- Вкладки -->
     <string name="tab_title_forecast">Расписание</string>
     <string name="tab_title_map">Карта</string>

@@ -30,4 +30,7 @@ public class AssetArchive implements IArchiveFile {
             return null;
         }
     }
+
+    @Override
+    public void close() {}
 }

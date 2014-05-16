@@ -3,7 +3,6 @@ package com.micdm.transportlive.server;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import com.micdm.transportlive.server.cities.CityConfig;
 import com.micdm.transportlive.server.commands.Command;
 import com.micdm.transportlive.server.commands.GetForecastCommand;
 import com.micdm.transportlive.server.commands.GetVehiclesCommand;
@@ -33,17 +32,15 @@ public class ServerConnectTask extends AsyncTask<Command, Void, Command.Result> 
 
     private Command.Result executeCommand(Command command) {
         CommandHandler handler = getCommandHandler(command);
-        handler.setCity(CityConfig.CITY_TOMSK);
-        handler.setCommand(command);
         return handler.handle();
     }
 
     private CommandHandler getCommandHandler(Command command) {
         if (command instanceof GetVehiclesCommand) {
-            return new GetVehiclesCommandHandler(context);
+            return new GetVehiclesCommandHandler(context, command);
         }
         if (command instanceof GetForecastCommand) {
-            return new GetForecastCommandHandler(context);
+            return new GetForecastCommandHandler(context, command);
         }
         throw new RuntimeException("unknown command");
     }

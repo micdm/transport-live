@@ -1,143 +1,86 @@
 package com.micdm.transportlive.server.handlers;
 
 import android.content.Context;
-import android.util.Xml;
 
-import com.micdm.transportlive.data.Direction;
 import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.Vehicle;
 import com.micdm.transportlive.data.VehicleInfo;
-import com.micdm.transportlive.misc.Utils;
+import com.micdm.transportlive.server.commands.Command;
 import com.micdm.transportlive.server.commands.GetVehiclesCommand;
 
-import org.apache.commons.lang3.StringUtils;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 public class GetVehiclesCommandHandler extends CommandHandler {
 
-    private static class ContentHandler extends DefaultHandler {
+    private static final String API_METHOD = "vehicles";
 
-        private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-        private List<SelectedRouteInfo> selected;
-        public List<VehicleInfo> vehicles = new ArrayList<VehicleInfo>();
-
-        public ContentHandler(List<SelectedRouteInfo> selected) {
-            this.selected = selected;
-        }
-
-        @Override
-        public void startElement(String uri, String localName, String qName, Attributes attrs) {
-            if (localName.equals("veh")) {
-                Date lastUpdate = getLastVehicleUpdate(attrs);
-                if (lastUpdate == null) {
-                    return;
-                }
-                SelectedRouteInfo info = getSelectedRouteInfo(getTransportCode(attrs), getRouteNumber(attrs));
-                Direction direction = info.route.getDirectionById(getDirectionId(attrs));
-                Vehicle vehicle = new Vehicle(getVehicleId(attrs), getVehicleNumber(attrs), getVehicleLatitude(attrs), getVehicleLongitude(attrs), getVehicleDirection(attrs), lastUpdate);
-                vehicles.add(new VehicleInfo(info.transport, info.route, direction, vehicle));
-            }
-        }
-
-        private SelectedRouteInfo getSelectedRouteInfo(String transportCode, int routeNumber) {
-            for (SelectedRouteInfo info: selected) {
-                if (info.transport.code.equals(transportCode) && info.route.number == routeNumber) {
-                    return info;
-                }
-            }
-            throw new RuntimeException("cannot find route info");
-        }
-
-        private String getTransportCode(Attributes attrs) {
-            return attrs.getValue("", "rtype");
-        }
-
-        private int getRouteNumber(Attributes attrs) {
-            return Integer.valueOf(attrs.getValue("", "rnum"));
-        }
-
-        private int getDirectionId(Attributes attrs) {
-            return Integer.valueOf(attrs.getValue("", "rid"));
-        }
-
-        private String getVehicleId(Attributes attrs) {
-            return attrs.getValue("", "id");
-        }
-
-        private String getVehicleNumber(Attributes attrs) {
-            return attrs.getValue("", "gos_num");
-        }
-
-        private int getVehicleLatitude(Attributes attrs) {
-            return Integer.valueOf(attrs.getValue("", "lat"));
-        }
-
-        private int getVehicleLongitude(Attributes attrs) {
-            return Integer.valueOf(attrs.getValue("", "lon"));
-        }
-
-        private int getVehicleDirection(Attributes attrs) {
-            return Integer.valueOf(attrs.getValue("", "dir"));
-        }
-
-        private Date getLastVehicleUpdate(Attributes attrs) {
-            try {
-                return DATE_FORMAT.parse(attrs.getValue("", "lasttime"));
-            } catch (ParseException e) {
-                return null;
-            }
-        }
-    }
-
-    public GetVehiclesCommandHandler(Context context) {
-        super(context);
+    public GetVehiclesCommandHandler(Context context, Command command) {
+        super(context, command);
     }
 
     @Override
     public GetVehiclesCommand.Result handle() {
-        try {
-            List<SelectedRouteInfo> selected = ((GetVehiclesCommand) command).selected;
-            HashMap<String, String> params = getRequestParams(selected);
-            String response = sendRequest("getRoutesVehicles", params);
-            ContentHandler handler = new ContentHandler(selected);
-            Xml.parse(response, handler);
-            return new GetVehiclesCommand.Result(handler.vehicles);
-        } catch (IOException e) {
+        List<SelectedRouteInfo> selected = ((GetVehiclesCommand) command).selected;
+        List<RequestParam> params = getRequestParams(selected);
+        JSONObject response = sendRequest(API_METHOD, params);
+        if (response == null) {
             return null;
-        } catch (SAXException e) {
+        }
+        try {
+            List<VehicleInfo> vehicles = getVehicles(response.getJSONArray("vehicles"), selected);
+            return new GetVehiclesCommand.Result(vehicles);
+        } catch (JSONException e) {
             return null;
         }
     }
 
-    private HashMap<String, String> getRequestParams(List<SelectedRouteInfo> selected) {
-        List<String> keys = getSelectedDirectionKeys(selected);
-        if (keys.size() == 0) {
-            throw new RuntimeException("cannot build request: no route selected");
+    private List<RequestParam> getRequestParams(List<SelectedRouteInfo> selected) {
+        List<RequestParam> params = new ArrayList<RequestParam>();
+        for (SelectedRouteInfo info: selected) {
+            params.add(new RequestParam("route", String.format("%s-%s", info.transport.id, info.route.number)));
         }
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("ids", StringUtils.join(keys, '|'));
         return params;
     }
 
-    private List<String> getSelectedDirectionKeys(List<SelectedRouteInfo> selected) {
-        List<String> keys = new ArrayList<String>();
+    private List<VehicleInfo> getVehicles(JSONArray vehicleListJson, List<SelectedRouteInfo> selected) throws JSONException {
+        List<VehicleInfo> vehicles = new ArrayList<VehicleInfo>();
+        for (int i = 0; i < vehicleListJson.length(); i += 1) {
+            JSONObject vehicleJson = vehicleListJson.getJSONObject(i);
+            vehicles.add(getVehicleInfo(vehicleJson, selected));
+        }
+        return vehicles;
+    }
+
+    private VehicleInfo getVehicleInfo(JSONObject vehicleJson, List<SelectedRouteInfo> selected) throws JSONException {
+        int transportId = vehicleJson.getInt("transport");
+        int routeNumber = vehicleJson.getInt("route");
+        SelectedRouteInfo info = getSelectedRouteInfo(transportId, routeNumber, selected);
+        return new VehicleInfo(info.transport, info.route, getVehicle(vehicleJson));
+    }
+
+    private SelectedRouteInfo getSelectedRouteInfo(int transportId, int routeNumber, List<SelectedRouteInfo> selected) {
         for (SelectedRouteInfo info: selected) {
-            for (Direction direction: info.route.directions) {
-                keys.add(String.format("%s;%s", direction.id, Utils.getTransportDriveType(info.transport)));
+            if (info.transport.id == transportId && info.route.number == routeNumber) {
+                return info;
             }
         }
-        return keys;
+        throw new RuntimeException("cannot find route info");
+    }
+
+    private Vehicle getVehicle(JSONObject vehicleJson) throws JSONException {
+        String number = vehicleJson.getString("number");
+        BigDecimal latitude = new BigDecimal(vehicleJson.getString("lat"));
+        BigDecimal longitude = new BigDecimal(vehicleJson.getString("lon"));
+        int course = vehicleJson.getInt("course");
+        // TODO: дата последнего обновления
+        Date lastUpdate = new Date();
+        return new Vehicle(number, latitude, longitude, course, lastUpdate);
     }
 }

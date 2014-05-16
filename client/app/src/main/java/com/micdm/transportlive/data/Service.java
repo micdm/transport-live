@@ -15,13 +15,4 @@ public class Service {
         }
         return null;
     }
-
-    public Transport getTransportByCode(String code) {
-        for (Transport transport: transports) {
-            if (transport.code.equals(code)) {
-                return transport;
-            }
-        }
-        return null;
-    }
 }

@@ -8,28 +8,11 @@ import com.micdm.transportlive.data.Transport;
 public class Utils {
 
     public static String getTransportName(Context context, Transport transport) {
-        switch (transport.type) {
-            case BUS:
-                return context.getString(R.string.transport_type_bus);
+        switch (transport.getType()) {
             case TROLLEYBUS:
                 return context.getString(R.string.transport_type_trolleybus);
             case TRAM:
                 return context.getString(R.string.transport_type_tram);
-            case TAXI:
-                return context.getString(R.string.transport_type_taxi);
-            default:
-                throw new RuntimeException("unknown transport type");
-        }
-    }
-
-    public static int getTransportDriveType(Transport transport) {
-        switch (transport.type) {
-            case BUS:
-            case TROLLEYBUS:
-            case TAXI:
-                return 0;
-            case TRAM:
-                return 1;
             default:
                 throw new RuntimeException("unknown transport type");
         }

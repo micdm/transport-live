@@ -72,13 +72,15 @@ public class MapFragment extends Fragment {
         public List<OverlayItem> build(List<VehicleInfo> vehicles) {
             List<OverlayItem> markers = new ArrayList<OverlayItem>();
             for (VehicleInfo info: vehicles) {
+                // TODO: учитывать lastUpdate
                 markers.add(getMarker(info));
             }
             return markers;
         }
 
         private OverlayItem getMarker(VehicleInfo info) {
-            OverlayItem marker = new OverlayItem(info.vehicle.number, "", new GeoPoint(info.vehicle.latitude, info.vehicle.longitude));
+            GeoPoint coords = new GeoPoint(info.vehicle.latitude.doubleValue(), info.vehicle.longitude.doubleValue());
+            OverlayItem marker = new OverlayItem(info.vehicle.number, "", coords);
             Bitmap bitmap = getBitmap(info);
             marker.setMarker(new BitmapDrawable(resources, bitmap));
             marker.setMarkerHotspot(OverlayItem.HotspotPlace.CENTER);
@@ -89,7 +91,7 @@ public class MapFragment extends Fragment {
             Bitmap result = Bitmap.createBitmap(original.getWidth(), original.getHeight(), original.getConfig());
             Canvas canvas = new Canvas(result);
             Matrix matrix = new Matrix();
-            matrix.setRotate(info.vehicle.direction, original.getWidth() / 2, original.getHeight() / 2);
+            matrix.setRotate(info.vehicle.course, original.getWidth() / 2, original.getHeight() / 2);
             canvas.drawBitmap(original, matrix, null);
             String text = String.valueOf(info.route.number);
             Rect bounds = getTextBounds(text);

@@ -1,22 +1,21 @@
 package com.micdm.transportlive.data;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 public class Vehicle {
 
-    public String id;
     public String number;
-    public int latitude;
-    public int longitude;
-    public int direction;
+    public BigDecimal latitude;
+    public BigDecimal longitude;
+    public int course;
     public Date lastUpdate;
 
-    public Vehicle(String id, String number, int latitude, int longitude, int direction, Date lastUpdate) {
-        this.id = id;
+    public Vehicle(String number, BigDecimal latitude, BigDecimal longitude, int course, Date lastUpdate) {
         this.number = number;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.direction = direction;
+        this.course = course;
         this.lastUpdate = lastUpdate;
     }
 }

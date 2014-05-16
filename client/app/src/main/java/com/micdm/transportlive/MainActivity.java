@@ -312,9 +312,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_text, getPackageName()));
         try {
             startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-
-        }
+        } catch (ActivityNotFoundException e) {}
     }
 
     private void showAboutMessage() {

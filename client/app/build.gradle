@@ -35,7 +35,7 @@ android {
 }
 
 Properties p = new Properties ()
-p.load(new FileInputStream(rootProject.file('keys/sign.properties')))
+p.load(new FileInputStream(rootProject.file('../../keys/sign.properties')))
 android.signingConfigs.release.storeFile file(p.file)
 android.signingConfigs.release.storePassword p.password
 android.signingConfigs.release.keyAlias p.keyAlias

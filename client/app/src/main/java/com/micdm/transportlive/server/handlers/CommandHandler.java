@@ -7,42 +7,55 @@ import android.net.Uri;
 import android.net.http.AndroidHttpClient;
 
 import com.micdm.transportlive.R;
-import com.micdm.transportlive.server.cities.CityConfig;
 import com.micdm.transportlive.server.commands.Command;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 public abstract class CommandHandler {
 
+    protected static final class RequestParam {
+
+        public final String name;
+        public final String value;
+
+        public RequestParam(String name, String value) {
+            this.name = name;
+            this.value = value;
+        }
+    }
+
+    private static final String SERVER_PROTOCOL = "http";
+    private static final String SERVER_HOST = "transport-live.tom.ru";
+    private static final String SERVER_PATH = "/api/v1/%s";
+
     private Context context;
-    private CityConfig city;
     protected Command command;
 
-    public CommandHandler(Context context) {
+    public CommandHandler(Context context, Command command) {
         this.context = context;
-    }
-
-    public void setCity(CityConfig city) {
-        this.city = city;
-    }
-
-    public void setCommand(Command command) {
         this.command = command;
     }
 
-    protected String sendRequest(String method, HashMap<String, String> params) throws IOException {
-        AndroidHttpClient client = AndroidHttpClient.newInstance(getUserAgent());
-        HttpGet request = new HttpGet(getRequestUri(method, params));
-        HttpResponse response = client.execute(request);
-        String content = IOUtils.toString(response.getEntity().getContent());
-        client.close();
-        return content;
+    protected JSONObject sendRequest(String method, List<RequestParam> params) {
+        try {
+            AndroidHttpClient client = AndroidHttpClient.newInstance(getUserAgent());
+            HttpGet request = new HttpGet(getRequestUri(method, params));
+            HttpResponse response = client.execute(request);
+            String content = IOUtils.toString(response.getEntity().getContent());
+            client.close();
+            return new JSONObject(content);
+        } catch (IOException e) {
+            return null;
+        } catch (JSONException e) {
+            return null;
+        }
     }
 
     private String getUserAgent() {
@@ -62,15 +75,14 @@ public abstract class CommandHandler {
         }
     }
 
-    private String getRequestUri(String method, HashMap<String, String> params) {
+    private String getRequestUri(String method, List<RequestParam> params) {
         Uri.Builder builder = new Uri.Builder();
-        builder.scheme("http");
-        builder.authority(city.backend.host);
-        builder.path(String.format(city.backend.path, method));
-        builder.appendQueryParameter("city", city.id);
+        builder.scheme(SERVER_PROTOCOL);
+        builder.authority(SERVER_HOST);
+        builder.path(String.format(SERVER_PATH, method));
         if (params != null) {
-            for (Map.Entry<String, String> item: params.entrySet()) {
-                builder.appendQueryParameter(item.getKey(), item.getValue());
+            for (RequestParam param: params) {
+                builder.appendQueryParameter(param.name, param.value);
             }
         }
         Uri uri = builder.build();

@@ -6,21 +6,19 @@ import java.util.List;
 public class Transport {
 
     public static enum Type {
-        BUS,
         TROLLEYBUS,
-        TRAM,
-        TAXI
+        TRAM
     }
 
     public int id;
-    public Type type;
-    public String code;
     public List<Route> routes = new ArrayList<Route>();
 
-    public Transport(int id, Type type, String code) {
+    public Transport(int id) {
         this.id = id;
-        this.type = type;
-        this.code = code;
+    }
+
+    public Type getType() {
+        return Type.values()[id];
     }
 
     public Route getRouteByNumber(int number) {

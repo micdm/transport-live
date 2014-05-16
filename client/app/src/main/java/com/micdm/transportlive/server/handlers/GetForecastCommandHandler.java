@@ -1,7 +1,6 @@
 package com.micdm.transportlive.server.handlers;
 
 import android.content.Context;
-import android.util.Xml;
 
 import com.micdm.transportlive.data.Forecast;
 import com.micdm.transportlive.data.ForecastVehicle;
@@ -9,86 +8,77 @@ import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.SelectedStationInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
-import com.micdm.transportlive.misc.Utils;
+import com.micdm.transportlive.server.commands.Command;
 import com.micdm.transportlive.server.commands.GetForecastCommand;
 
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class GetForecastCommandHandler extends CommandHandler {
 
-    private static class ContentHandler extends DefaultHandler {
+    private static final String API_METHOD = "forecasts";
 
-        private Service service;
-        public Forecast forecast = new Forecast();
-
-        public ContentHandler(Service service) {
-            this.service = service;
-        }
-
-        @Override
-        public void startElement(String uri, String localName, String qName, Attributes attrs) {
-            if (localName.equals("forecast")) {
-                Transport transport = service.getTransportByCode(getTransportCode(attrs));
-                Route route = transport.getRouteByNumber(getRouteNumber(attrs));
-                int arrivalTime = getArrivalTime(attrs);
-                if (!isVehicleAlreadyAdded(transport, route, arrivalTime)) {
-                    forecast.vehicles.add(new ForecastVehicle(transport, route, arrivalTime));
-                }
-            }
-        }
-
-        private String getTransportCode(Attributes attrs) {
-            return attrs.getValue("", "route_type");
-        }
-
-        private int getRouteNumber(Attributes attrs) {
-            return Integer.valueOf(attrs.getValue("", "route_num"));
-        }
-
-        private int getArrivalTime(Attributes attrs) {
-            return Integer.valueOf(attrs.getValue("", "arr_time"));
-        }
-
-        private boolean isVehicleAlreadyAdded(Transport transport, Route route, int arrivalTime) {
-            for (ForecastVehicle vehicle: forecast.vehicles) {
-                if (vehicle.transport.equals(transport) && vehicle.route.equals(route) && vehicle.arrivalTime == arrivalTime) {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-
-    public GetForecastCommandHandler(Context context) {
-        super(context);
+    public GetForecastCommandHandler(Context context, Command command) {
+        super(context, command);
     }
 
     @Override
     public GetForecastCommand.Result handle() {
-        try {
-            Service service = ((GetForecastCommand) command).service;
-            SelectedStationInfo selected = ((GetForecastCommand) command).selected;
-            HashMap<String, String> params = getRequestParams(selected);
-            String response = sendRequest("getStationForecasts", params);
-            ContentHandler handler = new ContentHandler(service);
-            Xml.parse(response, handler);
-            return new GetForecastCommand.Result(handler.forecast);
-        } catch (IOException e) {
+        SelectedStationInfo selected = ((GetForecastCommand) command).selected;
+        List<RequestParam> params = getRequestParams(selected);
+        JSONObject response = sendRequest(API_METHOD, params);
+        if (response == null) {
             return null;
-        } catch (SAXException e) {
+        }
+        Service service = ((GetForecastCommand) command).service;
+        try {
+            List<Forecast> forecasts = getForecasts(response.getJSONArray("stations"), service);
+            return new GetForecastCommand.Result(forecasts.get(0));
+        } catch (JSONException e) {
             return null;
         }
     }
 
-    private HashMap<String, String> getRequestParams(SelectedStationInfo selected) {
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("type", String.valueOf(Utils.getTransportDriveType(selected.transport)));
-        params.put("id", String.valueOf(selected.station.id));
+    private List<RequestParam> getRequestParams(SelectedStationInfo selected) {
+        List<RequestParam> params = new ArrayList<RequestParam>();
+        params.add(new RequestParam("station", String.format("%s-%s", selected.transport.id, selected.station.id)));
         return params;
+    }
+
+    private List<Forecast> getForecasts(JSONArray forecastListJson, Service service) throws JSONException {
+        List<Forecast> forecasts = new ArrayList<Forecast>();
+        for (int i = 0; i < forecastListJson.length(); i += 1) {
+            JSONObject forecastJson = forecastListJson.getJSONObject(i);
+            forecasts.add(getForecast(forecastJson, service));
+        }
+        return forecasts;
+    }
+
+    private Forecast getForecast(JSONObject forecastJson, Service service) throws JSONException {
+        Forecast forecast = new Forecast();
+        List<ForecastVehicle> vehicles = getForecastVehicles(forecastJson.getJSONArray("vehicles"), service);
+        Collections.copy(forecast.vehicles, vehicles);
+        return forecast;
+    }
+
+    private List<ForecastVehicle> getForecastVehicles(JSONArray vehicleListJson, Service service) throws JSONException {
+        List<ForecastVehicle> vehicles = new ArrayList<ForecastVehicle>();
+        for (int i = 0; i < vehicleListJson.length(); i += 1) {
+            JSONObject vehicleJson = vehicleListJson.getJSONObject(i);
+            vehicles.add(getForecastVehicle(vehicleJson, service));
+        }
+        return vehicles;
+    }
+
+    private ForecastVehicle getForecastVehicle(JSONObject vehicleJson, Service service) throws JSONException {
+        Transport transport = service.getTransportById(vehicleJson.getInt("transport"));
+        Route route = transport.getRouteByNumber(vehicleJson.getInt("route"));
+        int time = vehicleJson.getInt("time");
+        return new ForecastVehicle(transport, route, time);
     }
 }
