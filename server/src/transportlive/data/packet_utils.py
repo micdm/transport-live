@@ -4,7 +4,7 @@ from datetime import datetime
 import re
 
 from transportlive.data.packets import LoginPacket, LoginAnswerPacket, PingPacket, PingAnswerPacket, DataPacket, DataAnswerPacket
-from transportlive.misc.decimal_impl import Decimal, ROUND_FLOOR
+from transportlive.misc.decimal_impl import Decimal, ROUND_FLOOR, normalize_coordinate
 
 class PacketSerializer(object):
 
@@ -81,7 +81,7 @@ class PacketBuilder(object):
         if nmea_string == self.VALUE_NOT_AVAILABLE:
             return None
         nmea_value = Decimal(nmea_string)
-        return ((nmea_value / 100).quantize(Decimal(1), ROUND_FLOOR) + (nmea_value % 100) / 60).quantize(Decimal("0.000001"))
+        return normalize_coordinate(((nmea_value / 100).quantize(Decimal(1), ROUND_FLOOR) + (nmea_value % 100) / 60))
 
     def _get_speed(self, speed_string):
         return None if speed_string == self.VALUE_NOT_AVAILABLE else int(speed_string)
@@ -90,6 +90,8 @@ class PacketBuilder(object):
         return None if course_string == self.VALUE_NOT_AVAILABLE else int(course_string)
 
     def _get_params(self, params_string):
+        if params_string == self.VALUE_NOT_AVAILABLE:
+            return {}
         return dict(map(self._get_param, params_string.split(",")))
 
     def _get_param(self, param_string):

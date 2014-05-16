@@ -3,6 +3,7 @@
 from logging import getLogger
 import math
 
+from transportlive.misc.decimal_impl import normalize_coordinate
 from transportlive.models import Forecast, ForecastVehicle, Coords
 
 logger = getLogger(__name__)
@@ -31,7 +32,7 @@ def _get_projection(begin, end, point):
     k = (end.longitude - begin.longitude) / (end.latitude - begin.latitude)
     latitude = (k * begin.latitude + point.latitude / k - begin.longitude + point.longitude) / (k + 1 / k)
     longitude = k * (latitude - begin.latitude) + begin.longitude
-    return Coords(latitude, longitude)
+    return Coords(normalize_coordinate(latitude), normalize_coordinate(longitude))
 
 def _is_point_inside_segment(begin, end, point):
     if begin.latitude <= point.latitude <= end.latitude and begin.longitude <= point.longitude <= end.longitude:
@@ -45,6 +46,8 @@ def _is_point_inside_segment(begin, end, point):
     return False
 
 def _get_distance_in_meters(point1, point2):
+    if point1.latitude == point2.latitude and point1.longitude == point2.longitude:
+        return 0
     lat1, lon1 = math.radians(point1.latitude), math.radians(point1.longitude)
     lat2, lon2 = math.radians(point2.latitude), math.radians(point2.longitude)
     radians = math.acos(math.sin(lat1) * math.sin(lat2) + math.cos(lat1) * math.cos(lat2) * math.cos(lon1 - lon2))
