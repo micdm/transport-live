@@ -8,12 +8,13 @@ import sys
 import xml.etree.ElementTree as etree
 
 xml = etree.parse(sys.argv[1]).getroot()
+IS_EXTENDED_MODE = (sys.argv[2] == "server")
 
 def _get_transports(xml):
     transports = []
     for node in xml.findall(".//transport"):
         transports.append({
-            "type": int(node.attrib["id"]),
+            "id": int(node.attrib["id"]),
             "stations": _get_all_stations(node),
             "routes": _get_routes(node)
         })
@@ -100,15 +101,15 @@ def _build_transports_xml(transports, parent):
 
 def _build_transport_xml(transport, parent):
     node = etree.SubElement(parent, "transport", {
-        "type": str(_get_transport_type(transport["type"]))
+        "id": str(_get_transport_id(transport["id"]))
     })
     _build_all_stations_xml(transport["stations"], node)
     _build_routes_xml(transport["routes"], node)
 
-def _get_transport_type(transport_type):
-    if transport_type == 2:
+def _get_transport_id(id):
+    if id == 2:
         return 0
-    if transport_type == 3:
+    if id == 3:
         return 1
 
 def _build_all_stations_xml(stations, parent):
@@ -117,12 +118,16 @@ def _build_all_stations_xml(stations, parent):
         _build_station_data_xml(station, node)
 
 def _build_station_data_xml(station, parent):
-    etree.SubElement(parent, "station", {
+    info = {
         "id": str(station["id"]),
-        "lat": str(station["lat"]),
-        "lon": str(station["lon"]),
         "name": station["name"]
-    })
+    }
+    if IS_EXTENDED_MODE:
+        info.update({
+            "lat": str(station["lat"]),
+            "lon": str(station["lon"])
+        })
+    etree.SubElement(parent, "station", info)
 
 def _build_routes_xml(routes, parent):
     node = etree.SubElement(parent, "routes")
@@ -145,7 +150,8 @@ def _build_direction_xml(direction, parent):
         "id": str(direction["id"])
     })
     _build_stations_xml(direction["stations"], node)
-    _build_points_xml(direction["points"], node)
+    if IS_EXTENDED_MODE:
+        _build_points_xml(direction["points"], node)
 
 def _build_stations_xml(stations, parent):
     node = etree.SubElement(parent, "stations")

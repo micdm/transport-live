@@ -117,29 +117,18 @@ public class SelectStationFragment extends DialogFragment {
     }
 
     private ServiceHandler serviceHandler;
-    private Service service;
     private final ServiceHandler.OnLoadServiceListener onLoadServiceListener = new ServiceHandler.OnLoadServiceListener() {
         @Override
-        public void onLoadService(Service loaded) {
-            service = loaded;
+        public void onLoadService(Service service) {
+            Transport transport = service.transports.get(0);
+            Route route = transport.routes.get(0);
+            Direction direction = route.directions.get(0);
+            Station station = direction.stations.get(0);
+            setup(service, transport, route, direction, station);
         }
     };
 
     private ForecastHandler forecastHandler;
-    private final ForecastHandler.OnSelectStationListener onSelectStationListener = new ForecastHandler.OnSelectStationListener() {
-        @Override
-        public void onSelectStation(SelectedStationInfo selected) {
-            if (selected == null) {
-                Transport transport = service.transports.get(0);
-                Route route = transport.routes.get(0);
-                Direction direction = route.directions.get(0);
-                Station station = direction.stations.get(0);
-                setupForSelectedStation(service, transport, route, direction, station);
-            } else {
-                setupForSelectedStation(service, selected.transport, selected.route, selected.direction, selected.station);
-            }
-        }
-    };
 
     @Override
     public void onAttach(Activity activity) {
@@ -179,17 +168,16 @@ public class SelectStationFragment extends DialogFragment {
     }
 
     private Spinner getStationListSpinner() {
-        return (Spinner) getDialog().findViewById(R.id.station_list);
+        return (Spinner) getDialog().findViewById(R.id.forecast_list);
     }
 
     @Override
     public void onStart() {
         super.onStart();
         serviceHandler.addOnLoadServiceListener(onLoadServiceListener);
-        forecastHandler.addOnSelectStationListener(onSelectStationListener);
     }
 
-    private void setupForSelectedStation(Service service, Transport transport, Route route, Direction direction, Station station) {
+    private void setup(Service service, Transport transport, Route route, Direction direction, Station station) {
         setupTransportListSpinner(service.transports, transport);
         setupRouteListSpinner(transport.routes, route);
         setupDirectionListSpinner(route.directions, direction);
@@ -259,6 +247,5 @@ public class SelectStationFragment extends DialogFragment {
     public void onStop() {
         super.onStop();
         serviceHandler.removeOnLoadServiceListener(onLoadServiceListener);
-        forecastHandler.removeOnSelectStationListener(onSelectStationListener);
     }
 }

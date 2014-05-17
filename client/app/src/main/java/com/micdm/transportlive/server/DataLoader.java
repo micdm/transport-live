@@ -44,7 +44,7 @@ public class DataLoader {
         this.context = context;
     }
 
-    public Task loadVehicles(List<SelectedRouteInfo> selected, final OnLoadVehiclesListener listener) {
+    public Task loadVehicles(Service service, List<SelectedRouteInfo> selected, final OnLoadVehiclesListener listener) {
         ServerConnectTask task = new ServerConnectTask(context, new ServerConnectTask.OnResultListener() {
             @Override
             public void onResult(Command.Result result) {
@@ -56,7 +56,7 @@ public class DataLoader {
                 listener.onError();
             }
         });
-        task.execute(new GetVehiclesCommand(selected));
+        task.execute(new GetVehiclesCommand(service, selected));
         return new Task(task);
     }
 

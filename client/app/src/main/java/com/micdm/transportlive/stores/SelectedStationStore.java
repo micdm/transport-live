@@ -19,13 +19,15 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SelectedStationStore {
 
     private static class ContentHandler extends DefaultHandler {
 
         private final Service service;
-        public SelectedStationInfo selected;
+        public final List<SelectedStationInfo> selected = new ArrayList<SelectedStationInfo>();
 
         public ContentHandler(Service service) {
             this.service = service;
@@ -38,7 +40,7 @@ public class SelectedStationStore {
                 Route route = transport.getRouteByNumber(getRouteNumber(attrs));
                 Direction direction = route.getDirectionById(getDirectionId(attrs));
                 Station station = direction.getStationById(getStationId(attrs));
-                selected = new SelectedStationInfo(transport, route, direction, station);
+                selected.add(new SelectedStationInfo(transport, route, direction, station));
             }
         }
 
@@ -51,7 +53,7 @@ public class SelectedStationStore {
         }
 
         private int getDirectionId(Attributes attrs) {
-            return Integer.valueOf(attrs.getValue("course"));
+            return Integer.valueOf(attrs.getValue("direction"));
         }
 
         private int getStationId(Attributes attrs) {
@@ -59,7 +61,7 @@ public class SelectedStationStore {
         }
     }
 
-    private static final String FILE_NAME = "selected_station.xml";
+    private static final String FILE_NAME = "selected_stations.xml";
 
     private final Context context;
 
@@ -67,26 +69,26 @@ public class SelectedStationStore {
         this.context = context;
     }
 
-    public SelectedStationInfo load(Service service) {
+    public List<SelectedStationInfo> load(Service service) {
         try {
             InputStream input = context.openFileInput(FILE_NAME);
-            SelectedStationInfo selected = unserialize(input, service);
+            List<SelectedStationInfo> selected = unserialize(input, service);
             input.close();
             return selected;
         } catch (SAXException e) {
-            return null;
+            return new ArrayList<SelectedStationInfo>();
         } catch (IOException e) {
-            return null;
+            return new ArrayList<SelectedStationInfo>();
         }
     }
 
-    private SelectedStationInfo unserialize(InputStream input, Service service) throws SAXException, IOException {
+    private List<SelectedStationInfo> unserialize(InputStream input, Service service) throws SAXException, IOException {
         ContentHandler handler = new ContentHandler(service);
         Xml.parse(input, Xml.Encoding.UTF_8, handler);
         return handler.selected;
     }
 
-    public void put(SelectedStationInfo selected) {
+    public void put(List<SelectedStationInfo> selected) {
         try {
             OutputStream output = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE);
             serialize(output, selected);
@@ -98,16 +100,20 @@ public class SelectedStationStore {
         }
     }
 
-    private void serialize(OutputStream output, SelectedStationInfo selected) throws IOException {
+    private void serialize(OutputStream output, List<SelectedStationInfo> selected) throws IOException {
         XmlSerializer serializer = Xml.newSerializer();
         serializer.setOutput(output, "utf-8");
         serializer.startDocument("utf-8", true);
-        serializer.startTag("", "station");
-        serializer.attribute("", "transport", String.valueOf(selected.transport.id));
-        serializer.attribute("", "route", String.valueOf(selected.route.number));
-        serializer.attribute("", "course", String.valueOf(selected.direction.id));
-        serializer.attribute("", "station", String.valueOf(selected.station.id));
-        serializer.endTag("", "station");
+        serializer.startTag("", "stations");
+        for (SelectedStationInfo info: selected) {
+            serializer.startTag("", "station");
+            serializer.attribute("", "transport", String.valueOf(info.transport.id));
+            serializer.attribute("", "route", String.valueOf(info.route.number));
+            serializer.attribute("", "direction", String.valueOf(info.direction.id));
+            serializer.attribute("", "station", String.valueOf(info.station.id));
+            serializer.endTag("", "station");
+        }
+        serializer.endTag("", "stations");
         serializer.endDocument();
     }
 }

@@ -41,7 +41,13 @@ public class ServiceLoader {
                 direction = new Direction(getDirectionId(attrs));
             }
             if (localName.equals("station")) {
-                station = new Station(getStationId(attrs), getStationName(attrs));
+                int stationId = getStationId(attrs);
+                String stationName = getStationName(attrs);
+                if (stationName == null) {
+                    station = transport.getStationById(stationId);
+                } else {
+                    station = new Station(stationId, stationName);
+                }
             }
         }
 
@@ -68,7 +74,11 @@ public class ServiceLoader {
         @Override
         public void endElement(String uri, String localName, String qName) {
             if (localName.equals("station")) {
-                direction.stations.add(station);
+                if (direction == null) {
+                    transport.stations.add(station);
+                } else {
+                    direction.stations.add(station);
+                }
                 station = null;
             }
             if (localName.equals("direction")) {

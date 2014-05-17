@@ -11,6 +11,7 @@ public class Transport {
     }
 
     public final int id;
+    public final List<Station> stations = new ArrayList<Station>();
     public final List<Route> routes = new ArrayList<Route>();
 
     public Transport(int id) {
@@ -19,6 +20,15 @@ public class Transport {
 
     public Type getType() {
         return Type.values()[id];
+    }
+
+    public Station getStationById(int id) {
+        for (Station station: stations) {
+            if (station.id == id) {
+                return station;
+            }
+        }
+        return null;
     }
 
     public Route getRouteByNumber(int number) {

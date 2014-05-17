@@ -75,7 +75,6 @@ public class MapFragment extends Fragment {
         public List<OverlayItem> build(List<RouteInfo> routes) {
             List<OverlayItem> markers = new ArrayList<OverlayItem>();
             for (RouteInfo info: routes) {
-                // TODO: учитывать lastUpdate
                 for (Vehicle vehicle: info.vehicles) {
                     markers.add(getMarker(info.route, vehicle));
                 }
@@ -84,6 +83,7 @@ public class MapFragment extends Fragment {
         }
 
         private OverlayItem getMarker(Route route, Vehicle vehicle) {
+            // TODO: для разных маршрутов выбрать разные цвета?
             GeoPoint coords = new GeoPoint(vehicle.latitude.doubleValue(), vehicle.longitude.doubleValue());
             OverlayItem marker = new OverlayItem(vehicle.number, "", coords);
             Bitmap bitmap = getBitmap(route, vehicle);

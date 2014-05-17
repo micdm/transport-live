@@ -7,6 +7,7 @@ import com.micdm.transportlive.data.ForecastVehicle;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.SelectedStationInfo;
 import com.micdm.transportlive.data.Service;
+import com.micdm.transportlive.data.Station;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.server.commands.Command;
 import com.micdm.transportlive.server.commands.GetForecastsCommand;
@@ -34,7 +35,6 @@ public class GetForecastsCommandHandler extends CommandHandler {
         if (response == null) {
             return null;
         }
-        // TODO: не использовать сервис
         Service service = ((GetForecastsCommand) command).service;
         try {
             List<Forecast> forecasts = getForecasts(response.getJSONArray("result"), service);
@@ -62,26 +62,27 @@ public class GetForecastsCommandHandler extends CommandHandler {
     }
 
     private Forecast getForecast(JSONObject forecastJson, Service service) throws JSONException {
-        Forecast forecast = new Forecast();
-        for (ForecastVehicle vehicle: getForecastVehicles(forecastJson.getJSONArray("vehicles"), service)) {
+        Transport transport = service.getTransportById(forecastJson.getInt("transport"));
+        Station station = transport.getStationById(forecastJson.getInt("station"));
+        Forecast forecast = new Forecast(transport, station);
+        for (ForecastVehicle vehicle: getForecastVehicles(forecastJson.getJSONArray("vehicles"), transport)) {
             forecast.vehicles.add(vehicle);
         }
         return forecast;
     }
 
-    private List<ForecastVehicle> getForecastVehicles(JSONArray vehicleListJson, Service service) throws JSONException {
+    private List<ForecastVehicle> getForecastVehicles(JSONArray vehicleListJson, Transport transport) throws JSONException {
         List<ForecastVehicle> vehicles = new ArrayList<ForecastVehicle>();
         for (int i = 0; i < vehicleListJson.length(); i += 1) {
             JSONObject vehicleJson = vehicleListJson.getJSONObject(i);
-            vehicles.add(getForecastVehicle(vehicleJson, service));
+            vehicles.add(getForecastVehicle(vehicleJson, transport));
         }
         return vehicles;
     }
 
-    private ForecastVehicle getForecastVehicle(JSONObject vehicleJson, Service service) throws JSONException {
-        Transport transport = service.getTransportById(vehicleJson.getInt("transport"));
+    private ForecastVehicle getForecastVehicle(JSONObject vehicleJson, Transport transport) throws JSONException {
         Route route = transport.getRouteByNumber(vehicleJson.getInt("route"));
         int time = vehicleJson.getInt("time");
-        return new ForecastVehicle(transport, route, time);
+        return new ForecastVehicle(route, time);
     }
 }

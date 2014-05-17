@@ -22,6 +22,7 @@ import com.micdm.transportlive.data.RouteInfo;
 import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.SelectedStationInfo;
 import com.micdm.transportlive.data.Service;
+import com.micdm.transportlive.data.Station;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.fragments.AboutFragment;
 import com.micdm.transportlive.fragments.ForecastFragment;
@@ -98,8 +99,11 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     private static final String EVENT_LISTENER_KEY_ON_UNSELECT_ALL_ROUTES = "OnUnselectAllRoutes";
     private static final String EVENT_LISTENER_KEY_ON_LOAD_SERVICE = "OnLoadService";
     private static final String EVENT_LISTENER_KEY_ON_LOAD_VEHICLES = "OnLoadVehicles";
+    private static final String EVENT_LISTENER_KEY_ON_LOAD_STATIONS = "OnLoadStations";
     private static final String EVENT_LISTENER_KEY_ON_SELECT_STATION = "OnSelectStation";
-    private static final String EVENT_LISTENER_KEY_ON_LOAD_FORECAST = "OnLoadForecast";
+    private static final String EVENT_LISTENER_KEY_ON_UNSELECT_STATION = "OnUnselectStation";
+    private static final String EVENT_LISTENER_KEY_ON_UNSELECT_ALL_STATIONS = "OnUnselectAllStations";
+    private static final String EVENT_LISTENER_KEY_ON_LOAD_FORECASTS = "OnLoadForecasts";
 
     private final EventListenerManager listeners = new EventListenerManager();
 
@@ -136,6 +140,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         @Override
         public void onError() {
             vehiclePoller.stop();
+            forecastPoller.stop();
             showNoConnectionMessage();
         }
     });
@@ -146,42 +151,42 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     private final ForecastPoller forecastPoller = new ForecastPoller(this, new ForecastPoller.OnLoadListener() {
         @Override
         public void onStart() {
-            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_FORECAST, new EventListenerManager.OnIterateListener() {
+            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_FORECASTS, new EventListenerManager.OnIterateListener() {
                 @Override
                 public void onIterate(EventListener listener) {
-                    ((OnLoadForecastListener) listener).onStart();
+                    ((OnLoadForecastsListener) listener).onStart();
                 }
             });
         }
         @Override
         public void onFinish() {
-            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_FORECAST, new EventListenerManager.OnIterateListener() {
+            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_FORECASTS, new EventListenerManager.OnIterateListener() {
                 @Override
                 public void onIterate(EventListener listener) {
-                    ((OnLoadForecastListener) listener).onFinish();
+                    ((OnLoadForecastsListener) listener).onFinish();
                 }
             });
         }
         @Override
         public void onLoad(final List<Forecast> loaded) {
             hideNoConnectionMessage();
-            // TODO
-            forecast = loaded.get(0);
-            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_FORECAST, new EventListenerManager.OnIterateListener() {
+            forecasts = loaded;
+            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_FORECASTS, new EventListenerManager.OnIterateListener() {
                 @Override
                 public void onIterate(EventListener listener) {
-                    ((OnLoadForecastListener) listener).onLoadForecast(forecast);
+                    ((OnLoadForecastsListener) listener).onLoadForecasts(forecasts);
                 }
             });
         }
         @Override
         public void onError() {
+            vehiclePoller.stop();
             forecastPoller.stop();
             showNoConnectionMessage();
         }
     });
-    private SelectedStationInfo selectedStation;
-    private Forecast forecast;
+    private List<SelectedStationInfo> selectedStations;
+    private List<Forecast> forecasts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -248,20 +253,28 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
                 ((OnLoadServiceListener) listener).onLoadService(service);
             }
         });
-        selectedStation = (new SelectedStationStore(this)).load(service);
-        listeners.notify(EVENT_LISTENER_KEY_ON_SELECT_STATION, new EventListenerManager.OnIterateListener() {
+        selectedStations = (new SelectedStationStore(this)).load(service);
+        listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_STATIONS, new EventListenerManager.OnIterateListener() {
             @Override
             public void onIterate(EventListener listener) {
-                ((OnSelectStationListener) listener).onSelectStation(selectedStation);
+                ((OnLoadStationsListener) listener).onLoadStations(selectedStations);
             }
         });
+        if (selectedStations.isEmpty()) {
+            listeners.notify(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_STATIONS, new EventListenerManager.OnIterateListener() {
+                @Override
+                public void onIterate(EventListener listener) {
+                    ((OnUnselectAllStationsListener) listener).onUnselectAllStations();
+                }
+            });
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         loadVehicles();
-        loadForecast();
+        loadForecasts();
     }
 
     @Override
@@ -283,7 +296,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         switch (item.getItemId()) {
             case R.id.reload:
                 loadVehicles();
-                loadForecast();
+                loadForecasts();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -341,7 +354,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     @Override
     public void requestReconnect() {
         loadVehicles();
-        loadForecast();
+        loadForecasts();
     }
 
     @Override
@@ -368,13 +381,14 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         selectedRoutes = selected;
         (new SelectedRouteStore(this)).put(selected);
         if (vehicles != null) {
-            cleanupVehicles();
-            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, new EventListenerManager.OnIterateListener() {
-                @Override
-                public void onIterate(EventListener listener) {
-                    ((OnLoadVehiclesListener) listener).onLoadVehicles(vehicles);
-                }
-            });
+            if (cleanupVehicles()) {
+                listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, new EventListenerManager.OnIterateListener() {
+                    @Override
+                    public void onIterate(EventListener listener) {
+                        ((OnLoadVehiclesListener) listener).onLoadVehicles(vehicles);
+                    }
+                });
+            }
         }
         if (selectedRoutes.isEmpty()) {
             listeners.notify(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_ROUTES, new EventListenerManager.OnIterateListener() {
@@ -387,7 +401,8 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         loadVehicles();
     }
 
-    private void cleanupVehicles() {
+    private boolean cleanupVehicles() {
+        int count = vehicles.size();
         Iterator<RouteInfo> iterator = vehicles.iterator();
         while (iterator.hasNext()) {
             RouteInfo info = iterator.next();
@@ -395,12 +410,13 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
                 iterator.remove();
             }
         }
+        return vehicles.size() != count;
     }
 
     private void loadVehicles() {
         vehiclePoller.stop();
-        if (!selectedRoutes.isEmpty()) {
-            vehiclePoller.start(selectedRoutes);
+        if (service != null && !selectedRoutes.isEmpty()) {
+            vehiclePoller.start(service, selectedRoutes);
         }
     }
 
@@ -451,32 +467,105 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
 
     @Override
     public void selectStation(final SelectedStationInfo selected) {
+        if (isStationSelected(selected.transport, selected.station)) {
+            return;
+        }
         forecastPoller.stop();
-        selectedStation = selected;
-        (new SelectedStationStore(this)).put(selected);
+        selectedStations.add(selected);
+        (new SelectedStationStore(this)).put(selectedStations);
         listeners.notify(EVENT_LISTENER_KEY_ON_SELECT_STATION, new EventListenerManager.OnIterateListener() {
             @Override
             public void onIterate(EventListener listener) {
                 ((OnSelectStationListener) listener).onSelectStation(selected);
             }
         });
-        loadForecast();
+        loadForecasts();
     }
 
-    private void loadForecast() {
-        forecastPoller.stop();
-        if (service != null && selectedStation != null) {
-            // TODO
-            List<SelectedStationInfo> selected = new ArrayList<SelectedStationInfo>();
-            selected.add(selectedStation);
-            forecastPoller.start(service, selected);
+    private boolean isStationSelected(Transport transport, Station station) {
+        for (SelectedStationInfo info: selectedStations) {
+            if (info.transport.equals(transport) && info.station.equals(station)) {
+                return true;
+            }
         }
+        return false;
+    }
+
+    @Override
+    public void unselectStation(final Transport transport, final Station station) {
+        forecastPoller.stop();
+        removeSelectedStation(transport, station);
+        (new SelectedStationStore(this)).put(selectedStations);
+        listeners.notify(EVENT_LISTENER_KEY_ON_UNSELECT_STATION, new EventListenerManager.OnIterateListener() {
+            @Override
+            public void onIterate(EventListener listener) {
+                ((OnUnselectStationListener) listener).onUnselectStation(transport, station);
+            }
+        });
+        if (forecasts != null) {
+            if (cleanupForecasts(transport, station)) {
+                listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_FORECASTS, new EventListenerManager.OnIterateListener() {
+                    @Override
+                    public void onIterate(EventListener listener) {
+                        ((OnLoadForecastsListener) listener).onLoadForecasts(forecasts);
+                    }
+                });
+            }
+        }
+        if (selectedStations.isEmpty()) {
+            listeners.notify(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_STATIONS, new EventListenerManager.OnIterateListener() {
+                @Override
+                public void onIterate(EventListener listener) {
+                    ((OnUnselectAllStationsListener) listener).onUnselectAllStations();
+                }
+            });
+        }
+        loadForecasts();
+    }
+
+    private void removeSelectedStation(Transport transport, Station station) {
+        Iterator<SelectedStationInfo> iterator = selectedStations.iterator();
+        while (iterator.hasNext()) {
+            SelectedStationInfo info = iterator.next();
+            if (info.transport.equals(transport) && info.station.equals(station)) {
+                iterator.remove();
+            }
+        }
+    }
+
+    private boolean cleanupForecasts(Transport transport, Station station) {
+        int count = forecasts.size();
+        Iterator<Forecast> iterator = forecasts.iterator();
+        while (iterator.hasNext()) {
+            Forecast forecast = iterator.next();
+            if (forecast.transport.equals(transport) && forecast.station.equals(station)) {
+                iterator.remove();
+            }
+        }
+        return forecasts.size() != count;
+    }
+
+    private void loadForecasts() {
+        forecastPoller.stop();
+        if (service != null && !selectedStations.isEmpty()) {
+            forecastPoller.start(service, selectedStations);
+        }
+    }
+
+    @Override
+    public void addOnLoadStationsListener(OnLoadStationsListener listener) {
+        listeners.add(EVENT_LISTENER_KEY_ON_LOAD_STATIONS, listener);
+        listener.onLoadStations(selectedStations);
+    }
+
+    @Override
+    public void removeOnLoadStationsListener(OnLoadStationsListener listener) {
+        listeners.remove(EVENT_LISTENER_KEY_ON_LOAD_STATIONS, listener);
     }
 
     @Override
     public void addOnSelectStationListener(OnSelectStationListener listener) {
         listeners.add(EVENT_LISTENER_KEY_ON_SELECT_STATION, listener);
-        listener.onSelectStation(selectedStation);
     }
 
     @Override
@@ -485,15 +574,38 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     }
 
     @Override
-    public void addOnLoadForecastListener(OnLoadForecastListener listener) {
-        listeners.add(EVENT_LISTENER_KEY_ON_LOAD_FORECAST, listener);
-        if (forecast != null) {
-            listener.onLoadForecast(forecast);
+    public void addOnUnselectStationListener(OnUnselectStationListener listener) {
+        listeners.add(EVENT_LISTENER_KEY_ON_UNSELECT_STATION, listener);
+    }
+
+    @Override
+    public void removeOnUnselectStationListener(OnUnselectStationListener listener) {
+        listeners.remove(EVENT_LISTENER_KEY_ON_UNSELECT_STATION, listener);
+    }
+
+    @Override
+    public void addOnUnselectAllStationsListener(OnUnselectAllStationsListener listener) {
+        listeners.add(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_STATIONS, listener);
+        if (selectedStations.isEmpty()) {
+            listener.onUnselectAllStations();
         }
     }
 
     @Override
-    public void removeOnLoadForecastListener(OnLoadForecastListener listener) {
-        listeners.remove(EVENT_LISTENER_KEY_ON_LOAD_FORECAST, listener);
+    public void removeOnUnselectAllStationsListener(OnUnselectAllStationsListener listener) {
+        listeners.remove(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_STATIONS, listener);
+    }
+
+    @Override
+    public void addOnLoadForecastsListener(OnLoadForecastsListener listener) {
+        listeners.add(EVENT_LISTENER_KEY_ON_LOAD_FORECASTS, listener);
+        if (forecasts != null) {
+            listener.onLoadForecasts(forecasts);
+        }
+    }
+
+    @Override
+    public void removeOnLoadForecastsListener(OnLoadForecastsListener listener) {
+        listeners.remove(EVENT_LISTENER_KEY_ON_LOAD_FORECASTS, listener);
     }
 }

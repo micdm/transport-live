@@ -5,6 +5,7 @@ import android.os.Handler;
 
 import com.micdm.transportlive.data.RouteInfo;
 import com.micdm.transportlive.data.SelectedRouteInfo;
+import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.server.DataLoader;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public class VehiclePoller {
         this.onLoadListener = onLoadListener;
     }
 
-    public void start(final List<SelectedRouteInfo> selected) {
+    public void start(final Service service, final List<SelectedRouteInfo> selected) {
         if (handler != null) {
             return;
         }
@@ -39,16 +40,16 @@ public class VehiclePoller {
         load = new Runnable() {
             @Override
             public void run() {
-                load(selected);
+                load(service, selected);
             }
         };
         load.run();
     }
 
-    private void load(List<SelectedRouteInfo> selected) {
+    private void load(Service service, List<SelectedRouteInfo> selected) {
         handler.postDelayed(load, UPDATE_INTERVAL * 1000);
         onLoadListener.onStart();
-        currentTask = loader.loadVehicles(selected, new DataLoader.OnLoadVehiclesListener() {
+        currentTask = loader.loadVehicles(service, selected, new DataLoader.OnLoadVehiclesListener() {
             @Override
             public void onLoad(List<RouteInfo> vehicles) {
                 currentTask = null;

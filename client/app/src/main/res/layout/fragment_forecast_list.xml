@@ -14,37 +14,15 @@
             android:gravity="center"
             android:padding="5dp"
             android:text="@string/fragment_forecast_no_station_selected"/>
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:id="@+id/forecast"
-            android:padding="5dp">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/station"
-                android:padding="5dp"
-                android:background="#FFDDDDDD"
-                android:drawableLeft="@android:drawable/ic_menu_myplaces"
-                android:drawablePadding="5dp"/>
-            <ScrollView
+            android:layout_height="match_parent">
+            <ExpandableListView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/vehicle_container">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:id="@+id/vehicle_list"/>
-            </ScrollView>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/no_vehicles"
-                android:gravity="center"
-                android:text="@string/fragment_forecast_no_vehicles"/>
-        </LinearLayout>
+                android:id="@+id/forecast_list"
+                android:groupIndicator="@null"/>
+        </FrameLayout>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
