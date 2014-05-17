@@ -89,7 +89,6 @@ class Forecast(object):
 
 class ForecastVehicle(object):
 
-    def __init__(self, transport, route, time):
-        self.transport = transport
+    def __init__(self, route, time):
         self.route = route
         self.time = time

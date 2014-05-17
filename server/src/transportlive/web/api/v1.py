@@ -73,7 +73,6 @@ class ForecastHandler(RequestHandler):
 
     def _vehicle_to_dict(self, vehicle):
         return {
-            "transport": vehicle.transport.type,
             "route": vehicle.route.number,
             "time": vehicle.time
         }

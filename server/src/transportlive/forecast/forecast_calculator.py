@@ -70,9 +70,7 @@ class ForecastCalculator(object):
             speed = self._get_vehicle_speed(vehicle)
             if not speed:
                 continue
-            # TODO: возвращать время в секундах
-            time = int(distance / speed) / 60
-            forecast.vehicles.append(ForecastVehicle(transport, route, time))
+            forecast.vehicles.append(ForecastVehicle(route, int(distance / speed)))
         return forecast
 
     def _get_vehicles(self, station):
@@ -110,8 +108,7 @@ class _DirectionCalculator(object):
         self._vehicles = {}
 
     def get_vehicles(self, direction):
-        # TODO: может быть пустое
-        return self._vehicles.get(direction)
+        return self._vehicles.get(direction, [])
 
     def update_vehicle(self, vehicle):
         self.remove_vehicle(vehicle)
