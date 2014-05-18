@@ -6,14 +6,14 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/no_vehicles"
+        android:id="@+id/v__forecasts_list_item_vehicle_list_item__no_vehicles"
         android:gravity="center"
         android:text="@string/fragment_forecast_no_vehicles"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:id="@+id/vehicle_info">
+        android:id="@+id/v__forecasts_list_item_vehicle_list_item__vehicle_info">
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -22,11 +22,11 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/route"/>
+                android:id="@+id/v__forecasts_list_item_vehicle_list_item__route"/>
         </LinearLayout>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:id="@+id/arrival_time"/>
+            android:id="@+id/v__forecasts_list_item_vehicle_list_item__arrival_time"/>
     </LinearLayout>
 </FrameLayout>

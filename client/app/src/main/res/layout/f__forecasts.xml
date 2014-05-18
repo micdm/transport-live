@@ -10,7 +10,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/no_station_selected"
+            android:id="@+id/f__forecasts__no_station_selected"
             android:gravity="center"
             android:padding="5dp"
             android:text="@string/fragment_forecast_no_station_selected"/>
@@ -20,18 +20,18 @@
             <ExpandableListView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/forecast_list"
+                android:id="@+id/f__forecasts__forecast_list"
                 android:groupIndicator="@null"/>
         </FrameLayout>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/loading"
+            android:id="@+id/f__forecasts__loading"
             style="@style/AppTheme.LoadingMessage"/>
     </FrameLayout>
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/select_station"
+        android:id="@+id/f__forecasts__select_station"
         android:text="@string/fragment_forecast_select_station"/>
 </LinearLayout>

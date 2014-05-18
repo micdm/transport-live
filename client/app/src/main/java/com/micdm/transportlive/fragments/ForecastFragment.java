@@ -88,11 +88,11 @@ public class ForecastFragment extends Fragment {
         public View getGroupView(int position, boolean isExpanded, View view, ViewGroup viewGroup) {
             final SelectedStationInfo info = getGroup(position).info;
             if (view == null) {
-                view = View.inflate(getActivity(), R.layout.view_forecast_list_item_title, null);
+                view = View.inflate(getActivity(), R.layout.v__forecasts_list_item_title, null);
             }
-            TextView stationView = (TextView) view.findViewById(R.id.station);
+            TextView stationView = (TextView) view.findViewById(R.id.v__forecasts_list_item_title__station);
             stationView.setText(getString(R.string.fragment_forecast_station, info.direction.getStart(), info.direction.getFinish(), info.station.name));
-            ImageButton removeView = (ImageButton) view.findViewById(R.id.remove_station);
+            ImageButton removeView = (ImageButton) view.findViewById(R.id.v__forecasts_list_item_title__remove_station);
             removeView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -105,11 +105,11 @@ public class ForecastFragment extends Fragment {
         @Override
         public View getChildView(int groupPosition, int childPosition, boolean isExpanded, View view, ViewGroup viewGroup) {
             if (view == null) {
-                view = View.inflate(getActivity(), R.layout.view_forecast_list_item_vehicle_list_item, null);
+                view = View.inflate(getActivity(), R.layout.v__forecasts_list_item_vehicle_list_item, null);
             }
             Forecast forecast = getGroup(groupPosition).forecast;
-            View noVehiclesView = view.findViewById(R.id.no_vehicles);
-            View vehicleInfoView = view.findViewById(R.id.vehicle_info);
+            View noVehiclesView = view.findViewById(R.id.v__forecasts_list_item_vehicle_list_item__no_vehicles);
+            View vehicleInfoView = view.findViewById(R.id.v__forecasts_list_item_vehicle_list_item__vehicle_info);
             if (forecast.vehicles.size() == 0) {
                 noVehiclesView.setVisibility(View.VISIBLE);
                 vehicleInfoView.setVisibility(View.GONE);
@@ -117,9 +117,9 @@ public class ForecastFragment extends Fragment {
                 noVehiclesView.setVisibility(View.GONE);
                 vehicleInfoView.setVisibility(View.VISIBLE);
                 ForecastVehicle vehicle = getChild(groupPosition, childPosition);
-                TextView routeView = (TextView) view.findViewById(R.id.route);
+                TextView routeView = (TextView) view.findViewById(R.id.v__forecasts_list_item_vehicle_list_item__route);
                 routeView.setText(getString(R.string.fragment_forecast_route, Utils.getTransportName(getActivity(), forecast.transport), vehicle.route.number));
-                TextView arrivalTimeView = (TextView) view.findViewById(R.id.arrival_time);
+                TextView arrivalTimeView = (TextView) view.findViewById(R.id.v__forecasts_list_item_vehicle_list_item__arrival_time);
                 arrivalTimeView.setText(getArrivalTimeInMinutes(vehicle.arrivalTime));
             }
             return view;
@@ -169,7 +169,7 @@ public class ForecastFragment extends Fragment {
         @Override
         public void onLoadStations(List<SelectedStationInfo> selected) {
             hideAllViews();
-            showView(R.id.forecast_list);
+            showView(R.id.f__forecasts__forecast_list);
             ForecastListAdapter adapter = new ForecastListAdapter();
             for (SelectedStationInfo info: selected) {
                 adapter.addSelectedStation(info);
@@ -185,7 +185,7 @@ public class ForecastFragment extends Fragment {
         @Override
         public void onSelectStation(SelectedStationInfo selected) {
             hideAllViews();
-            showView(R.id.forecast_list);
+            showView(R.id.f__forecasts__forecast_list);
             ForecastListAdapter adapter = getForecastListAdapter();
             int position = adapter.addSelectedStation(selected);
             adapter.notifyDataSetChanged();
@@ -204,17 +204,17 @@ public class ForecastFragment extends Fragment {
         @Override
         public void onUnselectAllStations() {
             hideAllViews();
-            showView(R.id.no_station_selected);
+            showView(R.id.f__forecasts__no_station_selected);
         }
     };
     private final ForecastHandler.OnLoadForecastsListener onLoadForecastsListener = new ForecastHandler.OnLoadForecastsListener() {
         @Override
         public void onStart() {
-            showView(R.id.loading);
+            showView(R.id.f__forecasts__loading);
         }
         @Override
         public void onFinish() {
-            hideView(R.id.loading);
+            hideView(R.id.f__forecasts__loading);
         }
         @Override
         public void onLoadForecasts(List<Forecast> forecasts) {
@@ -240,9 +240,9 @@ public class ForecastFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_forecast_list, null);
+        View view = inflater.inflate(R.layout.f__forecasts, null);
         if (view != null) {
-            view.findViewById(R.id.select_station).setOnClickListener(new View.OnClickListener() {
+            view.findViewById(R.id.f__forecasts__select_station).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     forecastHandler.requestStationSelection();
@@ -272,12 +272,12 @@ public class ForecastFragment extends Fragment {
     }
 
     private void hideAllViews() {
-        hideView(R.id.no_station_selected);
-        hideView(R.id.forecast_list);
+        hideView(R.id.f__forecasts__no_station_selected);
+        hideView(R.id.f__forecasts__forecast_list);
     }
 
     private ExpandableListView getForecastListView() {
-        return ((ExpandableListView) getView().findViewById(R.id.forecast_list));
+        return ((ExpandableListView) getView().findViewById(R.id.f__forecasts__forecast_list));
     }
 
     private ForecastListAdapter getForecastListAdapter() {

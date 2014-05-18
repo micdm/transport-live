@@ -89,7 +89,7 @@ public class SelectRouteFragment extends DialogFragment {
         public View getGroupView(int position, boolean isExpanded, View view, ViewGroup viewGroup) {
             Transport transport = getGroup(position);
             if (view == null) {
-                view = View.inflate(getActivity(), R.layout.view_select_route_title, null);
+                view = View.inflate(getActivity(), R.layout.v__select_route_title, null);
             }
             ((TextView) view).setText(Utils.getTransportName(getActivity(), transport));
             return view;
@@ -100,9 +100,9 @@ public class SelectRouteFragment extends DialogFragment {
             final Transport transport = getGroup(groupPosition);
             final Route route = getChild(groupPosition, childPosition);
             if (view == null) {
-                view = View.inflate(getActivity(), R.layout.view_select_route_list_item, null);
+                view = View.inflate(getActivity(), R.layout.v__select_route_list_item, null);
             }
-            final CheckBox checkbox = (CheckBox) view.findViewById(R.id.is_selected);
+            final CheckBox checkbox = (CheckBox) view.findViewById(R.id.v__select_route_list_item__is_selected);
             checkbox.setOnCheckedChangeListener(null);
             checkbox.setChecked(handler.isRouteSelected(transport, route));
             checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -115,11 +115,11 @@ public class SelectRouteFragment extends DialogFragment {
                     }
                 }
             });
-            TextView numberView = (TextView) view.findViewById(R.id.number);
+            TextView numberView = (TextView) view.findViewById(R.id.v__select_route_list_item__number);
             numberView.setText(String.valueOf(route.number));
-            TextView startView = (TextView) view.findViewById(R.id.start);
+            TextView startView = (TextView) view.findViewById(R.id.v__select_route_list_item__start);
             startView.setText(route.getStart());
-            TextView finishView = (TextView) view.findViewById(R.id.finish);
+            TextView finishView = (TextView) view.findViewById(R.id.v__select_route_list_item__finish);
             finishView.setText(route.getFinish());
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -153,7 +153,7 @@ public class SelectRouteFragment extends DialogFragment {
     private final ServiceHandler.OnLoadServiceListener onLoadServiceListener = new ServiceHandler.OnLoadServiceListener() {
         @Override
         public void onLoadService(Service service) {
-            ExpandableListView listView = (ExpandableListView) getDialog().findViewById(R.id.route_list);
+            ExpandableListView listView = (ExpandableListView) getDialog().findViewById(R.id.f__select_route__route_list);
             ExpandableListAdapter adapter = new RouteListAdapter(service.transports);
             listView.setAdapter(adapter);
             for (int i = 0; i < adapter.getGroupCount(); i += 1) {
@@ -172,11 +172,11 @@ public class SelectRouteFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.fragment_select_route_title);
-        builder.setView(View.inflate(getActivity(), R.layout.fragment_select_route, null));
+        builder.setView(View.inflate(getActivity(), R.layout.f__select_route, null));
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                ExpandableListView view = (ExpandableListView) getDialog().findViewById(R.id.route_list);
+                ExpandableListView view = (ExpandableListView) getDialog().findViewById(R.id.f__select_route__route_list);
                 RouteListAdapter adapter = (RouteListAdapter) view.getExpandableListAdapter();
                 handler.selectRoutes(adapter.selected);
             }

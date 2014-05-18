@@ -24,7 +24,7 @@ public class NoConnectionFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setView(View.inflate(getActivity(), R.layout.fragment_no_connection, null));
+        builder.setView(View.inflate(getActivity(), R.layout.f__no_connection, null));
         builder.setPositiveButton(R.string.fragment_no_connection_retry, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {}

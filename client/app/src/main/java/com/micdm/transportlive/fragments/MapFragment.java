@@ -127,7 +127,7 @@ public class MapFragment extends Fragment {
             if (!key.equals(PREF_KEY_USE_EXTERNAL_MAP)) {
                 return;
             }
-            ViewGroup containerView = ((ViewGroup) getView().findViewById(R.id.map_container));
+            ViewGroup containerView = ((ViewGroup) getView().findViewById(R.id.f__map__map_container));
             MapView oldMapView = (MapView) containerView.getChildAt(0);
             MapView newMapView = getMapView(needUseExternalMap());
             newMapView.setVisibility(oldMapView.getVisibility());
@@ -146,17 +146,17 @@ public class MapFragment extends Fragment {
         @Override
         public void onUnselectAllRoutes() {
             hideAllViews();
-            showView(R.id.no_route_selected);
+            showView(R.id.f__map__no_route_selected);
         }
     };
     private final ServiceHandler.OnLoadVehiclesListener onLoadVehiclesListener = new ServiceHandler.OnLoadVehiclesListener() {
         @Override
         public void onStart() {
-            showView(R.id.loading);
+            showView(R.id.f__map__loading);
         }
         @Override
         public void onFinish() {
-            hideView(R.id.loading);
+            hideView(R.id.f__map__loading);
         }
         @Override
         public void onLoadVehicles(List<RouteInfo> vehicles) {
@@ -174,9 +174,9 @@ public class MapFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_map, null);
+        View view = inflater.inflate(R.layout.f__map, null);
         if (view != null) {
-            View selectRoutesView = view.findViewById(R.id.select_route);
+            View selectRoutesView = view.findViewById(R.id.f__map__select_route);
             selectRoutesView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -185,7 +185,7 @@ public class MapFragment extends Fragment {
             });
             MapView mapView = getMapView(needUseExternalMap());
             mapView.setVisibility(View.GONE);
-            ((ViewGroup) view.findViewById(R.id.map_container)).addView(mapView, 0);
+            ((ViewGroup) view.findViewById(R.id.f__map__map_container)).addView(mapView, 0);
             setupMapController(mapView);
         }
         return view;
@@ -202,7 +202,7 @@ public class MapFragment extends Fragment {
     private MapView getMapView(boolean needUseExternalMap) {
         ResourceProxy proxy = new DefaultResourceProxyImpl(getActivity());
         MapView mapView = new MapView(getActivity(), TILE_SIZE, proxy, needUseExternalMap ? null : getTileProviders());
-        mapView.setId(R.id.map);
+        mapView.setId(R.id.f__map__map);
         if (!needUseExternalMap) {
             mapView.setMinZoomLevel(MIN_ZOOM);
             mapView.setMaxZoomLevel(MAX_ZOOM);
@@ -244,18 +244,18 @@ public class MapFragment extends Fragment {
     }
 
     private void hideAllViews() {
-        hideView(R.id.no_route_selected);
-        hideView(R.id.no_vehicles);
-        hideView(R.id.map);
+        hideView(R.id.f__map__no_route_selected);
+        hideView(R.id.f__map__no_vehicles);
+        hideView(R.id.f__map__map);
     }
 
     public void update(List<RouteInfo> vehicles) {
         hideAllViews();
         if (vehicles.size() == 0) {
-            showView(R.id.no_vehicles);
+            showView(R.id.f__map__no_vehicles);
             return;
         }
-        showView(R.id.map);
+        showView(R.id.f__map__map);
         if (builder == null) {
             builder = new MarkerBuilder(getResources());
         }
@@ -264,7 +264,7 @@ public class MapFragment extends Fragment {
     }
 
     private void updateMap(List<OverlayItem> markers) {
-        MapView view = (MapView) getView().findViewById(R.id.map);
+        MapView view = (MapView) getView().findViewById(R.id.f__map__map);
         if (view != null) {
             List<Overlay> overlays = view.getOverlays();
             overlays.clear();

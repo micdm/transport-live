@@ -11,18 +11,18 @@
         <Spinner
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/transport_list"/>
+            android:id="@+id/f__select_station__transport_list"/>
         <Spinner
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/route_list"/>
+            android:id="@+id/f__select_station__route_list"/>
     </LinearLayout>
     <Spinner
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/direction_list"/>
+        android:id="@+id/f__select_station__direction_list"/>
     <Spinner
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/forecast_list"/>
+        android:id="@+id/f__select_station__station_list"/>
 </LinearLayout>

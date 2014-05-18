@@ -54,7 +54,7 @@ public class SelectStationFragment extends DialogFragment {
         @Override
         public View getView(int position, View view, ViewGroup viewGroup) {
             if (view == null) {
-                view = View.inflate(getActivity(), R.layout.view_select_station_list_item, null);
+                view = View.inflate(getActivity(), R.layout.v__select_station_list_item, null);
             }
             ((TextView) view).setText(getItemName(position));
             return view;
@@ -141,7 +141,7 @@ public class SelectStationFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.fragment_select_station_title);
-        builder.setView(View.inflate(getActivity(), R.layout.fragment_select_station, null));
+        builder.setView(View.inflate(getActivity(), R.layout.f__select_station, null));
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -156,19 +156,19 @@ public class SelectStationFragment extends DialogFragment {
     }
 
     private Spinner getTransportListSpinner() {
-        return (Spinner) getDialog().findViewById(R.id.transport_list);
+        return (Spinner) getDialog().findViewById(R.id.f__select_station__transport_list);
     }
 
     private Spinner getRouteListSpinner() {
-        return (Spinner) getDialog().findViewById(R.id.route_list);
+        return (Spinner) getDialog().findViewById(R.id.f__select_station__route_list);
     }
 
     private Spinner getDirectionListSpinner() {
-        return (Spinner) getDialog().findViewById(R.id.direction_list);
+        return (Spinner) getDialog().findViewById(R.id.f__select_station__direction_list);
     }
 
     private Spinner getStationListSpinner() {
-        return (Spinner) getDialog().findViewById(R.id.forecast_list);
+        return (Spinner) getDialog().findViewById(R.id.f__select_station__station_list);
     }
 
     @Override

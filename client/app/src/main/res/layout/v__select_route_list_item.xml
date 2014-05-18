@@ -6,11 +6,11 @@
     <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/is_selected"/>
+        android:id="@+id/v__select_route_list_item__is_selected"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/number"
+        android:id="@+id/v__select_route_list_item__number"
         android:gravity="center"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
@@ -22,13 +22,13 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/start"
+            android:id="@+id/v__select_route_list_item__start"
             android:layout_weight="1"
             android:gravity="bottom"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/finish"
+            android:id="@+id/v__select_route_list_item__finish"
             android:layout_weight="1"
             android:gravity="top"/>
     </LinearLayout>

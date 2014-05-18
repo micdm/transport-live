@@ -191,7 +191,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.a__main);
         setupActionBar();
         setupPager();
         loadData();
@@ -204,7 +204,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     }
 
     private void setupPager() {
-        CustomViewPager pager = (CustomViewPager) findViewById(R.id.pager);
+        CustomViewPager pager = (CustomViewPager) findViewById(R.id.a__main__pager);
         pager.setAdapter(new CustomPagerAdapter(getSupportFragmentManager()));
         pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
@@ -212,13 +212,12 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
                 getSupportActionBar().setSelectedNavigationItem(i);
             }
         });
-        addPage(new CustomPagerAdapter.Page(getString(R.string.tab_title_forecast), new ForecastFragment()));
-        addPage(new CustomPagerAdapter.Page(getString(R.string.tab_title_map), new MapFragment()));
-        addPage(new CustomPagerAdapter.Page(getString(R.string.tab_title_settings), new SettingsFragment()));
+        addPage(pager, new CustomPagerAdapter.Page(getString(R.string.tab_title_forecast), new ForecastFragment()));
+        addPage(pager, new CustomPagerAdapter.Page(getString(R.string.tab_title_map), new MapFragment()));
+        addPage(pager, new CustomPagerAdapter.Page(getString(R.string.tab_title_settings), new SettingsFragment()));
     }
 
-    private void addPage(CustomPagerAdapter.Page page) {
-        final CustomViewPager pager = (CustomViewPager) findViewById(R.id.pager);
+    private void addPage(final CustomViewPager pager, CustomPagerAdapter.Page page) {
         ((CustomPagerAdapter) pager.getAdapter()).add(page);
         ActionBar actionBar = getSupportActionBar();
         ActionBar.Tab tab = actionBar.newTab();
