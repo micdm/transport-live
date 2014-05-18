@@ -55,6 +55,8 @@ def _get_distance_in_meters(point1, point2):
 
 class ForecastCalculator(object):
 
+    MAX_ARRIVAL_TIME = 1800
+
     def __init__(self, service):
         self._direction_calculator = _DirectionCalculator()
         self._distance_calculator = _DistanceCalculator(service)
@@ -70,7 +72,10 @@ class ForecastCalculator(object):
             speed = self._get_vehicle_speed(vehicle)
             if not speed:
                 continue
-            forecast.vehicles.append(ForecastVehicle(route, int(distance / speed)))
+            time = int(distance / speed)
+            if time > self.MAX_ARRIVAL_TIME:
+                continue
+            forecast.vehicles.append(ForecastVehicle(route, time))
         return forecast
 
     def _get_vehicles(self, station):
