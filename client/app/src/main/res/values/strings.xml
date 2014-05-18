@@ -25,7 +25,7 @@
     <!-- Фрагмент с прогнозами -->
     <string name="fragment_forecast_select_station">Добавить остановку…</string>
     <string name="fragment_forecast_no_station_selected">Здесь будет показано ориентировочное время прибытия транспорта на остановки, которые вы выберете.</string>
-    <string name="fragment_forecast_station">%1$s №%2$s\n%3$s → %4$s\n%5$s</string>
+    <string name="fragment_forecast_station">%1$s → %2$s\n%3$s</string>
     <string name="fragment_forecast_route">%1$s №%2$s</string>
     <string name="fragment_forecast_arrival_time">%s мин.</string>
     <string name="fragment_forecast_no_vehicles">К остановке пока ничего не едет.</string>

@@ -53,7 +53,8 @@ public class ForecastFragment extends Fragment {
             if (forecast == null) {
                 return 0;
             }
-            return forecast.vehicles.size();
+            int count = forecast.vehicles.size();
+            return count == 0 ? 1 : count;
         }
 
         @Override
@@ -63,7 +64,8 @@ public class ForecastFragment extends Fragment {
 
         @Override
         public ForecastVehicle getChild(int groupPosition, int childPosition) {
-            return getGroup(groupPosition).forecast.vehicles.get(childPosition);
+            List<ForecastVehicle> vehicles = getGroup(groupPosition).forecast.vehicles;
+            return vehicles.size() == 0 ? null : vehicles.get(childPosition);
         }
 
         @Override
@@ -73,7 +75,8 @@ public class ForecastFragment extends Fragment {
 
         @Override
         public long getChildId(int groupPosition, int childPodition) {
-            return getChild(groupPosition, childPodition).hashCode();
+            ForecastVehicle vehicle = getChild(groupPosition, childPodition);
+            return vehicle == null ? 0 : vehicle.hashCode();
         }
 
         @Override
@@ -88,8 +91,7 @@ public class ForecastFragment extends Fragment {
                 view = View.inflate(getActivity(), R.layout.view_forecast_list_item_title, null);
             }
             TextView stationView = (TextView) view.findViewById(R.id.station);
-            stationView.setText(getString(R.string.fragment_forecast_station, Utils.getTransportName(getActivity(), info.transport), info.route.number,
-                    info.direction.getStart(), info.direction.getFinish(), info.station.name));
+            stationView.setText(getString(R.string.fragment_forecast_station, info.direction.getStart(), info.direction.getFinish(), info.station.name));
             ImageButton removeView = (ImageButton) view.findViewById(R.id.remove_station);
             removeView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -102,16 +104,24 @@ public class ForecastFragment extends Fragment {
 
         @Override
         public View getChildView(int groupPosition, int childPosition, boolean isExpanded, View view, ViewGroup viewGroup) {
-            // TODO: обработать ситуацию, когда транспорт не едет
-            Forecast forecast = getGroup(groupPosition).forecast;
-            ForecastVehicle vehicle = getChild(groupPosition, childPosition);
             if (view == null) {
                 view = View.inflate(getActivity(), R.layout.view_forecast_list_item_vehicle_list_item, null);
             }
-            TextView routeView = (TextView) view.findViewById(R.id.route);
-            routeView.setText(getString(R.string.fragment_forecast_route, Utils.getTransportName(getActivity(), forecast.transport), vehicle.route.number));
-            TextView arrivalTimeView = (TextView) view.findViewById(R.id.arrival_time);
-            arrivalTimeView.setText(getArrivalTimeInMinutes(vehicle.arrivalTime));
+            Forecast forecast = getGroup(groupPosition).forecast;
+            View noVehiclesView = view.findViewById(R.id.no_vehicles);
+            View vehicleInfoView = view.findViewById(R.id.vehicle_info);
+            if (forecast.vehicles.size() == 0) {
+                noVehiclesView.setVisibility(View.VISIBLE);
+                vehicleInfoView.setVisibility(View.GONE);
+            } else {
+                noVehiclesView.setVisibility(View.GONE);
+                vehicleInfoView.setVisibility(View.VISIBLE);
+                ForecastVehicle vehicle = getChild(groupPosition, childPosition);
+                TextView routeView = (TextView) view.findViewById(R.id.route);
+                routeView.setText(getString(R.string.fragment_forecast_route, Utils.getTransportName(getActivity(), forecast.transport), vehicle.route.number));
+                TextView arrivalTimeView = (TextView) view.findViewById(R.id.arrival_time);
+                arrivalTimeView.setText(getArrivalTimeInMinutes(vehicle.arrivalTime));
+            }
             return view;
         }
 
