@@ -9,7 +9,6 @@ import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.Vehicle;
 import com.micdm.transportlive.server.commands.Command;
-import com.micdm.transportlive.server.commands.GetForecastsCommand;
 import com.micdm.transportlive.server.commands.GetVehiclesCommand;
 
 import org.json.JSONArray;
