@@ -8,6 +8,7 @@ from transportlive.models import Forecast, ForecastVehicle, Coords
 
 logger = getLogger(__name__)
 
+_MAX_DISTANCE_TO_PROJECTION = 50
 _EARTH_RADIUS = 6371000
 
 def _get_nearest_point_index(points, point):
@@ -22,7 +23,7 @@ def _get_nearest_point_index(points, point):
                 min_distance = distance
                 result = i
         i += 1
-    return result
+    return result if min_distance <= _MAX_DISTANCE_TO_PROJECTION else None
 
 def _get_projection(begin, end, point):
     if begin.latitude == end.latitude:
@@ -82,7 +83,11 @@ class ForecastCalculator(object):
         for transport, route, direction in self._station_index.get(station):
             for vehicle in self._direction_calculator.get_vehicles(direction):
                 station_distance = self._distance_calculator.get_distance(direction, station.coords)
+                if station_distance is None:
+                    continue
                 vehicle_distance = self._distance_calculator.get_distance(direction, vehicle.last_mark.coords)
+                if vehicle_distance is None:
+                    continue
                 distance = station_distance - vehicle_distance
                 if distance > 0:
                     yield route, vehicle, distance
@@ -134,7 +139,7 @@ class _DirectionCalculator(object):
         direction = route.directions[0]
         begin = self._get_nearest_point_index(direction.points, point1)
         end = self._get_nearest_point_index(direction.points, point2)
-        if begin == end:
+        if begin is None or end is None or begin == end:
             return None
         return direction if end > begin else route.directions[1]
 
@@ -165,6 +170,8 @@ class _DistanceCalculator(object):
 
     def _get_distance(self, direction, point):
         nearest = _get_nearest_point_index(direction.points, point)
+        if nearest is None:
+            return None
         projection = _get_projection(direction.points[nearest], direction.points[nearest + 1], point)
         return self._distance_index.get(direction.points[nearest]) + _get_distance_in_meters(direction.points[nearest], projection)
 

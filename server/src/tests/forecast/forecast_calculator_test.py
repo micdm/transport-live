@@ -2,13 +2,24 @@
 
 import unittest
 
-from transportlive.forecast.forecast_calculator import _get_projection, _is_point_inside_segment, _get_distance_in_meters
+from transportlive.forecast.forecast_calculator import _get_nearest_point_index, _get_projection, _is_point_inside_segment, _get_distance_in_meters
 from transportlive.misc.dataproviders import use_dataproviders, dataprovider
 from transportlive.misc.decimal_impl import Decimal
 from transportlive.models import Coords
 
 @use_dataproviders
 class MiscTest(unittest.TestCase):
+
+    @dataprovider("provider_get_nearest_point_index")
+    def test_get_nearest_point_index(self, begin, end, point, index):
+        result = _get_nearest_point_index([begin, end], point)
+        self.assertEqual(index, result)
+
+    @staticmethod
+    def provider_get_nearest_point_index():
+        return (
+            (Coords(Decimal("56.455632"), Decimal("84.95132")), Coords(Decimal("56.455811"), Decimal("84.95117")), Coords(Decimal("56.455561"), Decimal("84.951369")), None),
+         )
 
     @dataprovider("provider_get_projection")
     def test_get_projection(self, begin, end, point, projection):
