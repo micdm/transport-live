@@ -18,27 +18,27 @@
     <!-- Общее для фрагментов -->
     <string name="fragment_loading">Обновление…</string>
     <!-- Фрагмент о приложении -->
-    <string name="fragment_about_text">По любым вопросам пишите на %s.\nРаботает на основе http://openstreetmap.org и http://raspisanie.tomsk.ru/online/gis-online.php</string>
+    <string name="fragment_about_text">По любым вопросам пишите на %s.\nРаботает на основе http://openstreetmap.org</string>
     <!-- Фрагмент про ошибку сети -->
     <string name="fragment_no_connection_text">Невозможно подключиться к серверу.\nПроверьте, есть ли у вас доступ в Интернет.</string>
     <string name="fragment_no_connection_retry">Ещё раз</string>
     <!-- Фрагмент с прогнозами -->
-    <string name="fragment_forecast_select_station">Выбрать остановку…</string>
-    <string name="fragment_forecast_no_station_selected">Здесь будет показано ориентировочное время прибытия транспорта на остановку, которую вы выберете.</string>
+    <string name="fragment_forecast_select_station">Добавить остановку…</string>
+    <string name="fragment_forecast_no_station_selected">Здесь будет показано ориентировочное время прибытия транспорта на остановки, которые вы выберете.</string>
     <string name="fragment_forecast_station">%1$s №%2$s\n%3$s → %4$s\n%5$s</string>
     <string name="fragment_forecast_route">%1$s №%2$s</string>
     <string name="fragment_forecast_arrival_time">%s мин.</string>
     <string name="fragment_forecast_no_vehicles">К остановке пока ничего не едет.</string>
-    <!-- Фрагмент выбора станции -->
+    <!-- Фрагмент выбора остановки -->
     <string name="fragment_select_station_title">Выберите остановку</string>
     <string name="fragment_select_station_route_list_item">№%s</string>
     <string name="fragment_select_station_direction_list_item">%1$s → %2$s</string>
     <!-- Фрагмент с картой -->
-    <string name="fragment_map_select_route">Выбрать маршрут…</string>
+    <string name="fragment_map_select_route">Выбрать маршруты…</string>
     <string name="fragment_map_no_route_selected">Здесь на карте в реальном времени будет показан транспорт, маршрут которого вы выберете.</string>
     <string name="fragment_map_no_vehicles">Похоже, весь транспорт в парке.</string>
     <!-- Фрагмент выбора маршрутов -->
-    <string name="fragment_select_route_title">Выберите маршрут</string>
+    <string name="fragment_select_route_title">Выберите маршруты</string>
     <!-- Фрагмент с настройками -->
     <string name="fragment_settings_use_external_map_title">Дополнительные карты</string>
     <string name="fragment_settings_use_external_map_summary">Вы сможете изменять масштаб, но это потребует больше Интернет-трафика</string>
