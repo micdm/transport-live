@@ -35,10 +35,10 @@ public class SelectRouteFragment extends DialogFragment {
 
         public RouteListAdapter(List<Transport> transports) {
             this.transports = transports;
-            this.selected = setupSelectedRoutes();
+            this.selected = getSelectedRoutes();
         }
 
-        private List<SelectedRouteInfo> setupSelectedRoutes() {
+        private List<SelectedRouteInfo> getSelectedRoutes() {
             List<SelectedRouteInfo> selected = new ArrayList<SelectedRouteInfo>();
             for (Transport transport: transports) {
                 for (Route route: transport.routes) {

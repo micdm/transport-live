@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LightingColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -21,6 +22,8 @@ import android.view.ViewGroup;
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.RouteInfo;
+import com.micdm.transportlive.data.Service;
+import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.Vehicle;
 import com.micdm.transportlive.interfaces.ServiceHandler;
 import com.micdm.transportlive.misc.AssetArchive;
@@ -44,7 +47,9 @@ import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 public class MapFragment extends Fragment {
 
@@ -52,19 +57,49 @@ public class MapFragment extends Fragment {
 
         private final Resources resources;
         private final Bitmap original;
-        private final Paint paint;
+        private final Map<Route, Paint> routePaints;
+        private final Paint textPaint;
 
-        public MarkerBuilder(Resources resources) {
+        public MarkerBuilder(Service service, Resources resources) {
             this.resources = resources;
-            this.original = setupOriginalBitmap();
-            this.paint = setupPaint();
+            this.original = getOriginalBitmap();
+            this.routePaints = getRoutePaints(service);
+            this.textPaint = getTextPaint();
         }
 
-        private Bitmap setupOriginalBitmap() {
+        private Bitmap getOriginalBitmap() {
             return BitmapFactory.decodeResource(resources, R.drawable.vehicle);
         }
 
-        private Paint setupPaint() {
+        private Map<Route, Paint> getRoutePaints(Service service) {
+            Map<Route, Paint> paints = new Hashtable<Route, Paint>();
+            int count = getRouteCount(service);
+            int number = 0;
+            for (Transport transport: service.transports) {
+                for (Route route: transport.routes) {
+                    paints.put(route, getRoutePaint(count, number));
+                    number += 1;
+                }
+            }
+            return paints;
+        }
+
+        private int getRouteCount(Service service) {
+            int count = 0;
+            for (Transport transport: service.transports) {
+                count += transport.routes.size();
+            }
+            return count;
+        }
+
+        private Paint getRoutePaint(int count, int number) {
+            Paint paint = new Paint();
+            int color = Color.HSVToColor(new float[] {(255.0f / count) * number, 100, 50});
+            paint.setColorFilter(new LightingColorFilter(0xFF999999, color));
+            return paint;
+        }
+
+        private Paint getTextPaint() {
             Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
             paint.setColor(Color.BLACK);
             paint.setStyle(Paint.Style.FILL);
@@ -83,7 +118,6 @@ public class MapFragment extends Fragment {
         }
 
         private OverlayItem getMarker(Route route, Vehicle vehicle) {
-            // TODO: для разных маршрутов выбрать разные цвета?
             GeoPoint coords = new GeoPoint(vehicle.latitude.doubleValue(), vehicle.longitude.doubleValue());
             OverlayItem marker = new OverlayItem(vehicle.number, "", coords);
             Bitmap bitmap = getBitmap(route, vehicle);
@@ -97,16 +131,16 @@ public class MapFragment extends Fragment {
             Canvas canvas = new Canvas(result);
             Matrix matrix = new Matrix();
             matrix.setRotate(vehicle.course, original.getWidth() / 2, original.getHeight() / 2);
-            canvas.drawBitmap(original, matrix, null);
+            canvas.drawBitmap(original, matrix, routePaints.get(route));
             String text = String.valueOf(route.number);
             Rect bounds = getTextBounds(text);
-            canvas.drawText(text, canvas.getWidth() / 2 - bounds.width() / 2, canvas.getHeight() / 2 + bounds.height() / 2, paint);
+            canvas.drawText(text, canvas.getWidth() / 2 - bounds.width() / 2, canvas.getHeight() / 2 + bounds.height() / 2, textPaint);
             return result;
         }
 
         private Rect getTextBounds(String text) {
             Rect bounds = new Rect();
-            paint.getTextBounds(text, 0, text.length(), bounds);
+            textPaint.getTextBounds(text, 0, text.length(), bounds);
             return bounds;
         }
     }
@@ -147,6 +181,12 @@ public class MapFragment extends Fragment {
         public void onUnselectAllRoutes() {
             hideAllViews();
             showView(R.id.f__map__no_route_selected);
+        }
+    };
+    private final ServiceHandler.OnLoadServiceListener onLoadServiceListener = new ServiceHandler.OnLoadServiceListener() {
+        @Override
+        public void onLoadService(Service service) {
+            builder = new MarkerBuilder(service, getResources());
         }
     };
     private final ServiceHandler.OnLoadVehiclesListener onLoadVehiclesListener = new ServiceHandler.OnLoadVehiclesListener() {
@@ -232,6 +272,7 @@ public class MapFragment extends Fragment {
         hideAllViews();
         getSharedPreferences().registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
         serviceHandler.addOnUnselectAllRoutesListener(onUnselectAllRoutesListener);
+        serviceHandler.addOnLoadServiceListener(onLoadServiceListener);
         serviceHandler.addOnLoadVehiclesListener(onLoadVehiclesListener);
     }
 
@@ -256,9 +297,6 @@ public class MapFragment extends Fragment {
             return;
         }
         showView(R.id.f__map__map);
-        if (builder == null) {
-            builder = new MarkerBuilder(getResources());
-        }
         List<OverlayItem> markers = builder.build(vehicles);
         updateMap(markers);
     }
@@ -290,6 +328,7 @@ public class MapFragment extends Fragment {
         super.onStop();
         getSharedPreferences().unregisterOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
         serviceHandler.removeOnUnselectAllRoutesListener(onUnselectAllRoutesListener);
+        serviceHandler.removeOnLoadServiceListener(onLoadServiceListener);
         serviceHandler.removeOnLoadVehiclesListener(onLoadVehiclesListener);
     }
 }
