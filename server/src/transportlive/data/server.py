@@ -15,11 +15,22 @@ logger = getLogger(__name__)
 
 class DataServer(TCPServer):
 
+    PACKET_COUNTER_INTERVAL = timedelta(minutes=10)
+
     def __init__(self, datastore):
         super(DataServer, self).__init__()
         self._vehicle_builder = VehicleBuilder()
         self._datastore = datastore
         self._stream_count = 0
+        self._packet_count = 0
+
+    def start_packet_counter(self):
+        ioloop = IOLoop.instance()
+        def _report_and_restart():
+            logger.info("Received %s packets in last %s", self._packet_count, self.PACKET_COUNTER_INTERVAL)
+            self._packet_count = 0
+            ioloop.add_timeout(self.PACKET_COUNTER_INTERVAL, _report_and_restart)
+        ioloop.add_timeout(self.PACKET_COUNTER_INTERVAL, )
 
     def handle_stream(self, stream, address):
         logger.info("New connection from %s:%s", *address)
@@ -27,6 +38,7 @@ class DataServer(TCPServer):
         StreamHandler(self._stream_count, stream, self._handle_data_packet).run()
 
     def _handle_data_packet(self, packet):
+        self._packet_count += 1
         vehicle_info = self._vehicle_builder.build(packet)
         if not vehicle_info:
             logger.debug("Cannot build vehicle, skipping packet...")
@@ -133,4 +145,5 @@ def start_data_server(datastore):
     host, port = options.DATA_SERVER["host"], options.DATA_SERVER["port"]
     logger.info("Starting data server on %s:%s...", host, port)
     server = DataServer(datastore)
+    server.start_packet_counter()
     server.listen(port, host)
