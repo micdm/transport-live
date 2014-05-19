@@ -29,7 +29,7 @@ class DataServer(TCPServer):
     def _handle_data_packet(self, packet):
         vehicle_info = self._vehicle_builder.build(packet)
         if not vehicle_info:
-            logger.info("Cannot build vehicle, skipping packet...")
+            logger.debug("Cannot build vehicle, skipping packet...")
         else:
             self._datastore.add_vehicle(*vehicle_info)
 
@@ -91,7 +91,7 @@ class StreamHandler(object):
             self._handle_data_packet(packet)
 
     def _handle_login_packet(self, packet):
-        logger.info("Login packet received")
+        logger.debug("Login packet received")
         if self._session:
             logger.warning("Session already started, closing stream...")
             self._stream.close()
@@ -107,12 +107,12 @@ class StreamHandler(object):
                 IOLoop.instance().remove_timeout(self._close_timeout)
 
     def _handle_ping_packet(self, packet):
-        logger.info("Ping packet received")
+        logger.debug("Ping packet received")
         answer_packet = PingAnswerPacket()
         self._stream.write(self._packet_serializer.serialize(answer_packet))
 
     def _handle_data_packet(self, packet):
-        logger.info("Data packet received")
+        logger.debug("Data packet received")
         if not self._session:
             logger.warning("No session started, closing stream...")
             self._stream.close()
@@ -122,7 +122,7 @@ class StreamHandler(object):
             self._on_data_packet(packet)
 
     def _on_close_stream(self):
-        logger.info("Stream %s closed", self._id)
+        logger.debug("Stream %s closed", self._id)
 
 class Session(object):
 

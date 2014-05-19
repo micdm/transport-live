@@ -44,20 +44,20 @@ class DataStore(object):
 
     def _remove_outdated_vehicles(self):
         time = datetime.utcnow() - self.VEHICLE_OUTDATE_INTERVAL
-        logger.info("Removing vehicles last updated before %s...", time)
+        logger.debug("Removing vehicles last updated before %s...", time)
         count = 0
         for vehicle_id, vehicle in dict(self._vehicles).items():
             if vehicle.last_mark.datetime < time:
                 self._forecast_calculator.remove_vehicle(vehicle)
                 del self._vehicles[vehicle_id]
                 count += 1
-        logger.info("Removed %s vehicles", count)
+        logger.debug("Removed %s vehicles", count)
 
     def _remove_unnecessary_vehicle_marks(self):
-        logger.info("Removing unnecessary vehicle marks...")
+        logger.debug("Removing unnecessary vehicle marks...")
         count = 0
         for vehicle in self._vehicles.values():
             marks = vehicle.marks[-self.MAX_MARK_COUNT:]
             count += len(vehicle.marks) - len(marks)
             vehicle.marks = marks
-        logger.info("Removed %s marks", count)
+        logger.debug("Removed %s marks", count)

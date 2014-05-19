@@ -67,7 +67,7 @@ class ForecastCalculator(object):
     def get_forecast(self, transport_type, station_id):
         transport = self._service.get_transport_by_type(transport_type)
         station = transport.get_station_by_id(station_id)
-        logger.info('Building forecast for station "%s" (%s-%s)...', station.name, transport_type, station.id)
+        logger.debug('Building forecast for station "%s" (%s-%s)...', station.name, transport_type, station.id)
         forecast = Forecast(transport, station)
         for route, vehicle, distance in self._get_vehicles(station):
             speed = self._get_vehicle_speed(vehicle)
@@ -182,7 +182,7 @@ class _DistanceIndex(object):
 
     @classmethod
     def create(cls, service):
-        logger.info("Building distance index...")
+        logger.debug("Building distance index...")
         index = {}
         for transport in service.transports:
             for route in transport.routes:
@@ -192,7 +192,7 @@ class _DistanceIndex(object):
                     for i, point in enumerate(direction.points[1:]):
                         distance += _get_distance_in_meters(point, direction.points[i - 1])
                         cls._add_to_index(point, distance, index)
-        logger.info("Distance index ready")
+        logger.debug("Distance index ready")
         return cls(index)
 
     @classmethod
@@ -209,14 +209,14 @@ class _StationIndex(object):
 
     @classmethod
     def create(cls, service):
-        logger.info("Building station index...")
+        logger.debug("Building station index...")
         index = {}
         for transport in service.transports:
             for route in transport.routes:
                 for direction in route.directions:
                     for station in direction.stations:
                         cls._add_to_index(station, transport, route, direction, index)
-        logger.info("Station index ready")
+        logger.debug("Station index ready")
         return cls(index)
 
     @classmethod
