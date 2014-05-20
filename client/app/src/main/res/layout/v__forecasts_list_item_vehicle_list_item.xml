@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="5dp">
+    android:layout_height="match_parent">
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -14,19 +13,20 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:id="@+id/v__forecasts_list_item_vehicle_list_item__vehicle_info">
-        <LinearLayout
-            android:layout_width="0dp"
+        <FrameLayout
+            android:layout_width="15dp"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_weight="1">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/v__forecasts_list_item_vehicle_list_item__route"/>
-        </LinearLayout>
+            android:id="@+id/v__forecasts_list_item_vehicle_list_item__color"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/v__forecasts_list_item_vehicle_list_item__route"
+            android:layout_weight="1"
+            android:padding="5dp"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:id="@+id/v__forecasts_list_item_vehicle_list_item__arrival_time"/>
+            android:id="@+id/v__forecasts_list_item_vehicle_list_item__arrival_time"
+            android:padding="5dp"/>
     </LinearLayout>
 </FrameLayout>

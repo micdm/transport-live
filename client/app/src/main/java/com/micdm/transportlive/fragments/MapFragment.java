@@ -27,6 +27,7 @@ import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.Vehicle;
 import com.micdm.transportlive.interfaces.ServiceHandler;
 import com.micdm.transportlive.misc.AssetArchive;
+import com.micdm.transportlive.misc.RouteColors;
 
 import org.osmdroid.DefaultResourceProxyImpl;
 import org.osmdroid.ResourceProxy;
@@ -73,28 +74,17 @@ public class MapFragment extends Fragment {
 
         private Map<Route, Paint> getRoutePaints(Service service) {
             Map<Route, Paint> paints = new Hashtable<Route, Paint>();
-            int count = getRouteCount(service);
-            int number = 0;
+            RouteColors colors = new RouteColors(service);
             for (Transport transport: service.transports) {
                 for (Route route: transport.routes) {
-                    paints.put(route, getRoutePaint(count, number));
-                    number += 1;
+                    paints.put(route, getRoutePaint(colors.get(route)));
                 }
             }
             return paints;
         }
 
-        private int getRouteCount(Service service) {
-            int count = 0;
-            for (Transport transport: service.transports) {
-                count += transport.routes.size();
-            }
-            return count;
-        }
-
-        private Paint getRoutePaint(int count, int number) {
+        private Paint getRoutePaint(int color) {
             Paint paint = new Paint();
-            int color = Color.HSVToColor(new float[] {(255.0f / count) * number, 100, 50});
             paint.setColorFilter(new LightingColorFilter(0xFF999999, color));
             return paint;
         }

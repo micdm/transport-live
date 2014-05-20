@@ -3,6 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal">
+    <FrameLayout
+        android:layout_width="15dp"
+        android:layout_height="match_parent"
+        android:id="@+id/v__select_route_list_item__color"/>
     <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="match_parent"

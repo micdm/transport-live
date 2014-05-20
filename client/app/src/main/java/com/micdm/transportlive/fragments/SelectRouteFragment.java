@@ -21,6 +21,7 @@ import com.micdm.transportlive.data.SelectedRouteInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.interfaces.ServiceHandler;
+import com.micdm.transportlive.misc.RouteColors;
 import com.micdm.transportlive.misc.Utils;
 
 import java.util.ArrayList;
@@ -30,17 +31,19 @@ public class SelectRouteFragment extends DialogFragment {
 
     private class RouteListAdapter extends BaseExpandableListAdapter {
 
+        private final RouteColors colors;
         private final List<Transport> transports;
         public final List<SelectedRouteInfo> selected;
 
-        public RouteListAdapter(List<Transport> transports) {
-            this.transports = transports;
-            this.selected = getSelectedRoutes();
+        public RouteListAdapter(Service service) {
+            this.colors = new RouteColors(service);
+            this.transports = service.transports;
+            this.selected = getSelectedRoutes(service);
         }
 
-        private List<SelectedRouteInfo> getSelectedRoutes() {
+        private List<SelectedRouteInfo> getSelectedRoutes(Service service) {
             List<SelectedRouteInfo> selected = new ArrayList<SelectedRouteInfo>();
-            for (Transport transport: transports) {
+            for (Transport transport: service.transports) {
                 for (Route route: transport.routes) {
                     if (handler.isRouteSelected(transport, route)) {
                         selected.add(new SelectedRouteInfo(transport, route));
@@ -102,6 +105,8 @@ public class SelectRouteFragment extends DialogFragment {
             if (view == null) {
                 view = View.inflate(getActivity(), R.layout.v__select_route_list_item, null);
             }
+            View colorView = view.findViewById(R.id.v__select_route_list_item__color);
+            colorView.setBackgroundColor(colors.get(route));
             final CheckBox checkbox = (CheckBox) view.findViewById(R.id.v__select_route_list_item__is_selected);
             checkbox.setOnCheckedChangeListener(null);
             checkbox.setChecked(handler.isRouteSelected(transport, route));
@@ -154,7 +159,7 @@ public class SelectRouteFragment extends DialogFragment {
         @Override
         public void onLoadService(Service service) {
             ExpandableListView listView = (ExpandableListView) getDialog().findViewById(R.id.f__select_route__route_list);
-            ExpandableListAdapter adapter = new RouteListAdapter(service.transports);
+            ExpandableListAdapter adapter = new RouteListAdapter(service);
             listView.setAdapter(adapter);
             for (int i = 0; i < adapter.getGroupCount(); i += 1) {
                 listView.expandGroup(i);

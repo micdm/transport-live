@@ -15,9 +15,12 @@ import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.Forecast;
 import com.micdm.transportlive.data.ForecastVehicle;
 import com.micdm.transportlive.data.SelectedStationInfo;
+import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Station;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.interfaces.ForecastHandler;
+import com.micdm.transportlive.interfaces.ServiceHandler;
+import com.micdm.transportlive.misc.RouteColors;
 import com.micdm.transportlive.misc.Utils;
 
 import java.util.ArrayList;
@@ -40,7 +43,12 @@ public class ForecastFragment extends Fragment {
             }
         }
 
+        private final RouteColors colors;
         private final List<Group> groups = new ArrayList<Group>();
+
+        public ForecastListAdapter(Service service) {
+            this.colors = new RouteColors(service);
+        }
 
         @Override
         public int getGroupCount() {
@@ -117,6 +125,8 @@ public class ForecastFragment extends Fragment {
                 noVehiclesView.setVisibility(View.GONE);
                 vehicleInfoView.setVisibility(View.VISIBLE);
                 ForecastVehicle vehicle = getChild(groupPosition, childPosition);
+                View colorView = view.findViewById(R.id.v__forecasts_list_item_vehicle_list_item__color);
+                colorView.setBackgroundColor(colors.get(vehicle.route));
                 TextView routeView = (TextView) view.findViewById(R.id.v__forecasts_list_item_vehicle_list_item__route);
                 routeView.setText(getString(R.string.fragment_forecast_route, Utils.getTransportName(getActivity(), forecast.transport), vehicle.route.number));
                 TextView arrivalTimeView = (TextView) view.findViewById(R.id.v__forecasts_list_item_vehicle_list_item__arrival_time);
@@ -164,18 +174,25 @@ public class ForecastFragment extends Fragment {
         }
     }
 
+    private ServiceHandler serviceHandler;
+    private final ServiceHandler.OnLoadServiceListener onLoadServiceListener = new ServiceHandler.OnLoadServiceListener() {
+        @Override
+        public void onLoadService(Service service) {
+            getForecastListView().setAdapter(new ForecastListAdapter(service));
+        }
+    };
+
     private ForecastHandler forecastHandler;
     private final ForecastHandler.OnLoadStationsListener onLoadStationsListener = new ForecastHandler.OnLoadStationsListener() {
         @Override
         public void onLoadStations(List<SelectedStationInfo> selected) {
             hideAllViews();
             showView(R.id.f__forecasts__forecast_list);
-            ForecastListAdapter adapter = new ForecastListAdapter();
+            ExpandableListView view = getForecastListView();
+            ForecastListAdapter adapter = getForecastListAdapter();
             for (SelectedStationInfo info: selected) {
                 adapter.addSelectedStation(info);
             }
-            ExpandableListView view = getForecastListView();
-            view.setAdapter(adapter);
             for (int i = 0; i < adapter.getGroupCount(); i += 1) {
                 view.expandGroup(i);
             }
@@ -235,6 +252,7 @@ public class ForecastFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        serviceHandler = (ServiceHandler) getActivity();
         forecastHandler = (ForecastHandler) getActivity();
     }
 
@@ -256,6 +274,7 @@ public class ForecastFragment extends Fragment {
     public void onStart() {
         super.onStart();
         hideAllViews();
+        serviceHandler.addOnLoadServiceListener(onLoadServiceListener);
         forecastHandler.addOnLoadStationsListener(onLoadStationsListener);
         forecastHandler.addOnSelectStationListener(onSelectStationListener);
         forecastHandler.addOnUnselectStationListener(onUnselectStationListener);
@@ -287,6 +306,7 @@ public class ForecastFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
+        serviceHandler.removeOnLoadServiceListener(onLoadServiceListener);
         forecastHandler.removeOnLoadStationsListener(onLoadStationsListener);
         forecastHandler.removeOnSelectStationListener(onSelectStationListener);
         forecastHandler.removeOnUnselectStationListener(onUnselectStationListener);
