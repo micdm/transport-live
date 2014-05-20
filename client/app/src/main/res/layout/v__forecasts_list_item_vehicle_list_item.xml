@@ -7,6 +7,7 @@
         android:layout_height="match_parent"
         android:id="@+id/v__forecasts_list_item_vehicle_list_item__no_vehicles"
         android:gravity="center"
+        android:padding="5dp"
         android:text="@string/fragment_forecast_no_vehicles"/>
     <LinearLayout
         android:layout_width="match_parent"
