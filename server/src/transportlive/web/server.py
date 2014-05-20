@@ -6,11 +6,13 @@ from tornado.options import options
 from tornado.web import Application
 
 from transportlive.web.api.v1 import VehicleHandler, ForecastHandler
+from transportlive.web.site import IndexHandler
 
 logger = getLogger(__name__)
 
 def _get_app(datastore):
     return Application([
+        (r"/", IndexHandler),
         (r"/api/v1/vehicles", VehicleHandler, {"datastore": datastore}),
         (r"/api/v1/forecasts", ForecastHandler, {"datastore": datastore}),
     ], debug=options.DEBUG)

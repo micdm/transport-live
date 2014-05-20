@@ -7,6 +7,7 @@ DEBUG = False
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 DATA_ROOT = os.path.join(PROJECT_ROOT, "data")
 SOURCE_ROOT = os.path.join(PROJECT_ROOT, "src")
+TEMPLATE_ROOT = os.path.join(SOURCE_ROOT, "templates")
 TEST_ROOT = os.path.join(SOURCE_ROOT, "tests")
 
 LOGGING = {
