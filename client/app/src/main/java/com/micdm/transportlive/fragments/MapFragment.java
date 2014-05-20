@@ -138,11 +138,11 @@ public class MapFragment extends Fragment {
     private static final String PREF_KEY_USE_EXTERNAL_MAP = "pref_use_external_map";
     private static final int TILE_SIZE = 256;
     private static final int MIN_ZOOM = 14;
-    private static final int MAX_ZOOM = 15;
-    private static final int NORTH_EDGE = 56547372;
-    private static final int WEST_EDGE = 84902344;
-    private static final int SOUTH_EDGE = 56438204;
-    private static final int EAST_EDGE = 85122070;
+    private static final int MAX_ZOOM = 16;
+    private static final int NORTH_EDGE = 56535258;
+    private static final int WEST_EDGE = 84924316;
+    private static final int SOUTH_EDGE = 56447313;
+    private static final int EAST_EDGE = 85111084;
     private static final GeoPoint INITIAL_LOCATION = new GeoPoint(56484642, 84948100);
 
     private final SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
@@ -250,7 +250,7 @@ public class MapFragment extends Fragment {
 
     private MapTileProviderArray getTileProviders() {
         IRegisterReceiver receiver = new SimpleRegisterReceiver(getActivity());
-        ITileSource source = new XYTileSource("OSMPublicTransport", ResourceProxy.string.public_transport, MIN_ZOOM, MAX_ZOOM, TILE_SIZE, ".png", null);
+        ITileSource source = new XYTileSource("OSMPublicTransport", ResourceProxy.string.public_transport, MIN_ZOOM, MAX_ZOOM, TILE_SIZE, ".jpg", null);
         AssetArchive archive = AssetArchive.getAssetArchive(getActivity());
         MapTileFileArchiveProvider provider = new MapTileFileArchiveProvider(receiver, source, new IArchiveFile[] {archive});
         return new MapTileProviderArray(source, receiver, new MapTileModuleProviderBase[] {provider});
