@@ -79,9 +79,13 @@ class StreamHandler(object):
 
     def _parse_packets(self):
         while True:
-            packet = self._parse_packet()
-            if not packet:
+            packet_info = self._parse_packet()
+            if not packet_info:
                 break
+            packet_type, parts = packet_info
+            packet = self._build_packet(packet_type, parts)
+            if not packet:
+                continue
             self._handle_packet(packet)
 
     def _parse_packet(self):
@@ -92,7 +96,14 @@ class StreamHandler(object):
             return None
         length, packet_type, parts = packet_info
         self._buffer = self._buffer[length:]
-        return self._packet_builder.build(packet_type, parts)
+        return packet_type, parts
+
+    def _build_packet(self, packet_type, parts):
+        try:
+            return self._packet_builder.build(packet_type, parts)
+        except Exception as e:
+            logger.warning("Cannot build packet: %s", e)
+            return None
 
     def _handle_packet(self, packet):
         if isinstance(packet, LoginPacket):

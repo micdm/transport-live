@@ -51,6 +51,7 @@ class PacketBuilder(object):
             return self._build_ping_packet(parts)
         if packet_type == "D":
             return self._build_data_packet(parts)
+        raise Exception('unknown packet type "%s"'%packet_type)
 
     def _build_login_packet(self, parts):
         return LoginPacket(self._get_login(parts[0]), self._get_password(parts[1]))
