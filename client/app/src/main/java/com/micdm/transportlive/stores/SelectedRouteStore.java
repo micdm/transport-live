@@ -49,7 +49,7 @@ public class SelectedRouteStore {
         }
     }
 
-    private static final String FILE_NAME = "selected_routes.xml";
+    private static final String FILE_NAME = "selected_routes_1.2.1.xml";
 
     private final Context context;
 

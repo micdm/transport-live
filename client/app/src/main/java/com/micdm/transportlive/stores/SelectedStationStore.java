@@ -61,7 +61,7 @@ public class SelectedStationStore {
         }
     }
 
-    private static final String FILE_NAME = "selected_stations.xml";
+    private static final String FILE_NAME = "selected_stations_1.2.1.xml";
 
     private final Context context;
 

@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+// TODO: добавить очистку настроек и файлов-хранилищ при обновлении на новую версию
 public class MainActivity extends ActionBarActivity implements PreferenceFragment.OnPreferenceStartFragmentCallback, ConnectionHandler, ServiceHandler, ForecastHandler {
 
     private static class CustomPagerAdapter extends FragmentPagerAdapter {
