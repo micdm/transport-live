@@ -30,7 +30,7 @@ class DataServer(TCPServer):
             logger.info("Received %s packets in last %s", self._packet_count, self.PACKET_COUNTER_INTERVAL)
             self._packet_count = 0
             ioloop.add_timeout(self.PACKET_COUNTER_INTERVAL, _report_and_restart)
-        ioloop.add_timeout(self.PACKET_COUNTER_INTERVAL, )
+        ioloop.add_timeout(self.PACKET_COUNTER_INTERVAL, _report_and_restart)
 
     def handle_stream(self, stream, address):
         logger.info("New connection from %s:%s", *address)
