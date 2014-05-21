@@ -59,7 +59,7 @@ public abstract class CommandHandler {
     }
 
     private String getUserAgent() {
-        return context.getString(R.string.user_agent, getAppVersion(), context.getString(R.string.contact_email));
+        return context.getString(R.string.user_agent, getAppVersion());
     }
 
     private String getAppVersion() {
