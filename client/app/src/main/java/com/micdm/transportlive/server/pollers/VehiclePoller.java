@@ -1,7 +1,6 @@
 package com.micdm.transportlive.server.pollers;
 
 import android.content.Context;
-import android.os.Handler;
 
 import com.micdm.transportlive.data.RouteInfo;
 import com.micdm.transportlive.data.SelectedRouteInfo;
@@ -10,71 +9,25 @@ import com.micdm.transportlive.server.DataLoader;
 
 import java.util.List;
 
-public class VehiclePoller {
+public class VehiclePoller extends Poller<List<SelectedRouteInfo>, List<RouteInfo>> {
 
-    public static interface OnLoadListener {
-        public void onStart();
-        public void onFinish();
-        public void onLoad(List<RouteInfo> vehicles);
-        public void onError();
+    public static interface OnLoadListener extends Poller.OnLoadListener<List<RouteInfo>> {}
+
+    public VehiclePoller(Context context, Poller.OnLoadListener listener) {
+        super(context, listener);
     }
 
-    private static final int UPDATE_INTERVAL = 30;
-
-    private Handler handler;
-    private Runnable load;
-    private final DataLoader loader;
-    private DataLoader.Task currentTask;
-    private final OnLoadListener onLoadListener;
-
-    public VehiclePoller(Context context, final OnLoadListener onLoadListener) {
-        this.loader = new DataLoader(context);
-        this.onLoadListener = onLoadListener;
-    }
-
-    public void start(final Service service, final List<SelectedRouteInfo> selected) {
-        if (handler != null) {
-            return;
-        }
-        handler = new Handler();
-        load = new Runnable() {
-            @Override
-            public void run() {
-                load(service, selected);
-            }
-        };
-        load.run();
-    }
-
-    private void load(Service service, List<SelectedRouteInfo> selected) {
-        handler.postDelayed(load, UPDATE_INTERVAL * 1000);
-        onLoadListener.onStart();
-        currentTask = loader.loadVehicles(service, selected, new DataLoader.OnLoadVehiclesListener() {
+    @Override
+    protected DataLoader.Task startTask(Service service, List<SelectedRouteInfo> selected) {
+        return loader.loadVehicles(service, selected, new DataLoader.OnLoadVehiclesListener() {
             @Override
             public void onLoad(List<RouteInfo> vehicles) {
-                currentTask = null;
-                onLoadListener.onFinish();
-                onLoadListener.onLoad(vehicles);
+                onTaskResult(vehicles);
             }
             @Override
             public void onError() {
-                currentTask = null;
-                onLoadListener.onFinish();
-                onLoadListener.onError();
+                onTaskError();
             }
         });
-    }
-
-    public void stop() {
-        if (handler == null) {
-            return;
-        }
-        handler.removeCallbacks(load);
-        handler = null;
-        if (currentTask != null) {
-            currentTask.cancel();
-            currentTask = null;
-            onLoadListener.onFinish();
-        }
     }
 }
