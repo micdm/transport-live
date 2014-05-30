@@ -2,7 +2,7 @@ apply plugin: 'android'
 
 android {
     compileSdkVersion 19
-    buildToolsVersion '19.0.3'
+    buildToolsVersion '19.1'
     defaultConfig {
         minSdkVersion 10
         targetSdkVersion 19
@@ -43,11 +43,12 @@ android.signingConfigs.release.keyAlias p.keyAlias
 android.signingConfigs.release.keyPassword p.keyPassword
 
 dependencies {
-    compile 'com.android.support:support-v4:+'
-    compile 'com.android.support:appcompat-v7:+'
-    compile 'org.apache.commons:commons-io:+'
-    compile 'org.apache.commons:commons-lang3:+'
-    compile 'org.slf4j:slf4j-android:+'
-    compile 'org.osmdroid:osmdroid-android:+'
+    compile 'com.android.support:support-v4:19+'
+    compile 'com.android.support:appcompat-v7:19+'
+    compile 'org.apache.commons:commons-io:1+'
+    compile 'org.apache.commons:commons-lang3:3+'
+    compile 'org.slf4j:slf4j-android:1+'
+    compile 'org.osmdroid:osmdroid-android:4+'
+    compile 'com.google.android.gms:play-services:4+'
     compile project(':third:android-support-v4-preferencefragment')
 }

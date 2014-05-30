@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.google.android.gms.analytics.GoogleAnalytics;
 import com.micdm.transportlive.data.Forecast;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.RouteInfo;
@@ -192,6 +193,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ((CustomApplication) getApplication()).getTracker();
         setContentView(R.layout.a__main);
         setupActionBar();
         setupPager();
@@ -273,6 +275,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     @Override
     protected void onStart() {
         super.onStart();
+        GoogleAnalytics.getInstance(this).reportActivityStart(this);
         loadVehicles();
         loadForecasts();
     }
@@ -282,6 +285,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         super.onStop();
         vehiclePoller.stop();
         forecastPoller.stop();
+        GoogleAnalytics.getInstance(this).reportActivityStop(this);
     }
 
     @Override
