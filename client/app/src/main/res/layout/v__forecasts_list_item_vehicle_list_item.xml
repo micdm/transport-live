@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="5dp">
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -18,12 +19,26 @@
             android:layout_width="15dp"
             android:layout_height="match_parent"
             android:id="@+id/v__forecasts_list_item_vehicle_list_item__color"/>
-        <TextView
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:id="@+id/v__forecasts_list_item_vehicle_list_item__route"
-            android:layout_weight="1"
-            android:padding="5dp"/>
+            android:orientation="horizontal"
+            android:layout_weight="1">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/v__forecasts_list_item_vehicle_list_item__route"
+                android:padding="5dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/v__forecasts_list_item_vehicle_list_item__low_floor"
+                android:padding="5dp"
+                android:textStyle="italic"
+                android:textColor="#999999"
+                android:background="@drawable/low_floor_label_background"
+                android:text="@string/fragment_forecast_low_floor"/>
+        </LinearLayout>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"

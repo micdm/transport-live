@@ -129,6 +129,8 @@ public class ForecastFragment extends Fragment {
                 colorView.setBackgroundColor(colors.get(vehicle.route));
                 TextView routeView = (TextView) view.findViewById(R.id.v__forecasts_list_item_vehicle_list_item__route);
                 routeView.setText(getString(R.string.fragment_forecast_route, Utils.getTransportName(getActivity(), forecast.transport), vehicle.route.number));
+                View lowFloorView = view.findViewById(R.id.v__forecasts_list_item_vehicle_list_item__low_floor);
+                lowFloorView.setVisibility(vehicle.isLowFloor ? View.VISIBLE : View.GONE);
                 TextView arrivalTimeView = (TextView) view.findViewById(R.id.v__forecasts_list_item_vehicle_list_item__arrival_time);
                 arrivalTimeView.setText(getArrivalTimeInMinutes(vehicle.arrivalTime));
             }

@@ -83,6 +83,7 @@ public class GetForecastsCommandHandler extends CommandHandler {
     private ForecastVehicle getForecastVehicle(JSONObject vehicleJson, Transport transport) throws JSONException {
         Route route = transport.getRouteByNumber(vehicleJson.getInt("route"));
         int time = vehicleJson.getInt("time");
-        return new ForecastVehicle(route, time);
+        boolean isLowFloor = vehicleJson.has("is_low_floor");
+        return new ForecastVehicle(route, time, isLowFloor);
     }
 }
