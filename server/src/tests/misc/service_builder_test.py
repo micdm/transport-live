@@ -2,7 +2,7 @@
 
 import unittest
 
-from transportlive.forecast.service_builder import ServiceBuilder
+from transportlive.misc.service_builder import ServiceBuilder
 
 class ServiceBuilderTest(unittest.TestCase):
 

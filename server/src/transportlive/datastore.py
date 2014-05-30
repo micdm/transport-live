@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 from logging import getLogger
 
 from transportlive.forecast.forecast_calculator import ForecastCalculator
-from transportlive.forecast.service_builder import ServiceBuilder
+from transportlive.misc.low_floor_vehicles_builder import LowFloorVehiclesBuilder
+from transportlive.misc.service_builder import ServiceBuilder
 from transportlive.models import Vehicle
 
 logger = getLogger(__name__)
@@ -16,18 +17,22 @@ class DataStore(object):
 
     def __init__(self):
         self._service = ServiceBuilder().build()
+        self._low_floor_vehicles = LowFloorVehiclesBuilder().build()
         self._vehicles = {}
         self._forecast_calculator = ForecastCalculator(self._service)
 
     def add_vehicle(self, vehicle_id, number, transport_type, route_number, mark):
         vehicle = self._vehicles.get(vehicle_id)
         if not vehicle:
-            vehicle = Vehicle(vehicle_id, number)
+            vehicle = Vehicle(vehicle_id, number, self._is_low_floor(transport_type, number))
             self._vehicles[vehicle_id] = vehicle
         vehicle.transport = self._service.get_transport_by_type(transport_type)
         vehicle.route = vehicle.transport.get_route_by_number(route_number)
         vehicle.marks.append(mark)
         self._forecast_calculator.update_vehicle(vehicle)
+
+    def _is_low_floor(self, transport_type, number):
+        return transport_type in self._low_floor_vehicles and number in self._low_floor_vehicles[transport_type]
 
     def get_vehicles(self, transport_type, route_number):
         transport = self._service.get_transport_by_type(transport_type)

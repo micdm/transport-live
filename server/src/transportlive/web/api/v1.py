@@ -35,12 +35,15 @@ class VehicleHandler(RequestHandler):
     def _vehicle_to_dict(self, vehicle):
         last_mark = vehicle.last_mark
         coords = last_mark.coords
-        return {
+        result = {
             "number": vehicle.number,
             "lat": str(coords.latitude),
             "lon": str(coords.longitude),
             "course": last_mark.course
         }
+        if vehicle.is_low_floor:
+            result["is_low_floor"] = True
+        return result
 
 class ForecastHandler(RequestHandler):
 
@@ -68,11 +71,14 @@ class ForecastHandler(RequestHandler):
         return {
             "transport": forecast.transport.type,
             "station": forecast.station.id,
-            "vehicles": map(self._vehicle_to_dict, forecast.vehicles)
+            "vehicles": map(lambda item: self._arrival_to_dict(*item), forecast.arrival)
         }
 
-    def _vehicle_to_dict(self, vehicle):
-        return {
+    def _arrival_to_dict(self, vehicle, time):
+        result = {
             "route": vehicle.route.number,
-            "time": vehicle.time
+            "time": time
         }
+        if vehicle.is_low_floor:
+            result["is_low_floor"] = True
+        return result

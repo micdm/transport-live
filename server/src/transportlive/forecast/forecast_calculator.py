@@ -4,7 +4,7 @@ from logging import getLogger
 import math
 
 from transportlive.misc.decimal_impl import normalize_coordinate
-from transportlive.models import Forecast, ForecastVehicle, Coords
+from transportlive.models import Forecast, Coords
 
 logger = getLogger(__name__)
 
@@ -76,7 +76,7 @@ class ForecastCalculator(object):
             time = int(distance / speed)
             if time > self.MAX_ARRIVAL_TIME:
                 continue
-            forecast.vehicles.append(ForecastVehicle(route, time))
+            forecast.arrival.append((vehicle, time))
         return forecast
 
     def _get_vehicles(self, station):

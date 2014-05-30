@@ -55,9 +55,10 @@ class Direction(object):
 
 class Vehicle(object):
 
-    def __init__(self, vehicle_id, number):
+    def __init__(self, vehicle_id, number, is_low_floor):
         self.id = vehicle_id
         self.number = number
+        self.is_low_floor = is_low_floor
         self.transport = None
         self.route = None
         self.marks = []
@@ -85,10 +86,4 @@ class Forecast(object):
     def __init__(self, transport, station):
         self.transport = transport
         self.station = station
-        self.vehicles = []
-
-class ForecastVehicle(object):
-
-    def __init__(self, route, time):
-        self.route = route
-        self.time = time
+        self.arrival = []
