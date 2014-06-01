@@ -10,7 +10,13 @@ public interface DonateHandler {
         public void onLoadDonateItems(List<DonateItem> items);
     }
 
+    public static interface OnDonateListener extends EventListener {
+        public void onDonate();
+    }
+
     public void makeDonation(DonateItem item);
     public void addOnLoadDonateItemsListener(OnLoadDonateItemsListener listener);
     public void removeOnLoadDonateItemsListener(OnLoadDonateItemsListener listener);
+    public void addOnDonateListener(OnDonateListener listener);
+    public void removeOnDonateListener(OnDonateListener listener);
 }

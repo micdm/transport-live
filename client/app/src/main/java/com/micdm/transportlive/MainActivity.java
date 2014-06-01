@@ -1,7 +1,9 @@
 package com.micdm.transportlive;
 
+import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.support.v4.app.Fragment;
@@ -110,6 +112,9 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     private static final String EVENT_LISTENER_KEY_ON_UNSELECT_ALL_STATIONS = "OnUnselectAllStations";
     private static final String EVENT_LISTENER_KEY_ON_LOAD_FORECASTS = "OnLoadForecasts";
     private static final String EVENT_LISTENER_KEY_ON_LOAD_DONATE_ITEMS = "OnLoadDonateItems";
+    private static final String EVENT_LISTENER_KEY_ON_DONATE = "OnDonate";
+
+    private static final int BUY_REQUEST_CODE = 1001;
 
     private final EventListenerManager listeners = new EventListenerManager();
 
@@ -390,6 +395,18 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     }
 
     @Override
+    protected void onActivityResult (int requestCode, int resultCode, Intent data) {
+        if (requestCode == BUY_REQUEST_CODE && resultCode == RESULT_OK) {
+            listeners.notify(EVENT_LISTENER_KEY_ON_DONATE, new EventListenerManager.OnIterateListener() {
+                @Override
+                public void onIterate(EventListener listener) {
+                    ((OnDonateListener) listener).onDonate();
+                }
+            });
+        }
+    }
+
+    @Override
     public void requestReconnect() {
         loadVehicles();
         loadForecasts();
@@ -649,7 +666,13 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
 
     @Override
     public void makeDonation(DonateItem item) {
-        donateManager.makeDonation(item);
+        PendingIntent intent = donateManager.getBuyIntent(item);
+        if (intent == null) {
+            return;
+        }
+        try {
+            startIntentSenderForResult(intent.getIntentSender(), BUY_REQUEST_CODE, new Intent(), 0, 0, 0);
+        } catch (IntentSender.SendIntentException e) {}
     }
 
     @Override
@@ -661,5 +684,15 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     @Override
     public void removeOnLoadDonateItemsListener(OnLoadDonateItemsListener listener) {
         listeners.remove(EVENT_LISTENER_KEY_ON_LOAD_DONATE_ITEMS, listener);
+    }
+
+    @Override
+    public void addOnDonateListener(OnDonateListener listener) {
+        listeners.add(EVENT_LISTENER_KEY_ON_DONATE, listener);
+    }
+
+    @Override
+    public void removeOnDonateListener(OnDonateListener listener) {
+        listeners.remove(EVENT_LISTENER_KEY_ON_DONATE, listener);
     }
 }

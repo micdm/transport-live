@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.donate.DonateItem;
@@ -68,6 +69,13 @@ public class DonateFragment extends DialogFragment {
             }
         }
     };
+    private final DonateHandler.OnDonateListener onDonateListener = new DonateHandler.OnDonateListener() {
+        @Override
+        public void onDonate() {
+            Toast.makeText(getActivity(), R.string.fragment_donate_thanks, Toast.LENGTH_LONG).show();
+            dismiss();
+        }
+    };
 
     @Override
     public void onAttach(Activity activity) {
@@ -101,11 +109,13 @@ public class DonateFragment extends DialogFragment {
     public void onStart() {
         super.onStart();
         handler.addOnLoadDonateItemsListener(onLoadDonateItemsListener);
+        handler.addOnDonateListener(onDonateListener);
     }
 
     @Override
     public void onStop() {
         super.onStop();
         handler.removeOnLoadDonateItemsListener(onLoadDonateItemsListener);
+        handler.removeOnDonateListener(onDonateListener);
     }
 }

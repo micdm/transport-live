@@ -35,7 +35,7 @@ public class LoadItemsTask extends AsyncTask<String[], Void, List<DonateItem>> {
     protected List<DonateItem> doInBackground(String[]... ids) {
         Bundle request = getLoadItemsRequestBundle(ids[0]);
         try {
-            Bundle result = service.getSkuDetails(3, context.getPackageName(), "inapp", request);
+            Bundle result = service.getSkuDetails(DonateManager.BILLING_API_VERSION, context.getPackageName(), DonateManager.PURCHASE_TYPE, request);
             if (result.getInt("RESPONSE_CODE") != 0) {
                 return null;
             }

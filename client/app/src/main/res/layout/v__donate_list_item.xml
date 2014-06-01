@@ -8,10 +8,12 @@
         android:layout_height="match_parent"
         android:id="@+id/v__donate_list_item__title"
         android:layout_weight="1"
-        android:padding="5dp"/>
+        android:padding="5dp"
+        android:textSize="18sp"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:id="@+id/v__donate_list_item__price"
-        android:padding="5dp"/>
+        android:padding="5dp"
+        android:textSize="18sp"/>
 </LinearLayout>

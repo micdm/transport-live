@@ -1,7 +1,10 @@
 package com.micdm.transportlive.donate;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
+import android.os.RemoteException;
 
 import java.util.List;
 
@@ -11,6 +14,8 @@ public class DonateManager {
         public void onLoadItems(List<DonateItem> items);
     }
 
+    public static final int BILLING_API_VERSION = 3;
+    public static final String PURCHASE_TYPE = "inapp";
     private static final String[] IDS = new String[] {"1", "2", "3", "4"};
 
     private final BillingServiceConnection connection = new BillingServiceConnection(new BillingServiceConnection.OnServiceReadyListener() {
@@ -52,7 +57,15 @@ public class DonateManager {
         task.execute(IDS);
     }
 
-    public void makeDonation(DonateItem item) {
-
+    public PendingIntent getBuyIntent(DonateItem item) {
+        try {
+            Bundle result = connection.getService().getBuyIntent(BILLING_API_VERSION, context.getPackageName(), item.id, PURCHASE_TYPE, "");
+            if (result.getInt("RESPONSE_CODE") != 0) {
+                return null;
+            }
+            return result.getParcelable("BUY_INTENT");
+        } catch (RemoteException e) {
+            return null;
+        }
     }
 }
