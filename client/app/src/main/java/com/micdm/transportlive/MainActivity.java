@@ -25,7 +25,10 @@ import com.micdm.transportlive.data.SelectedStationInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Station;
 import com.micdm.transportlive.data.Transport;
+import com.micdm.transportlive.donate.DonateItem;
+import com.micdm.transportlive.donate.DonateManager;
 import com.micdm.transportlive.fragments.AboutFragment;
+import com.micdm.transportlive.fragments.DonateFragment;
 import com.micdm.transportlive.fragments.ForecastFragment;
 import com.micdm.transportlive.fragments.MapFragment;
 import com.micdm.transportlive.fragments.NoConnectionFragment;
@@ -33,6 +36,7 @@ import com.micdm.transportlive.fragments.SelectRouteFragment;
 import com.micdm.transportlive.fragments.SelectStationFragment;
 import com.micdm.transportlive.fragments.SettingsFragment;
 import com.micdm.transportlive.interfaces.ConnectionHandler;
+import com.micdm.transportlive.interfaces.DonateHandler;
 import com.micdm.transportlive.interfaces.EventListener;
 import com.micdm.transportlive.interfaces.ForecastHandler;
 import com.micdm.transportlive.interfaces.ServiceHandler;
@@ -48,7 +52,8 @@ import java.util.Iterator;
 import java.util.List;
 
 // TODO: добавить очистку настроек и файлов-хранилищ при обновлении на новую версию
-public class MainActivity extends ActionBarActivity implements PreferenceFragment.OnPreferenceStartFragmentCallback, ConnectionHandler, ServiceHandler, ForecastHandler {
+public class MainActivity extends ActionBarActivity implements PreferenceFragment.OnPreferenceStartFragmentCallback,
+        ConnectionHandler, ServiceHandler, ForecastHandler, DonateHandler {
 
     private static class CustomPagerAdapter extends FragmentPagerAdapter {
 
@@ -94,9 +99,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     private static final String FRAGMENT_NO_CONNECTION_TAG = "no_connection";
     private static final String FRAGMENT_SELECT_STATION_TAG = "select_station";
     private static final String FRAGMENT_SELECT_ROUTE_TAG = "select_route";
-
-    private static final String PREF_KEY_SHARE = "pref_share";
-    private static final String PREF_KEY_ABOUT = "pref_about";
+    private static final String FRAGMENT_DONATE_TAG = "donate";
 
     private static final String EVENT_LISTENER_KEY_ON_UNSELECT_ALL_ROUTES = "OnUnselectAllRoutes";
     private static final String EVENT_LISTENER_KEY_ON_LOAD_SERVICE = "OnLoadService";
@@ -106,6 +109,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     private static final String EVENT_LISTENER_KEY_ON_UNSELECT_STATION = "OnUnselectStation";
     private static final String EVENT_LISTENER_KEY_ON_UNSELECT_ALL_STATIONS = "OnUnselectAllStations";
     private static final String EVENT_LISTENER_KEY_ON_LOAD_FORECASTS = "OnLoadForecasts";
+    private static final String EVENT_LISTENER_KEY_ON_LOAD_DONATE_ITEMS = "OnLoadDonateItems";
 
     private final EventListenerManager listeners = new EventListenerManager();
 
@@ -190,10 +194,23 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     private List<SelectedStationInfo> selectedStations;
     private List<Forecast> forecasts;
 
+    private DonateManager donateManager = new DonateManager(this, new DonateManager.OnLoadItemsListener() {
+        @Override
+        public void onLoadItems(final List<DonateItem> items) {
+            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_DONATE_ITEMS, new EventListenerManager.OnIterateListener() {
+                @Override
+                public void onIterate(EventListener listener) {
+                    ((OnLoadDonateItemsListener) listener).onLoadDonateItems(items);
+                }
+            });
+        }
+    });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ((CustomApplication) getApplication()).getTracker();
+        donateManager.init();
         setContentView(R.layout.a__main);
         setupActionBar();
         setupPager();
@@ -289,6 +306,12 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        donateManager.deinit();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.common, menu);
@@ -313,15 +336,26 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         if (key == null) {
             return false;
         }
-        if (key.equals(PREF_KEY_SHARE)) {
+        if (key.equals(SettingsFragment.PREF_KEY_DONATE)) {
+            showDonateMessage();
+            return true;
+        }
+        if (key.equals(SettingsFragment.PREF_KEY_SHARE)) {
             showShareMessage();
             return true;
         }
-        if (key.equals(PREF_KEY_ABOUT)) {
+        if (key.equals(SettingsFragment.PREF_KEY_ABOUT)) {
             showAboutMessage();
             return true;
         }
         return false;
+    }
+
+    private void showDonateMessage() {
+        FragmentManager manager = getSupportFragmentManager();
+        if (manager.findFragmentByTag(FRAGMENT_DONATE_TAG) == null) {
+            (new DonateFragment()).show(manager, FRAGMENT_DONATE_TAG);
+        }
     }
 
     private void showShareMessage() {
@@ -611,5 +645,21 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     @Override
     public void removeOnLoadForecastsListener(OnLoadForecastsListener listener) {
         listeners.remove(EVENT_LISTENER_KEY_ON_LOAD_FORECASTS, listener);
+    }
+
+    @Override
+    public void makeDonation(DonateItem item) {
+        donateManager.makeDonation(item);
+    }
+
+    @Override
+    public void addOnLoadDonateItemsListener(OnLoadDonateItemsListener listener) {
+        listeners.add(EVENT_LISTENER_KEY_ON_LOAD_DONATE_ITEMS, listener);
+        listener.onLoadDonateItems(donateManager.getItems());
+    }
+
+    @Override
+    public void removeOnLoadDonateItemsListener(OnLoadDonateItemsListener listener) {
+        listeners.remove(EVENT_LISTENER_KEY_ON_LOAD_DONATE_ITEMS, listener);
     }
 }

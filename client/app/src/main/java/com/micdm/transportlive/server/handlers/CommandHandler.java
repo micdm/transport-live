@@ -1,12 +1,12 @@
 package com.micdm.transportlive.server.handlers;
 
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.net.http.AndroidHttpClient;
+import android.os.Build;
 
 import com.micdm.transportlive.R;
+import com.micdm.transportlive.misc.Utils;
 import com.micdm.transportlive.server.commands.Command;
 
 import org.apache.commons.io.IOUtils;
@@ -59,20 +59,7 @@ public abstract class CommandHandler {
     }
 
     private String getUserAgent() {
-        return context.getString(R.string.user_agent, getAppVersion());
-    }
-
-    private String getAppVersion() {
-        try {
-            PackageManager manager = context.getPackageManager();
-            if (manager == null) {
-                return "";
-            }
-            PackageInfo info = manager.getPackageInfo(context.getPackageName(), 0);
-            return info.versionName;
-        } catch (PackageManager.NameNotFoundException e) {
-            return "";
-        }
+        return context.getString(R.string.user_agent, Utils.getAppVersion(context), Build.VERSION.RELEASE);
     }
 
     private String getRequestUri(String method, List<RequestParam> params) {

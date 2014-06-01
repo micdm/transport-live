@@ -6,11 +6,14 @@
         android:title="@string/fragment_settings_use_external_map_title"
         android:summary="@string/fragment_settings_use_external_map_summary"/>
     <Preference
+        android:key="pref_donate"
+        android:title="@string/fragment_settings_donate_title"
+        android:summary="@string/fragment_settings_donate_summary"/>
+    <Preference
         android:key="pref_share"
         android:title="@string/fragment_settings_share_title"
         android:summary="@string/fragment_settings_share_summary"/>
     <Preference
         android:key="pref_about"
-        android:title="@string/fragment_settings_about_title"
-        android:summary="@string/fragment_settings_about_summary"/>
+        android:title="@string/fragment_settings_about_title"/>
 </PreferenceScreen>

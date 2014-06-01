@@ -3,14 +3,14 @@
     <!-- Общее -->
     <string name="app_name">Транспорт Томска</string>
     <string name="contact_email">demerzov@gmail.com</string>
-    <string name="user_agent">transport-live %s</string>
+    <string name="user_agent">transport-live %1$s @ Android %2$s</string>
     <!-- Названия транспорта -->
     <string name="transport_type_trolleybus">Троллейбус</string>
     <string name="transport_type_tram">Трамвай</string>
     <!-- Вкладки -->
     <string name="tab_title_forecast">Расписание</string>
     <string name="tab_title_map">Карта</string>
-    <string name="tab_title_settings">Настройки</string>
+    <string name="tab_title_settings">Ещё</string>
     <!-- Меню -->
     <string name="menu_item_reload">Обновить</string>
     <!-- Расшаривание -->
@@ -18,8 +18,14 @@
     <!-- Общее для фрагментов -->
     <string name="fragment_loading">Обновление…</string>
     <!-- Фрагмент о приложении -->
-    <string name="fragment_about_text">По любым вопросам пишите на %s.\nРаботает на основе http://openstreetmap.org</string>
+    <string name="fragment_about_title">О приложении</string>
+    <string name="fragment_about_text">
+        &lt;b&gt;%1$s v%2$s&lt;/b&gt;&lt;br&gt;&lt;br&gt;
+        По любым вопросам пишите на %3$s.&lt;br&gt;&lt;br&gt;
+        Работает на основе openstreetmap.org
+    </string>
     <!-- Фрагмент про ошибку сети -->
+    <string name="fragment_no_connection_title">Нет сети</string>
     <string name="fragment_no_connection_text">Невозможно подключиться к серверу.\nПроверьте, есть ли у вас доступ в Интернет.</string>
     <string name="fragment_no_connection_retry">Ещё раз</string>
     <!-- Фрагмент с прогнозами -->
@@ -40,11 +46,14 @@
     <string name="fragment_map_no_vehicles">Похоже, весь транспорт в парке.</string>
     <!-- Фрагмент выбора маршрутов -->
     <string name="fragment_select_route_title">Выберите маршруты</string>
+    <!-- Фрагмент пожертвований -->
+    <string name="fragment_donate_title">Выберите сумму</string>
     <!-- Фрагмент с настройками -->
     <string name="fragment_settings_use_external_map_title">Дополнительные карты</string>
     <string name="fragment_settings_use_external_map_summary">Вы сможете изменять масштаб, но это потребует больше Интернет-трафика</string>
-    <string name="fragment_settings_share_title">Поделиться…</string>
-    <string name="fragment_settings_share_summary">Расскажите знакомым в соцсетях об этом приложении</string>
+    <string name="fragment_settings_donate_title">Дать денег…</string>
+    <string name="fragment_settings_donate_summary">Пожертвуйте разработчику на еду</string>
+    <string name="fragment_settings_share_title">Рассказать…</string>
+    <string name="fragment_settings_share_summary">Поделитесь приложением со знакомыми в соцсетях</string>
     <string name="fragment_settings_about_title">О приложении…</string>
-    <string name="fragment_settings_about_summary">Немного об авторах и технологиях</string>
 </resources>
