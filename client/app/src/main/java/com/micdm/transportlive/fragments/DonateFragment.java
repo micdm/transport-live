@@ -14,7 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.micdm.transportlive.R;
-import com.micdm.transportlive.donate.DonateItem;
+import com.micdm.transportlive.donate.DonateProduct;
 import com.micdm.transportlive.interfaces.DonateHandler;
 
 import java.util.List;
@@ -24,20 +24,20 @@ public class DonateFragment extends DialogFragment {
 
     private class DonateListAdapter extends BaseAdapter {
 
-        private final List<DonateItem> items;
+        private final List<DonateProduct> products;
 
-        public DonateListAdapter(List<DonateItem> items) {
-            this.items = items;
+        public DonateListAdapter(List<DonateProduct> products) {
+            this.products = products;
         }
 
         @Override
         public int getCount() {
-            return items.size();
+            return products.size();
         }
 
         @Override
-        public DonateItem getItem(int position) {
-            return items.get(position);
+        public DonateProduct getItem(int position) {
+            return products.get(position);
         }
 
         @Override
@@ -50,22 +50,22 @@ public class DonateFragment extends DialogFragment {
             if (view == null) {
                 view = View.inflate(getActivity(), R.layout.v__donate_list_item, null);
             }
-            DonateItem item = getItem(position);
+            DonateProduct product = getItem(position);
             TextView titleView = (TextView) view.findViewById(R.id.v__donate_list_item__title);
-            titleView.setText(item.title);
+            titleView.setText(product.title);
             TextView priceView = (TextView) view.findViewById(R.id.v__donate_list_item__price);
-            priceView.setText(item.price);
+            priceView.setText(product.price);
             return view;
         }
     }
 
     private DonateHandler handler;
-    private final DonateHandler.OnLoadDonateItemsListener onLoadDonateItemsListener = new DonateHandler.OnLoadDonateItemsListener() {
+    private final DonateHandler.OnLoadDonateProductsListener onLoadDonateProductsListener = new DonateHandler.OnLoadDonateProductsListener() {
         @Override
-        public void onLoadDonateItems(List<DonateItem> items) {
-            if (items != null) {
+        public void onLoadDonateProducts(List<DonateProduct> products) {
+            if (products != null) {
                 ListView view = (ListView) getDialog().findViewById(R.id.f__donate__donate_list);
-                view.setAdapter(new DonateListAdapter(items));
+                view.setAdapter(new DonateListAdapter(products));
             }
         }
     };
@@ -98,8 +98,8 @@ public class DonateFragment extends DialogFragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 DonateListAdapter adapter = (DonateListAdapter) adapterView.getAdapter();
-                DonateItem item = adapter.getItem(position);
-                handler.makeDonation(item);
+                DonateProduct product = adapter.getItem(position);
+                handler.makeDonation(product);
             }
         });
         return view;
@@ -108,14 +108,14 @@ public class DonateFragment extends DialogFragment {
     @Override
     public void onStart() {
         super.onStart();
-        handler.addOnLoadDonateItemsListener(onLoadDonateItemsListener);
+        handler.addOnLoadDonateProductsListener(onLoadDonateProductsListener);
         handler.addOnDonateListener(onDonateListener);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        handler.removeOnLoadDonateItemsListener(onLoadDonateItemsListener);
+        handler.removeOnLoadDonateProductsListener(onLoadDonateProductsListener);
         handler.removeOnDonateListener(onDonateListener);
     }
 }

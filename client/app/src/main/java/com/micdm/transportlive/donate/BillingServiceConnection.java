@@ -13,7 +13,7 @@ public class BillingServiceConnection implements ServiceConnection {
     }
 
     private IInAppBillingService service;
-    private OnServiceReadyListener listener;
+    private final OnServiceReadyListener listener;
 
     public BillingServiceConnection(OnServiceReadyListener listener) {
         this.listener = listener;

@@ -17,7 +17,7 @@ public abstract class Poller<Selected, Result> {
 
     private static final int UPDATE_INTERVAL = 15;
 
-    private Handler handler = new Handler();
+    private final Handler handler = new Handler();
     private Runnable load;
     protected final DataLoader loader;
     private DataLoader.Task currentTask;

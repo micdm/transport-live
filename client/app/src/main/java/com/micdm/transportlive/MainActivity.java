@@ -26,8 +26,8 @@ import com.micdm.transportlive.data.SelectedStationInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Station;
 import com.micdm.transportlive.data.Transport;
-import com.micdm.transportlive.donate.DonateItem;
 import com.micdm.transportlive.donate.DonateManager;
+import com.micdm.transportlive.donate.DonateProduct;
 import com.micdm.transportlive.fragments.AboutFragment;
 import com.micdm.transportlive.fragments.DonateFragment;
 import com.micdm.transportlive.fragments.ForecastFragment;
@@ -111,7 +111,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     private static final String EVENT_LISTENER_KEY_ON_UNSELECT_STATION = "OnUnselectStation";
     private static final String EVENT_LISTENER_KEY_ON_UNSELECT_ALL_STATIONS = "OnUnselectAllStations";
     private static final String EVENT_LISTENER_KEY_ON_LOAD_FORECASTS = "OnLoadForecasts";
-    private static final String EVENT_LISTENER_KEY_ON_LOAD_DONATE_ITEMS = "OnLoadDonateItems";
+    private static final String EVENT_LISTENER_KEY_ON_LOAD_DONATE_PRODUCTS = "OnLoadDonateProducts";
     private static final String EVENT_LISTENER_KEY_ON_DONATE = "OnDonate";
 
     private static final int BUY_REQUEST_CODE = 1001;
@@ -199,13 +199,13 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     private List<SelectedStationInfo> selectedStations;
     private List<Forecast> forecasts;
 
-    private DonateManager donateManager = new DonateManager(this, new DonateManager.OnLoadItemsListener() {
+    private final DonateManager donateManager = new DonateManager(this, new DonateManager.OnLoadProductsListener() {
         @Override
-        public void onLoadItems(final List<DonateItem> items) {
-            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_DONATE_ITEMS, new EventListenerManager.OnIterateListener() {
+        public void onLoadProducts(final List<DonateProduct> products) {
+            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_DONATE_PRODUCTS, new EventListenerManager.OnIterateListener() {
                 @Override
                 public void onIterate(EventListener listener) {
-                    ((OnLoadDonateItemsListener) listener).onLoadDonateItems(items);
+                    ((OnLoadDonateProductsListener) listener).onLoadDonateProducts(products);
                 }
             });
         }
@@ -672,26 +672,26 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     }
 
     @Override
-    public void makeDonation(DonateItem item) {
-        PendingIntent intent = donateManager.getDonateIntent(item);
+    public void makeDonation(DonateProduct product) {
+        PendingIntent intent = donateManager.getDonateIntent(product);
         if (intent == null) {
             return;
         }
         try {
             startIntentSenderForResult(intent.getIntentSender(), BUY_REQUEST_CODE, new Intent(), 0, 0, 0);
-            ((CustomApplication) getApplication()).getAnalytics().reportEvent(Analytics.Category.DONATE, Analytics.Action.CLICK, item.id);
+            ((CustomApplication) getApplication()).getAnalytics().reportEvent(Analytics.Category.DONATE, Analytics.Action.CLICK, product.id);
         } catch (IntentSender.SendIntentException e) {}
     }
 
     @Override
-    public void addOnLoadDonateItemsListener(OnLoadDonateItemsListener listener) {
-        listeners.add(EVENT_LISTENER_KEY_ON_LOAD_DONATE_ITEMS, listener);
-        listener.onLoadDonateItems(donateManager.getItems());
+    public void addOnLoadDonateProductsListener(OnLoadDonateProductsListener listener) {
+        listeners.add(EVENT_LISTENER_KEY_ON_LOAD_DONATE_PRODUCTS, listener);
+        listener.onLoadDonateProducts(donateManager.getProducts());
     }
 
     @Override
-    public void removeOnLoadDonateItemsListener(OnLoadDonateItemsListener listener) {
-        listeners.remove(EVENT_LISTENER_KEY_ON_LOAD_DONATE_ITEMS, listener);
+    public void removeOnLoadDonateProductsListener(OnLoadDonateProductsListener listener) {
+        listeners.remove(EVENT_LISTENER_KEY_ON_LOAD_DONATE_PRODUCTS, listener);
     }
 
     @Override

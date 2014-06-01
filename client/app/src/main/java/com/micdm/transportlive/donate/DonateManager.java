@@ -18,27 +18,27 @@ import java.util.List;
 
 public class DonateManager {
 
-    public static interface OnLoadItemsListener {
-        public void onLoadItems(List<DonateItem> items);
+    public static interface OnLoadProductsListener {
+        public void onLoadProducts(List<DonateProduct> products);
     }
 
-    public static final int BILLING_API_VERSION = 3;
-    public static final String PURCHASE_TYPE = "inapp";
+    private static final int BILLING_API_VERSION = 3;
+    private static final String PURCHASE_TYPE = "inapp";
     private static final String[] IDS = new String[] {"1", "2", "3", "4"};
 
     private final BillingServiceConnection connection = new BillingServiceConnection(new BillingServiceConnection.OnServiceReadyListener() {
         @Override
         public void onServiceReady() {
             consumeStalePurchases();
-            loadItems();
+            loadProducts();
         }
     });
-    private List<DonateItem> items;
+    private List<DonateProduct> products;
 
     private final Context context;
-    private final OnLoadItemsListener listener;
+    private final OnLoadProductsListener listener;
 
-    public DonateManager(Context context, OnLoadItemsListener listener) {
+    public DonateManager(Context context, OnLoadProductsListener listener) {
         this.context = context;
         this.listener = listener;
     }
@@ -51,8 +51,8 @@ public class DonateManager {
         context.unbindService(connection);
     }
 
-    public List<DonateItem> getItems() {
-        return items;
+    public List<DonateProduct> getProducts() {
+        return products;
     }
 
     private void consumeStalePurchases() {
@@ -83,51 +83,51 @@ public class DonateManager {
         }
     }
 
-    private void loadItems() {
-        AsyncTask<String[], Void, List<DonateItem>> task = new AsyncTask<String[], Void, List<DonateItem>>() {
+    private void loadProducts() {
+        AsyncTask<String[], Void, List<DonateProduct>> task = new AsyncTask<String[], Void, List<DonateProduct>>() {
             @Override
-            protected List<DonateItem> doInBackground(String[]... ids) {
-                Bundle request = getLoadItemsRequestBundle(ids[0]);
+            protected List<DonateProduct> doInBackground(String[]... ids) {
+                Bundle request = getLoadProductsRequestBundle(ids[0]);
                 try {
                     Bundle result = connection.getService().getSkuDetails(BILLING_API_VERSION, context.getPackageName(), PURCHASE_TYPE, request);
                     if (result.getInt("RESPONSE_CODE") != 0) {
                         return null;
                     }
-                    return parseItems(result.getStringArrayList("DETAILS_LIST"));
+                    return getProducts(result.getStringArrayList("DETAILS_LIST"));
                 } catch (RemoteException e) {
                     return null;
                 } catch (JSONException e) {
                     return null;
                 }
             }
-            private Bundle getLoadItemsRequestBundle(String[] ids) {
+            private Bundle getLoadProductsRequestBundle(String[] ids) {
                 Bundle result = new Bundle();
                 result.putStringArrayList("ITEM_ID_LIST", new ArrayList<String>(Arrays.asList(ids)));
                 return result;
             }
-            private List<DonateItem> parseItems(List<String> datas) throws JSONException {
-                List<DonateItem> items = new ArrayList<DonateItem>();
+            private List<DonateProduct> getProducts(List<String> datas) throws JSONException {
+                List<DonateProduct> products = new ArrayList<DonateProduct>();
                 for (String data: datas) {
                     JSONObject json = new JSONObject(data);
-                    items.add(new DonateItem(json.getString("productId"), json.getString("price"), getItemTitle(json.getString("title"))));
+                    products.add(new DonateProduct(json.getString("productId"), json.getString("price"), getProductTitle(json.getString("title"))));
                 }
-                return items;
+                return products;
             }
-            private String getItemTitle(String title) {
+            private String getProductTitle(String title) {
                 return title.replace(String.format(" (%s)", Utils.getAppTitle(context)), "");
             }
             @Override
-            protected void onPostExecute(List<DonateItem> loaded) {
-                items = loaded;
-                listener.onLoadItems(loaded);
+            protected void onPostExecute(List<DonateProduct> loaded) {
+                products = loaded;
+                listener.onLoadProducts(loaded);
             }
         };
         task.execute(IDS);
     }
 
-    public PendingIntent getDonateIntent(DonateItem item) {
+    public PendingIntent getDonateIntent(DonateProduct product) {
         try {
-            Bundle result = connection.getService().getBuyIntent(BILLING_API_VERSION, context.getPackageName(), item.id, PURCHASE_TYPE, "");
+            Bundle result = connection.getService().getBuyIntent(BILLING_API_VERSION, context.getPackageName(), product.id, PURCHASE_TYPE, "");
             if (result.getInt("RESPONSE_CODE") != 0) {
                 return null;
             }

@@ -6,7 +6,7 @@ import android.preference.Preference;
 import android.support.v4.preference.PreferenceFragment;
 
 import com.micdm.transportlive.R;
-import com.micdm.transportlive.donate.DonateItem;
+import com.micdm.transportlive.donate.DonateProduct;
 import com.micdm.transportlive.interfaces.DonateHandler;
 
 import java.util.List;
@@ -18,10 +18,10 @@ public class SettingsFragment extends PreferenceFragment {
     public static final String PREF_KEY_ABOUT = "pref_about";
 
     private DonateHandler handler;
-    private final DonateHandler.OnLoadDonateItemsListener onLoadDonateItemsListener = new DonateHandler.OnLoadDonateItemsListener() {
+    private final DonateHandler.OnLoadDonateProductsListener onLoadDonateProductsListener = new DonateHandler.OnLoadDonateProductsListener() {
         @Override
-        public void onLoadDonateItems(List<DonateItem> items) {
-            if (items == null) {
+        public void onLoadDonateProducts(List<DonateProduct> products) {
+            if (products == null) {
                 if (donatePreference == null) {
                     donatePreference = findPreference(PREF_KEY_DONATE);
                     getPreferenceScreen().removePreference(donatePreference);
@@ -51,12 +51,12 @@ public class SettingsFragment extends PreferenceFragment {
     @Override
     public void onStart() {
         super.onStart();
-        handler.addOnLoadDonateItemsListener(onLoadDonateItemsListener);
+        handler.addOnLoadDonateProductsListener(onLoadDonateProductsListener);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        handler.removeOnLoadDonateItemsListener(onLoadDonateItemsListener);
+        handler.removeOnLoadDonateProductsListener(onLoadDonateProductsListener);
     }
 }
