@@ -48,7 +48,7 @@
     <string name="fragment_select_route_title">Выберите маршруты</string>
     <!-- Фрагмент пожертвований -->
     <string name="fragment_donate_title">Выберите сумму</string>
-    <string name="fragment_donate_thanks">Ваше пожертвование принято и будет употреблено по назначению. Спасибо за поддержку!</string>
+    <string name="fragment_donate_thanks">Ваше пожертвование будет употреблено по назначению. Спасибо!</string>
     <!-- Фрагмент с настройками -->
     <string name="fragment_settings_use_external_map_title">Дополнительные карты</string>
     <string name="fragment_settings_use_external_map_summary">Вы сможете изменять масштаб, но это потребует больше Интернет-трафика</string>

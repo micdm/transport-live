@@ -395,7 +395,8 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     }
 
     @Override
-    protected void onActivityResult (int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == BUY_REQUEST_CODE && resultCode == RESULT_OK) {
             listeners.notify(EVENT_LISTENER_KEY_ON_DONATE, new EventListenerManager.OnIterateListener() {
                 @Override
@@ -403,6 +404,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
                     ((OnDonateListener) listener).onDonate();
                 }
             });
+            donateManager.handleDonate(data.getStringExtra("INAPP_PURCHASE_DATA"));
         }
     }
 
@@ -666,7 +668,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
 
     @Override
     public void makeDonation(DonateItem item) {
-        PendingIntent intent = donateManager.getBuyIntent(item);
+        PendingIntent intent = donateManager.getDonateIntent(item);
         if (intent == null) {
             return;
         }
