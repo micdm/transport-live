@@ -6,7 +6,7 @@ android {
     defaultConfig {
         minSdkVersion 10
         targetSdkVersion 19
-        versionCode 7
+        versionCode 8
         versionName '1.3'
     }
     signingConfigs {
@@ -26,7 +26,7 @@ android {
             jniDebugBuild true
             runProguard false
             zipAlign false
-            signingConfig signingConfigs.release
+            packageNameSuffix '.dev'
         }
     }
     packagingOptions {
