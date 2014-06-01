@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.micdm.transportlive.CustomApplication;
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.RouteInfo;
@@ -26,6 +27,7 @@ import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.Vehicle;
 import com.micdm.transportlive.interfaces.ServiceHandler;
+import com.micdm.transportlive.misc.Analytics;
 import com.micdm.transportlive.misc.AssetArchive;
 import com.micdm.transportlive.misc.RouteColors;
 
@@ -161,6 +163,9 @@ public class MapFragment extends Fragment {
             List<Overlay> overlays = oldMapView.getOverlays();
             if (!overlays.isEmpty()) {
                 newMapView.getOverlays().add(overlays.get(0));
+            }
+            if (needUseExternalMap()) {
+                ((CustomApplication) getActivity().getApplication()).getAnalytics().reportEvent(Analytics.Category.MISC, Analytics.Action.CLICK, "use_external_map");
             }
         }
     };

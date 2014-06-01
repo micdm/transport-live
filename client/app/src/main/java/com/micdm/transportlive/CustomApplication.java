@@ -2,18 +2,19 @@ package com.micdm.transportlive;
 
 import android.app.Application;
 
-import com.google.android.gms.analytics.GoogleAnalytics;
-import com.google.android.gms.analytics.Tracker;
+import com.micdm.transportlive.misc.Analytics;
 
 public class CustomApplication extends Application {
 
-    private Tracker tracker;
+    private Analytics analytics;
 
-    public Tracker getTracker() {
-        if (tracker == null) {
-            GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
-            tracker = analytics.newTracker(R.xml.tracker);
-        }
-        return tracker;
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        analytics = new Analytics(this);
+    }
+
+    public Analytics getAnalytics() {
+        return analytics;
     }
 }

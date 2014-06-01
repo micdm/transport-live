@@ -18,7 +18,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.google.android.gms.analytics.GoogleAnalytics;
 import com.micdm.transportlive.data.Forecast;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.RouteInfo;
@@ -42,6 +41,7 @@ import com.micdm.transportlive.interfaces.DonateHandler;
 import com.micdm.transportlive.interfaces.EventListener;
 import com.micdm.transportlive.interfaces.ForecastHandler;
 import com.micdm.transportlive.interfaces.ServiceHandler;
+import com.micdm.transportlive.misc.Analytics;
 import com.micdm.transportlive.misc.EventListenerManager;
 import com.micdm.transportlive.misc.ServiceLoader;
 import com.micdm.transportlive.server.pollers.ForecastPoller;
@@ -214,7 +214,6 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((CustomApplication) getApplication()).getTracker();
         donateManager.init();
         setContentView(R.layout.a__main);
         setupActionBar();
@@ -235,6 +234,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
             @Override
             public void onPageSelected(int i) {
                 getSupportActionBar().setSelectedNavigationItem(i);
+                ((CustomApplication) getApplication()).getAnalytics().reportEvent(Analytics.Category.TABS, Analytics.Action.SHOW, String.valueOf(i));
             }
         });
         addPage(pager, new CustomPagerAdapter.Page(getString(R.string.tab_title_forecast), new ForecastFragment()));
@@ -297,7 +297,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     @Override
     protected void onStart() {
         super.onStart();
-        GoogleAnalytics.getInstance(this).reportActivityStart(this);
+        ((CustomApplication) getApplication()).getAnalytics().reportActivityStart(this);
         loadVehicles();
         loadForecasts();
     }
@@ -307,7 +307,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         super.onStop();
         vehiclePoller.stop();
         forecastPoller.stop();
-        GoogleAnalytics.getInstance(this).reportActivityStop(this);
+        ((CustomApplication) getApplication()).getAnalytics().reportActivityStop(this);
     }
 
     @Override
@@ -360,6 +360,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         FragmentManager manager = getSupportFragmentManager();
         if (manager.findFragmentByTag(FRAGMENT_DONATE_TAG) == null) {
             (new DonateFragment()).show(manager, FRAGMENT_DONATE_TAG);
+            ((CustomApplication) getApplication()).getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "donate");
         }
     }
 
@@ -370,12 +371,14 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         try {
             startActivity(intent);
         } catch (ActivityNotFoundException e) {}
+        ((CustomApplication) getApplication()).getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "share");
     }
 
     private void showAboutMessage() {
         FragmentManager manager = getSupportFragmentManager();
         if (manager.findFragmentByTag(FRAGMENT_ABOUT_TAG) == null) {
             (new AboutFragment()).show(manager, FRAGMENT_ABOUT_TAG);
+            ((CustomApplication) getApplication()).getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "about");
         }
     }
 
@@ -419,6 +422,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         FragmentManager manager = getSupportFragmentManager();
         if (manager.findFragmentByTag(FRAGMENT_SELECT_ROUTE_TAG) == null) {
             (new SelectRouteFragment()).show(manager, FRAGMENT_SELECT_ROUTE_TAG);
+            ((CustomApplication) getApplication()).getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "select_route");
         }
     }
 
@@ -519,6 +523,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         FragmentManager manager = getSupportFragmentManager();
         if (manager.findFragmentByTag(FRAGMENT_SELECT_STATION_TAG) == null) {
             (new SelectStationFragment()).show(manager, FRAGMENT_SELECT_STATION_TAG);
+            ((CustomApplication) getApplication()).getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "select_station");
         }
     }
 
@@ -674,6 +679,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         }
         try {
             startIntentSenderForResult(intent.getIntentSender(), BUY_REQUEST_CODE, new Intent(), 0, 0, 0);
+            ((CustomApplication) getApplication()).getAnalytics().reportEvent(Analytics.Category.DONATE, Analytics.Action.CLICK, item.id);
         } catch (IntentSender.SendIntentException e) {}
     }
 
