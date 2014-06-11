@@ -21,8 +21,9 @@
     <string name="fragment_about_title">О приложении</string>
     <string name="fragment_about_text">
         &lt;b&gt;%1$s v%2$s&lt;/b&gt;&lt;br&gt;&lt;br&gt;
+        Больше информации про транспорт на raspisanie.tomsk.ru.&lt;br&gt;&lt;br&gt;
         По любым вопросам пишите на %3$s.&lt;br&gt;&lt;br&gt;
-        Работает на основе openstreetmap.org
+        Работает на основе openstreetmap.org.
     </string>
     <!-- Фрагмент про ошибку сети -->
     <string name="fragment_no_connection_title">Нет сети</string>
