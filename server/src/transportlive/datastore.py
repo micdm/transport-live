@@ -21,14 +21,14 @@ class DataStore(object):
         self._vehicles = {}
         self._forecast_calculator = ForecastCalculator(self._service)
 
-    def add_vehicle(self, vehicle_id, number, transport_type, route_number, mark):
-        vehicle = self._vehicles.get(vehicle_id)
+    def add_vehicle(self, info):
+        vehicle = self._vehicles.get(info.vehicle_id)
         if not vehicle:
-            vehicle = Vehicle(vehicle_id, number, self._is_low_floor(transport_type, number))
-            self._vehicles[vehicle_id] = vehicle
-        vehicle.transport = self._service.get_transport_by_type(transport_type)
-        vehicle.route = vehicle.transport.get_route_by_number(route_number)
-        vehicle.marks.append(mark)
+            vehicle = Vehicle(info.vehicle_id, info.number, self._is_low_floor(info.transport_type, info.number))
+            self._vehicles[info.vehicle_id] = vehicle
+        vehicle.transport = self._service.get_transport_by_type(info.transport_type)
+        vehicle.route = vehicle.transport.get_route_by_number(info.route_number)
+        vehicle.marks.append(info.mark)
         self._forecast_calculator.update_vehicle(vehicle)
 
     def _is_low_floor(self, transport_type, number):

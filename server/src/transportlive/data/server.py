@@ -42,8 +42,10 @@ class DataServer(TCPServer):
         vehicle_info = self._vehicle_builder.build(packet)
         if not vehicle_info:
             logger.debug("Cannot build vehicle, skipping packet...")
+        elif not vehicle_info.is_on_line:
+            logger.debug("Vehicle is off line, skipping...")
         else:
-            self._datastore.add_vehicle(*vehicle_info)
+            self._datastore.add_vehicle(vehicle_info)
 
 class StreamHandler(object):
 
