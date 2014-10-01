@@ -19,7 +19,6 @@ import com.micdm.transportlive.interfaces.DonateHandler;
 
 import java.util.List;
 
-// TODO: предусмотреть, что список не загрузился
 public class DonateFragment extends DialogFragment {
 
     private class DonateListAdapter extends BaseAdapter {

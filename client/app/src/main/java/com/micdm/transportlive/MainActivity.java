@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-// TODO: добавить очистку настроек и файлов-хранилищ при обновлении на новую версию
 public class MainActivity extends ActionBarActivity implements PreferenceFragment.OnPreferenceStartFragmentCallback,
         ConnectionHandler, ServiceHandler, ForecastHandler, DonateHandler {
 
@@ -383,6 +382,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     }
 
     private void showNoConnectionMessage() {
+
         FragmentManager manager = getSupportFragmentManager();
         if (manager.findFragmentByTag(FRAGMENT_NO_CONNECTION_TAG) == null) {
             (new NoConnectionFragment()).show(manager, FRAGMENT_NO_CONNECTION_TAG);
