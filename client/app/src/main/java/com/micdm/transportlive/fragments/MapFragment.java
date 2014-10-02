@@ -15,6 +15,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.util.Pools;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,22 +59,36 @@ public class MapFragment extends Fragment {
 
     private static class MarkerBuilder {
 
+        private static final int BITMAP_POOL_SIZE = 100;
         private static final int SHADOW_SIZE = 2;
+
+        private static final Matrix matrix = new Matrix();
+        private static final Rect bounds = new Rect();
 
         private final Resources resources;
         private final Bitmap original;
+        private final Pools.Pool<Bitmap> bitmapPool;
         private final Map<Route, Paint> routePaints;
         private final Paint textPaint;
 
         public MarkerBuilder(Service service, Resources resources) {
             this.resources = resources;
-            this.original = getOriginalBitmap();
-            this.routePaints = getRoutePaints(service);
-            this.textPaint = getTextPaint();
+            original = getOriginalBitmap();
+            bitmapPool = getBitmapPool();
+            routePaints = getRoutePaints(service);
+            textPaint = getTextPaint();
         }
 
         private Bitmap getOriginalBitmap() {
             return BitmapFactory.decodeResource(resources, R.drawable.vehicle);
+        }
+
+        private Pools.Pool<Bitmap> getBitmapPool() {
+            Pools.Pool<Bitmap> pool = new Pools.SimplePool<Bitmap>(BITMAP_POOL_SIZE);
+            for (int i = 0; i < BITMAP_POOL_SIZE; i += 1) {
+                pool.release(Bitmap.createBitmap(original.getWidth(), original.getHeight(), original.getConfig()));
+            }
+            return pool;
         }
 
         private Map<Route, Paint> getRoutePaints(Service service) {
@@ -107,37 +122,45 @@ public class MapFragment extends Fragment {
             List<OverlayItem> markers = new ArrayList<OverlayItem>();
             for (RouteInfo info: routes) {
                 for (Vehicle vehicle: info.vehicles) {
-                    markers.add(getMarker(info.route, vehicle));
+                    OverlayItem marker = getMarker(info.route, vehicle);
+                    if (marker != null) {
+                        markers.add(marker);
+                    }
                 }
             }
             return markers;
         }
 
         private OverlayItem getMarker(Route route, Vehicle vehicle) {
+            Bitmap bitmap = getBitmap(route, vehicle);
+            if (bitmap == null) {
+                return null;
+            }
             GeoPoint coords = new GeoPoint(vehicle.latitude.doubleValue(), vehicle.longitude.doubleValue());
             OverlayItem marker = new OverlayItem(vehicle.number, "", coords);
-            Bitmap bitmap = getBitmap(route, vehicle);
             marker.setMarker(new BitmapDrawable(resources, bitmap));
             marker.setMarkerHotspot(OverlayItem.HotspotPlace.CENTER);
             return marker;
         }
 
         private Bitmap getBitmap(Route route, Vehicle vehicle) {
-            Bitmap result = Bitmap.createBitmap(original.getWidth(), original.getHeight(), original.getConfig());
+            Bitmap result = bitmapPool.acquire();
+            if (result == null) {
+                return null;
+            }
             Canvas canvas = new Canvas(result);
-            Matrix matrix = new Matrix();
             matrix.setRotate(vehicle.course, original.getWidth() / 2, original.getHeight() / 2);
             canvas.drawBitmap(original, matrix, routePaints.get(route));
             String text = String.valueOf(route.number);
-            Rect bounds = getTextBounds(text);
+            textPaint.getTextBounds(text, 0, text.length(), bounds);
             canvas.drawText(text, canvas.getWidth() / 2 - bounds.width() / 2, canvas.getHeight() / 2 + bounds.height() / 2 - SHADOW_SIZE, textPaint);
             return result;
         }
 
-        private Rect getTextBounds(String text) {
-            Rect bounds = new Rect();
-            textPaint.getTextBounds(text, 0, text.length(), bounds);
-            return bounds;
+        public void release(OverlayItem marker) {
+            Bitmap bitmap = ((BitmapDrawable) marker.getDrawable()).getBitmap();
+            bitmap.eraseColor(Color.TRANSPARENT);
+            bitmapPool.release(bitmap);
         }
     }
 
@@ -156,7 +179,7 @@ public class MapFragment extends Fragment {
         @Override
         public void onUnselectAllRoutes() {
             hideAllViews();
-            showView(R.id.f__map__no_route_selected);
+            noRouteSelectedView.setVisibility(View.VISIBLE);
         }
     };
     private final ServiceHandler.OnLoadServiceListener onLoadServiceListener = new ServiceHandler.OnLoadServiceListener() {
@@ -168,11 +191,11 @@ public class MapFragment extends Fragment {
     private final ServiceHandler.OnLoadVehiclesListener onLoadVehiclesListener = new ServiceHandler.OnLoadVehiclesListener() {
         @Override
         public void onStart() {
-            showView(R.id.f__map__loading);
+            loadingView.setVisibility(View.VISIBLE);
         }
         @Override
         public void onFinish() {
-            hideView(R.id.f__map__loading);
+            loadingView.setVisibility(View.GONE);
         }
         @Override
         public void onLoadVehicles(List<RouteInfo> vehicles) {
@@ -182,6 +205,13 @@ public class MapFragment extends Fragment {
 
     private boolean externalMapUsed;
     private MarkerBuilder builder;
+    private ItemizedIconOverlay<OverlayItem> overlay;
+
+    private ViewGroup mapContainerView;
+    private View noRouteSelectedView;
+    private View noVehiclesView;
+    private MapView mapView;
+    private View loadingView;
 
     @Override
     public void onAttach(Activity activity) {
@@ -191,21 +221,23 @@ public class MapFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.f__map, null);
-        if (view != null) {
-            View selectRoutesView = view.findViewById(R.id.f__map__select_route);
-            selectRoutesView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    serviceHandler.requestRouteSelection();
-                }
-            });
-            externalMapUsed = needUseExternalMap();
-            MapView mapView = getMapView(externalMapUsed);
-            mapView.setVisibility(View.GONE);
-            ((ViewGroup) view.findViewById(R.id.f__map__map_container)).addView(mapView, 0);
-            setupMapController(mapView);
-        }
+        View view = inflater.inflate(R.layout.f__map, container, false);
+        mapContainerView = (ViewGroup) view.findViewById(R.id.f__map__map_container);
+        noRouteSelectedView = view.findViewById(R.id.f__map__no_route_selected);
+        noVehiclesView = view.findViewById(R.id.f__map__no_vehicles);
+        externalMapUsed = needUseExternalMap();
+        mapView = getMapView(externalMapUsed);
+        mapView.setVisibility(View.GONE);
+        mapContainerView.addView(mapView, 0);
+        setupMapController(mapView);
+        loadingView = view.findViewById(R.id.f__map__loading);
+        View selectRoutesView = view.findViewById(R.id.f__map__select_route);
+        selectRoutesView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                serviceHandler.requestRouteSelection();
+            }
+        });
         return view;
     }
 
@@ -253,33 +285,24 @@ public class MapFragment extends Fragment {
         serviceHandler.addOnLoadVehiclesListener(onLoadVehiclesListener);
     }
 
-    private void showView(int id) {
-        getView().findViewById(id).setVisibility(View.VISIBLE);
-    }
-
-    private void hideView(int id) {
-        getView().findViewById(id).setVisibility(View.GONE);
-    }
-
     private void hideAllViews() {
-        hideView(R.id.f__map__no_route_selected);
-        hideView(R.id.f__map__no_vehicles);
-        hideView(R.id.f__map__map);
+        noRouteSelectedView.setVisibility(View.GONE);
+        noVehiclesView.setVisibility(View.GONE);
+        mapView.setVisibility(View.GONE);
     }
 
     private void switchMapSource() {
-        ViewGroup containerView = ((ViewGroup) getView().findViewById(R.id.f__map__map_container));
-        MapView oldMapView = (MapView) containerView.getChildAt(0);
         externalMapUsed = needUseExternalMap();
         MapView newMapView = getMapView(externalMapUsed);
-        newMapView.setVisibility(oldMapView.getVisibility());
-        containerView.removeView(oldMapView);
-        containerView.addView(newMapView, 0);
+        newMapView.setVisibility(mapView.getVisibility());
+        mapContainerView.removeView(mapView);
+        mapContainerView.addView(newMapView, 0);
         setupMapController(newMapView);
-        List<Overlay> overlays = oldMapView.getOverlays();
+        List<Overlay> overlays = mapView.getOverlays();
         if (!overlays.isEmpty()) {
             newMapView.getOverlays().add(overlays.get(0));
         }
+        mapView = newMapView;
         if (needUseExternalMap()) {
             CustomApplication.get().getAnalytics().reportEvent(Analytics.Category.MISC, Analytics.Action.CLICK, "use_external_map");
         }
@@ -288,34 +311,33 @@ public class MapFragment extends Fragment {
     public void update(List<RouteInfo> vehicles) {
         hideAllViews();
         if (vehicles.size() == 0) {
-            showView(R.id.f__map__no_vehicles);
+            noVehiclesView.setVisibility(View.VISIBLE);
             return;
         }
-        showView(R.id.f__map__map);
-        List<OverlayItem> markers = builder.build(vehicles);
-        updateMap(markers);
-    }
-
-    private void updateMap(List<OverlayItem> markers) {
-        MapView view = (MapView) getView().findViewById(R.id.f__map__map);
-        if (view != null) {
-            List<Overlay> overlays = view.getOverlays();
-            overlays.clear();
-            overlays.add(getLayer(markers));
+        ItemizedIconOverlay<OverlayItem> overlay = getOverlay();
+        for (int i = 0; i < overlay.size(); i += 1) {
+            builder.release(overlay.getItem(i));
         }
+        overlay.removeAllItems();
+        overlay.addItems(builder.build(vehicles));
+        mapView.setVisibility(View.VISIBLE);
     }
 
-    private Overlay getLayer(List<OverlayItem> markers) {
-        return new ItemizedIconOverlay<OverlayItem>(getActivity(), markers, new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
-            @Override
-            public boolean onItemSingleTapUp(int i, OverlayItem item) {
-                return false;
-            }
-            @Override
-            public boolean onItemLongPress(int i, OverlayItem item) {
-                return false;
-            }
-        });
+    private ItemizedIconOverlay<OverlayItem> getOverlay() {
+        if (overlay == null) {
+            overlay = new ItemizedIconOverlay<OverlayItem>(getActivity(), new ArrayList<OverlayItem>(), new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
+                @Override
+                public boolean onItemSingleTapUp(int i, OverlayItem item) {
+                    return false;
+                }
+                @Override
+                public boolean onItemLongPress(int i, OverlayItem item) {
+                    return false;
+                }
+            });
+            mapView.getOverlays().add(overlay);
+        }
+        return overlay;
     }
 
     @Override
