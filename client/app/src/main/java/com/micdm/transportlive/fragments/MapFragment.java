@@ -50,13 +50,15 @@ import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class MapFragment extends Fragment {
 
     private static class MarkerBuilder {
+
+        private static final int SHADOW_SIZE = 2;
 
         private final Resources resources;
         private final Bitmap original;
@@ -75,7 +77,7 @@ public class MapFragment extends Fragment {
         }
 
         private Map<Route, Paint> getRoutePaints(Service service) {
-            Map<Route, Paint> paints = new Hashtable<Route, Paint>();
+            Map<Route, Paint> paints = new HashMap<Route, Paint>();
             RouteColors colors = new RouteColors(service);
             for (Transport transport: service.transports) {
                 for (Route route: transport.routes) {
@@ -86,16 +88,18 @@ public class MapFragment extends Fragment {
         }
 
         private Paint getRoutePaint(int color) {
-            Paint paint = new Paint();
-            paint.setColorFilter(new LightingColorFilter(0xFF999999, color));
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+            paint.setColorFilter(new LightingColorFilter(Color.BLACK, color));
+            paint.setShadowLayer(SHADOW_SIZE, 0, SHADOW_SIZE, Color.BLACK);
             return paint;
         }
 
         private Paint getTextPaint() {
             Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            paint.setColor(Color.BLACK);
+            paint.setColor(Color.WHITE);
             paint.setStyle(Paint.Style.FILL);
-            paint.setTextSize(original.getWidth() / 2);
+            paint.setTextSize(original.getWidth() * 0.35f);
+            paint.setShadowLayer(SHADOW_SIZE, 0, SHADOW_SIZE, Color.BLACK);
             return paint;
         }
 
@@ -126,7 +130,7 @@ public class MapFragment extends Fragment {
             canvas.drawBitmap(original, matrix, routePaints.get(route));
             String text = String.valueOf(route.number);
             Rect bounds = getTextBounds(text);
-            canvas.drawText(text, canvas.getWidth() / 2 - bounds.width() / 2, canvas.getHeight() / 2 + bounds.height() / 2, textPaint);
+            canvas.drawText(text, canvas.getWidth() / 2 - bounds.width() / 2, canvas.getHeight() / 2 + bounds.height() / 2 - SHADOW_SIZE, textPaint);
             return result;
         }
 

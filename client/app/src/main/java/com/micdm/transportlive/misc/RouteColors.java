@@ -39,7 +39,7 @@ public class RouteColors {
     }
 
     private int getColor(int count, int number) {
-        return Color.HSVToColor(new float[] {(255.0f / count) * number, 0.8f, 0.8f});
+        return Color.HSVToColor(new float[] {(255.0f / count) * number, 1f, 0.8f});
     }
 
     public int get(Route route) {
