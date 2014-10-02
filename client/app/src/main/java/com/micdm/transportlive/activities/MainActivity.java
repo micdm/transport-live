@@ -194,7 +194,6 @@ public class MainActivity extends FragmentActivity implements ConnectionHandler,
 
     private void setupActionBar() {
         ActionBar actionBar = getActionBar();
-        actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
     }
 

@@ -1,5 +1,10 @@
 <resources>
-    <style name="AppTheme" parent="android:Theme.Holo.Light"/>
+    <style name="AppTheme" parent="android:Theme.Holo.Light">
+        <item name="android:actionBarStyle">@style/ActionBarStyle</item>
+    </style>
+    <style name="ActionBarStyle" parent="android:Widget.Holo.Light.ActionBar">
+        <item name="android:displayOptions">showHome</item>
+    </style>
     <style name="AppTheme.LoadingMessage">
         <item name="android:layout_gravity">bottom|center</item>
         <item name="android:padding">5dp</item>
