@@ -207,8 +207,8 @@ public class MainActivity extends FragmentActivity implements ConnectionHandler,
                 CustomApplication.get().getAnalytics().reportEvent(Analytics.Category.TABS, Analytics.Action.SHOW, String.valueOf(i));
             }
         });
-        addPage(pager, new CustomPagerAdapter.Page(getString(R.string.tab_title_map), new MapFragment()));
-        addPage(pager, new CustomPagerAdapter.Page(getString(R.string.tab_title_forecast), new ForecastFragment()));
+        addPage(pager, new CustomPagerAdapter.Page(getString(R.string.__tab_title_map), new MapFragment()));
+        addPage(pager, new CustomPagerAdapter.Page(getString(R.string.__tab_title_forecast), new ForecastFragment()));
     }
 
     private void addPage(final CustomViewPager pager, CustomPagerAdapter.Page page) {
@@ -282,18 +282,18 @@ public class MainActivity extends FragmentActivity implements ConnectionHandler,
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.common, menu);
+        inflater.inflate(R.menu.main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.reload:
+            case R.id.m__main__reload:
                 loadVehicles();
                 loadForecasts();
                 return true;
-            case R.id.settings:
+            case R.id.m__main__settings:
                 Intent intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
                 return true;

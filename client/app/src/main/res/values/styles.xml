@@ -11,7 +11,7 @@
         <item name="android:layout_margin">3dp</item>
         <item name="android:background">#99000000</item>
         <item name="android:textColor">#FFFFFFFF</item>
-        <item name="android:text">@string/fragment_loading</item>
+        <item name="android:text">@string/__loading</item>
         <item name="android:visibility">gone</item>
     </style>
 </resources>

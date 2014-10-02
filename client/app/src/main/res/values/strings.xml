@@ -1,62 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Общее -->
-    <string name="app_name">Транспорт Томска</string>
-    <string name="contact_email">demerzov@gmail.com</string>
-    <string name="user_agent">transport-live %1$s @ Android %2$s</string>
+    <string name="__app_name">Транспорт Томска</string>
+    <string name="__contact_email">demerzov@gmail.com</string>
+    <string name="__user_agent">transport-live %1$s @ Android %2$s</string>
+    <string name="__loading">Обновление…</string>
+    <string name="__share">Троллейбусы и трамваи Томска на карте онлайн. https://play.google.com/store/apps/details?id=%s</string>
     <!-- Названия транспорта -->
-    <string name="transport_type_trolleybus">Троллейбус</string>
-    <string name="transport_type_tram">Трамвай</string>
+    <string name="__transport_type_trolleybus">Троллейбус</string>
+    <string name="__transport_type_tram">Трамвай</string>
     <!-- Вкладки -->
-    <string name="tab_title_forecast">Расписание</string>
-    <string name="tab_title_map">Карта</string>
-    <string name="tab_title_settings">Ещё</string>
+    <string name="__tab_title_forecast">Расписание</string>
+    <string name="__tab_title_map">Карта</string>
+    <string name="__tab_title_settings">Ещё</string>
     <!-- Меню -->
-    <string name="menu_item_reload">Обновить</string>
-    <string name="menu_item_settings">Настройки</string>
-    <!-- Расшаривание -->
-    <string name="share_app_text">Троллейбусы и трамваи Томска на карте онлайн. https://play.google.com/store/apps/details?id=%s</string>
-    <!-- Общее для фрагментов -->
-    <string name="fragment_loading">Обновление…</string>
+    <string name="m__reload">Обновить</string>
+    <string name="m__settings">Настройки</string>
     <!-- Фрагмент о приложении -->
-    <string name="fragment_about_title">О приложении</string>
-    <string name="fragment_about_text">
+    <string name="f__about__title">О приложении</string>
+    <string name="f__about__text">
         &lt;b&gt;%1$s v%2$s&lt;/b&gt;&lt;br&gt;&lt;br&gt;
         Больше информации про транспорт на raspisanie.tomsk.ru.&lt;br&gt;&lt;br&gt;
         По любым вопросам пишите на %3$s.&lt;br&gt;&lt;br&gt;
         Работает на основе openstreetmap.org.
     </string>
     <!-- Фрагмент про ошибку сети -->
-    <string name="fragment_no_connection_title">Нет сети</string>
-    <string name="fragment_no_connection_text">Невозможно подключиться к серверу.\nПроверьте, есть ли у вас доступ в Интернет.</string>
-    <string name="fragment_no_connection_retry">Ещё раз</string>
+    <string name="f__no_connection__title">Нет сети</string>
+    <string name="f__no_connection__text">Невозможно подключиться к серверу.\nПроверьте, есть ли у вас доступ в Интернет.</string>
+    <string name="f__no_connection__retry">Ещё раз</string>
     <!-- Фрагмент с прогнозами -->
-    <string name="fragment_forecast_select_station">Добавить остановку…</string>
-    <string name="fragment_forecast_no_station_selected">Здесь будет показано ориентировочное время прибытия транспорта на остановки, которые вы выберете.</string>
-    <string name="fragment_forecast_direction">→ %s</string>
-    <string name="fragment_forecast_route">%1$s №%2$s</string>
-    <string name="fragment_forecast_low_floor">Низкий</string>
-    <string name="fragment_forecast_arrival_time">%s мин.</string>
-    <string name="fragment_forecast_no_vehicles">К остановке пока ничего не едет.</string>
+    <string name="f__forecast__select_station">Добавить остановку…</string>
+    <string name="f__forecast__no_station_selected">Здесь будет показано ориентировочное время прибытия транспорта на остановки, которые вы выберете.</string>
+    <string name="f__forecast__direction">→ %s</string>
+    <string name="f__forecast__route">%1$s №%2$s</string>
+    <string name="f__forecast__low_floor">Низкий</string>
+    <string name="f__forecast__arrival_time">%s мин.</string>
+    <string name="f__forecast__no_vehicles">К остановке пока ничего не едет.</string>
     <!-- Фрагмент выбора остановки -->
-    <string name="fragment_select_station_title">Выберите остановку</string>
-    <string name="fragment_select_station_route_list_item">№%s</string>
-    <string name="fragment_select_station_direction_list_item">%1$s → %2$s</string>
+    <string name="f__select_station__title">Выберите остановку</string>
+    <string name="f__select_station__route_list_item">№%s</string>
+    <string name="f__select_station__direction_list_item">%1$s → %2$s</string>
     <!-- Фрагмент с картой -->
-    <string name="fragment_map_select_route">Выбрать маршруты…</string>
-    <string name="fragment_map_no_route_selected">Здесь на карте в реальном времени будет показан транспорт, маршрут которого вы выберете.</string>
-    <string name="fragment_map_no_vehicles">Похоже, весь транспорт в парке.</string>
+    <string name="f__map__select_route">Выбрать маршруты…</string>
+    <string name="f__map__no_route_selected">Здесь на карте в реальном времени будет показан транспорт, маршрут которого вы выберете.</string>
+    <string name="f__map__no_vehicles">Похоже, весь транспорт в парке.</string>
     <!-- Фрагмент выбора маршрутов -->
-    <string name="fragment_select_route_title">Выберите маршруты</string>
+    <string name="f__select_route__title">Выберите маршруты</string>
     <!-- Фрагмент пожертвований -->
-    <string name="fragment_donate_title">Выберите сумму</string>
-    <string name="fragment_donate_thanks">Ваше пожертвование будет употреблено по назначению. Спасибо!</string>
+    <string name="f__donate__title">Выберите сумму</string>
+    <string name="f__donate__thanks">Ваше пожертвование будет употреблено по назначению. Спасибо!</string>
     <!-- Фрагмент с настройками -->
-    <string name="fragment_settings_use_external_map_title">Дополнительные карты</string>
-    <string name="fragment_settings_use_external_map_summary">Вы сможете изменять масштаб, но это потребует больше Интернет-трафика</string>
-    <string name="fragment_settings_donate_title">Дать денег…</string>
-    <string name="fragment_settings_donate_summary">Пожертвуйте разработчику на еду</string>
-    <string name="fragment_settings_share_title">Рассказать…</string>
-    <string name="fragment_settings_share_summary">Поделитесь приложением со знакомыми в соцсетях</string>
-    <string name="fragment_settings_about_title">О приложении…</string>
+    <string name="f__settings__use_external_map_title">Дополнительные карты</string>
+    <string name="f__settings__use_external_map_summary">Вы сможете изменять масштаб, но это потребует больше Интернет-трафика</string>
+    <string name="f__settings__donate_title">Пожертвовать…</string>
+    <string name="f__settings__donate_summary">Сэкономили на проезде денег? Поделитесь с разработчиком!</string>
+    <string name="f__settings__share_title">Рассказать…</string>
+    <string name="f__settings__share_summary">Пусть знакомые в соцсетях тоже знают</string>
+    <string name="f__settings__about_title">О приложении…</string>
 </resources>

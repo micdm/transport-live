@@ -18,7 +18,7 @@ public class AboutFragment extends DialogFragment {
     @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.fragment_about_title);
+        builder.setTitle(R.string.f__about__title);
         builder.setView(getContent());
         return builder.create();
     }
@@ -27,7 +27,7 @@ public class AboutFragment extends DialogFragment {
         TextView view = (TextView) View.inflate(getActivity(), R.layout.f__about, null);
         String title = Utils.getAppTitle(getActivity());
         String version = Utils.getAppVersion(getActivity());
-        String text = getString(R.string.fragment_about_text, title, version, getString(R.string.contact_email));
+        String text = getString(R.string.f__about__text, title, version, getString(R.string.__contact_email));
         view.setText(Html.fromHtml(text));
         return view;
     }

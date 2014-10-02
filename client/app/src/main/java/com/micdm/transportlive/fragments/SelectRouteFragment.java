@@ -178,7 +178,7 @@ public class SelectRouteFragment extends DialogFragment {
     @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.fragment_select_route_title);
+        builder.setTitle(R.string.f__select_route__title);
         builder.setView(View.inflate(getActivity(), R.layout.f__select_route, null));
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override

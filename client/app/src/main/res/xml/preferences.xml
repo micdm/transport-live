@@ -3,17 +3,17 @@
     <CheckBoxPreference
         android:key="pref_use_external_map"
         android:defaultValue="false"
-        android:title="@string/fragment_settings_use_external_map_title"
-        android:summary="@string/fragment_settings_use_external_map_summary"/>
+        android:title="@string/f__settings__use_external_map_title"
+        android:summary="@string/f__settings__use_external_map_summary"/>
     <Preference
         android:key="pref_donate"
-        android:title="@string/fragment_settings_donate_title"
-        android:summary="@string/fragment_settings_donate_summary"/>
+        android:title="@string/f__settings__donate_title"
+        android:summary="@string/f__settings__donate_summary"/>
     <Preference
         android:key="pref_share"
-        android:title="@string/fragment_settings_share_title"
-        android:summary="@string/fragment_settings_share_summary"/>
+        android:title="@string/f__settings__share_title"
+        android:summary="@string/f__settings__share_summary"/>
     <Preference
         android:key="pref_about"
-        android:title="@string/fragment_settings_about_title"/>
+        android:title="@string/f__settings__about_title"/>
 </PreferenceScreen>

@@ -14,14 +14,14 @@
             android:id="@+id/f__map__no_route_selected"
             android:gravity="center"
             android:padding="5dp"
-            android:text="@string/fragment_map_no_route_selected"/>
+            android:text="@string/f__map__no_route_selected"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/f__map__no_vehicles"
             android:gravity="center"
             android:padding="5dp"
-            android:text="@string/fragment_map_no_vehicles"/>
+            android:text="@string/f__map__no_vehicles"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -32,5 +32,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/f__map__select_route"
-        android:text="@string/fragment_map_select_route"/>
+        android:text="@string/f__map__select_route"/>
 </LinearLayout>

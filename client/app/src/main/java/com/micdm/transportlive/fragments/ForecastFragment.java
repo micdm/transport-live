@@ -100,7 +100,7 @@ public class ForecastFragment extends Fragment {
             TextView stationView = (TextView) view.findViewById(R.id.v__forecasts_list_item_title__station);
             stationView.setText(info.station.name);
             TextView directionView = (TextView) view.findViewById(R.id.v__forecasts_list_item_title__direction);
-            directionView.setText(getString(R.string.fragment_forecast_direction, info.direction.getFinish()));
+            directionView.setText(getString(R.string.f__forecast__direction, info.direction.getFinish()));
             View removeView = view.findViewById(R.id.v__forecasts_list_item_title__remove_station);
             removeView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -129,7 +129,7 @@ public class ForecastFragment extends Fragment {
                 View colorView = view.findViewById(R.id.v__forecasts_list_item_vehicle_list_item__color);
                 colorView.setBackgroundColor(colors.get(vehicle.route));
                 TextView routeView = (TextView) view.findViewById(R.id.v__forecasts_list_item_vehicle_list_item__route);
-                routeView.setText(getString(R.string.fragment_forecast_route, Utils.getTransportName(getActivity(), forecast.transport), vehicle.route.number));
+                routeView.setText(getString(R.string.f__forecast__route, Utils.getTransportName(getActivity(), forecast.transport), vehicle.route.number));
                 View lowFloorView = view.findViewById(R.id.v__forecasts_list_item_vehicle_list_item__low_floor);
                 lowFloorView.setVisibility(vehicle.isLowFloor ? View.VISIBLE : View.GONE);
                 TextView arrivalTimeView = (TextView) view.findViewById(R.id.v__forecasts_list_item_vehicle_list_item__arrival_time);
@@ -139,7 +139,7 @@ public class ForecastFragment extends Fragment {
         }
 
         private String getArrivalTimeInMinutes(int arrivalTime) {
-            return getString(R.string.fragment_forecast_arrival_time, (int) Math.max(Math.ceil(arrivalTime / 60.0), 1));
+            return getString(R.string.f__forecast__arrival_time, (int) Math.max(Math.ceil(arrivalTime / 60.0), 1));
         }
 
         @Override

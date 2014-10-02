@@ -80,7 +80,7 @@ public class MapFragment extends Fragment {
         }
 
         private Bitmap getOriginalBitmap() {
-            return BitmapFactory.decodeResource(resources, R.drawable.vehicle);
+            return BitmapFactory.decodeResource(resources, R.drawable.ic_vehicle);
         }
 
         private Pools.Pool<Bitmap> getBitmapPool() {

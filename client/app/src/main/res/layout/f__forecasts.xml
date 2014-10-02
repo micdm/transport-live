@@ -13,7 +13,7 @@
             android:id="@+id/f__forecasts__no_station_selected"
             android:gravity="center"
             android:padding="5dp"
-            android:text="@string/fragment_forecast_no_station_selected"/>
+            android:text="@string/f__forecast__no_station_selected"/>
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -35,5 +35,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/f__forecasts__select_station"
-        android:text="@string/fragment_forecast_select_station"/>
+        android:text="@string/f__forecast__select_station"/>
 </LinearLayout>

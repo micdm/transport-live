@@ -12,7 +12,7 @@
         android:id="@+id/v__forecasts_list_item_vehicle_list_item__no_vehicles"
         android:gravity="center"
         android:padding="5dp"
-        android:text="@string/fragment_forecast_no_vehicles"/>
+        android:text="@string/f__forecast__no_vehicles"/>
     <RelativeLayout
         android:id="@+id/v__forecasts_list_item_vehicle_list_item__vehicle_info"
         android:layout_width="match_parent"
@@ -37,7 +37,7 @@
             android:textStyle="italic"
             android:textColor="#999999"
             android:background="@drawable/low_floor_label_background"
-            android:text="@string/fragment_forecast_low_floor"/>
+            android:text="@string/f__forecast__low_floor"/>
         <TextView
             android:id="@+id/v__forecasts_list_item_vehicle_list_item__arrival_time"
             android:layout_width="wrap_content"

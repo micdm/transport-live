@@ -87,7 +87,7 @@ public class SettingsActivity extends FragmentActivity implements PreferenceFrag
     private void showShareMessage() {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("plain/text");
-        intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_text, getPackageName()));
+        intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.__share, getPackageName()));
         try {
             startActivity(intent);
         } catch (ActivityNotFoundException e) {}

@@ -59,7 +59,7 @@ public abstract class CommandHandler {
     }
 
     private String getUserAgent() {
-        return context.getString(R.string.user_agent, Utils.getAppVersion(context), Build.VERSION.RELEASE);
+        return context.getString(R.string.__user_agent, Utils.getAppVersion(context), Build.VERSION.RELEASE);
     }
 
     private String getRequestUri(String method, List<RequestParam> params) {

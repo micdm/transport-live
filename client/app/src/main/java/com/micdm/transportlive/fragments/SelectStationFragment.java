@@ -88,7 +88,7 @@ public class SelectStationFragment extends DialogFragment {
 
         @Override
         protected String getItemName(int position) {
-            return getString(R.string.fragment_select_station_route_list_item, getItem(position).number);
+            return getString(R.string.f__select_station__route_list_item, getItem(position).number);
         }
     }
 
@@ -101,7 +101,7 @@ public class SelectStationFragment extends DialogFragment {
         @Override
         protected String getItemName(int position) {
             Direction direction = getItem(position);
-            return getString(R.string.fragment_select_station_direction_list_item, direction.getStart(), direction.getFinish());
+            return getString(R.string.f__select_station__direction_list_item, direction.getStart(), direction.getFinish());
         }
     }
 
@@ -142,7 +142,7 @@ public class SelectStationFragment extends DialogFragment {
     @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.fragment_select_station_title);
+        builder.setTitle(R.string.f__select_station__title);
         builder.setView(View.inflate(getActivity(), R.layout.f__select_station, null));
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override

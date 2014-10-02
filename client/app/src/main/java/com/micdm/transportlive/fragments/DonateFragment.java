@@ -72,7 +72,7 @@ public class DonateFragment extends DialogFragment {
     private final DonateHandler.OnDonateListener onDonateListener = new DonateHandler.OnDonateListener() {
         @Override
         public void onDonate() {
-            Toast.makeText(getActivity(), R.string.fragment_donate_thanks, Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), R.string.f__donate__thanks, Toast.LENGTH_LONG).show();
             dismiss();
         }
     };
@@ -87,7 +87,7 @@ public class DonateFragment extends DialogFragment {
     @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(getString(R.string.fragment_donate_title));
+        builder.setTitle(getString(R.string.f__donate__title));
         builder.setView(getContent());
         return builder.create();
     }
