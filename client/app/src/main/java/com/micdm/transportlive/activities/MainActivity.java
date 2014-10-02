@@ -208,8 +208,8 @@ public class MainActivity extends FragmentActivity implements ConnectionHandler,
                 CustomApplication.get().getAnalytics().reportEvent(Analytics.Category.TABS, Analytics.Action.SHOW, String.valueOf(i));
             }
         });
-        addPage(pager, new CustomPagerAdapter.Page(getString(R.string.tab_title_forecast), new ForecastFragment()));
         addPage(pager, new CustomPagerAdapter.Page(getString(R.string.tab_title_map), new MapFragment()));
+        addPage(pager, new CustomPagerAdapter.Page(getString(R.string.tab_title_forecast), new ForecastFragment()));
     }
 
     private void addPage(final CustomViewPager pager, CustomPagerAdapter.Page page) {
