@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="5dp"
-    android:background="#FFDDDDDD">
+    android:padding="10dp">
     <TextView
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
         android:id="@+id/v__forecasts_list_item_title__station"
-        android:layout_weight="1"
-        android:gravity="center_vertical"/>
-    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textStyle="bold"/>
+    <TextView
+        android:id="@+id/v__forecasts_list_item_title__direction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/v__forecasts_list_item_title__station"/>
+    <ImageView
+        android:id="@+id/v__forecasts_list_item_title__remove_station"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/v__forecasts_list_item_title__remove_station"
-        android:src="@android:drawable/ic_menu_delete"/>
-</LinearLayout>
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/ic_action_remove"/>
+</RelativeLayout>

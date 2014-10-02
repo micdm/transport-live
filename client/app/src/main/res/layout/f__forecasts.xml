@@ -18,10 +18,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <ExpandableListView
+                android:id="@+id/f__forecasts__forecast_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/f__forecasts__forecast_list"
-                android:groupIndicator="@null"/>
+                android:listSelector="@android:color/transparent"
+                android:groupIndicator="@null"
+                android:childDivider="@android:color/transparent"/>
         </FrameLayout>
         <TextView
             android:layout_width="wrap_content"

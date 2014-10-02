@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.micdm.transportlive.R;
@@ -99,8 +98,10 @@ public class ForecastFragment extends Fragment {
                 view = View.inflate(getActivity(), R.layout.v__forecasts_list_item_title, null);
             }
             TextView stationView = (TextView) view.findViewById(R.id.v__forecasts_list_item_title__station);
-            stationView.setText(getString(R.string.fragment_forecast_station, info.direction.getStart(), info.direction.getFinish(), info.station.name));
-            ImageButton removeView = (ImageButton) view.findViewById(R.id.v__forecasts_list_item_title__remove_station);
+            stationView.setText(info.station.name);
+            TextView directionView = (TextView) view.findViewById(R.id.v__forecasts_list_item_title__direction);
+            directionView.setText(getString(R.string.fragment_forecast_direction, info.direction.getFinish()));
+            View removeView = view.findViewById(R.id.v__forecasts_list_item_title__remove_station);
             removeView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -180,7 +181,7 @@ public class ForecastFragment extends Fragment {
     private final ServiceHandler.OnLoadServiceListener onLoadServiceListener = new ServiceHandler.OnLoadServiceListener() {
         @Override
         public void onLoadService(Service service) {
-            getForecastListView().setAdapter(new ForecastListAdapter(service));
+            forecastListView.setAdapter(new ForecastListAdapter(service));
         }
     };
 
@@ -189,14 +190,13 @@ public class ForecastFragment extends Fragment {
         @Override
         public void onLoadStations(List<SelectedStationInfo> selected) {
             hideAllViews();
-            showView(R.id.f__forecasts__forecast_list);
-            ExpandableListView view = getForecastListView();
-            ForecastListAdapter adapter = getForecastListAdapter();
+            forecastListView.setVisibility(View.VISIBLE);
+            ForecastListAdapter adapter = (ForecastListAdapter) forecastListView.getExpandableListAdapter();
             for (SelectedStationInfo info: selected) {
                 adapter.addSelectedStation(info);
             }
             for (int i = 0; i < adapter.getGroupCount(); i += 1) {
-                view.expandGroup(i);
+                forecastListView.expandGroup(i);
             }
         }
     };
@@ -204,17 +204,17 @@ public class ForecastFragment extends Fragment {
         @Override
         public void onSelectStation(SelectedStationInfo selected) {
             hideAllViews();
-            showView(R.id.f__forecasts__forecast_list);
-            ForecastListAdapter adapter = getForecastListAdapter();
+            forecastListView.setVisibility(View.VISIBLE);
+            ForecastListAdapter adapter = (ForecastListAdapter) forecastListView.getExpandableListAdapter();
             int position = adapter.addSelectedStation(selected);
             adapter.notifyDataSetChanged();
-            getForecastListView().expandGroup(position);
+            forecastListView.expandGroup(position);
         }
     };
     private final ForecastHandler.OnUnselectStationListener onUnselectStationListener = new ForecastHandler.OnUnselectStationListener() {
         @Override
         public void onUnselectStation(Transport transport, Station station) {
-            ForecastListAdapter adapter = getForecastListAdapter();
+            ForecastListAdapter adapter = (ForecastListAdapter) forecastListView.getExpandableListAdapter();
             adapter.removeSelectedStation(transport, station);
             adapter.notifyDataSetChanged();
         }
@@ -223,21 +223,21 @@ public class ForecastFragment extends Fragment {
         @Override
         public void onUnselectAllStations() {
             hideAllViews();
-            showView(R.id.f__forecasts__no_station_selected);
+            noStationSelectedView.setVisibility(View.VISIBLE);
         }
     };
     private final ForecastHandler.OnLoadForecastsListener onLoadForecastsListener = new ForecastHandler.OnLoadForecastsListener() {
         @Override
         public void onStart() {
-            showView(R.id.f__forecasts__loading);
+            loadingView.setVisibility(View.VISIBLE);
         }
         @Override
         public void onFinish() {
-            hideView(R.id.f__forecasts__loading);
+            loadingView.setVisibility(View.GONE);
         }
         @Override
         public void onLoadForecasts(List<Forecast> forecasts) {
-            ForecastListAdapter adapter = getForecastListAdapter();
+            ForecastListAdapter adapter = (ForecastListAdapter) forecastListView.getExpandableListAdapter();
             for (Forecast forecast: forecasts) {
                 Collections.sort(forecast.vehicles, new Comparator<ForecastVehicle>() {
                     @Override
@@ -251,6 +251,10 @@ public class ForecastFragment extends Fragment {
         }
     };
 
+    private View noStationSelectedView;
+    private ExpandableListView forecastListView;
+    private View loadingView;
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -260,15 +264,23 @@ public class ForecastFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.f__forecasts, null);
-        if (view != null) {
-            view.findViewById(R.id.f__forecasts__select_station).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    forecastHandler.requestStationSelection();
-                }
-            });
-        }
+        View view = inflater.inflate(R.layout.f__forecasts, container, false);
+        noStationSelectedView = view.findViewById(R.id.f__forecasts__no_station_selected);
+        forecastListView = (ExpandableListView) view.findViewById(R.id.f__forecasts__forecast_list);
+        forecastListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+                return true;
+            }
+        });
+        loadingView = view.findViewById(R.id.f__forecasts__loading);
+        View selectStationView = view.findViewById(R.id.f__forecasts__select_station);
+        selectStationView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                forecastHandler.requestStationSelection();
+            }
+        });
         return view;
     }
 
@@ -284,25 +296,9 @@ public class ForecastFragment extends Fragment {
         forecastHandler.addOnLoadForecastsListener(onLoadForecastsListener);
     }
 
-    private void showView(int id) {
-        getView().findViewById(id).setVisibility(View.VISIBLE);
-    }
-
-    private void hideView(int id) {
-        getView().findViewById(id).setVisibility(View.GONE);
-    }
-
     private void hideAllViews() {
-        hideView(R.id.f__forecasts__no_station_selected);
-        hideView(R.id.f__forecasts__forecast_list);
-    }
-
-    private ExpandableListView getForecastListView() {
-        return ((ExpandableListView) getView().findViewById(R.id.f__forecasts__forecast_list));
-    }
-
-    private ForecastListAdapter getForecastListAdapter() {
-        return (ForecastListAdapter) getForecastListView().getExpandableListAdapter();
+        noStationSelectedView.setVisibility(View.GONE);
+        forecastListView.setVisibility(View.GONE);
     }
 
     @Override
