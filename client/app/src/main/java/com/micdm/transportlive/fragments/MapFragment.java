@@ -27,9 +27,9 @@ import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.Vehicle;
 import com.micdm.transportlive.interfaces.ServiceHandler;
-import com.micdm.transportlive.misc.Analytics;
 import com.micdm.transportlive.misc.AssetArchive;
 import com.micdm.transportlive.misc.RouteColors;
+import com.micdm.transportlive.misc.analytics.Analytics;
 
 import org.osmdroid.DefaultResourceProxyImpl;
 import org.osmdroid.ResourceProxy;
@@ -147,29 +147,6 @@ public class MapFragment extends Fragment {
     private static final int EAST_EDGE = 85111084;
     private static final GeoPoint INITIAL_LOCATION = new GeoPoint(56484642, 84948100);
 
-    private final SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-            if (!key.equals(PREF_KEY_USE_EXTERNAL_MAP)) {
-                return;
-            }
-            ViewGroup containerView = ((ViewGroup) getView().findViewById(R.id.f__map__map_container));
-            MapView oldMapView = (MapView) containerView.getChildAt(0);
-            MapView newMapView = getMapView(needUseExternalMap());
-            newMapView.setVisibility(oldMapView.getVisibility());
-            containerView.removeView(oldMapView);
-            containerView.addView(newMapView, 0);
-            setupMapController(newMapView);
-            List<Overlay> overlays = oldMapView.getOverlays();
-            if (!overlays.isEmpty()) {
-                newMapView.getOverlays().add(overlays.get(0));
-            }
-            if (needUseExternalMap()) {
-                ((CustomApplication) getActivity().getApplication()).getAnalytics().reportEvent(Analytics.Category.MISC, Analytics.Action.CLICK, "use_external_map");
-            }
-        }
-    };
-
     private ServiceHandler serviceHandler;
     private final ServiceHandler.OnUnselectAllRoutesListener onUnselectAllRoutesListener = new ServiceHandler.OnUnselectAllRoutesListener() {
         @Override
@@ -199,6 +176,7 @@ public class MapFragment extends Fragment {
         }
     };
 
+    private boolean externalMapUsed;
     private MarkerBuilder builder;
 
     @Override
@@ -218,7 +196,8 @@ public class MapFragment extends Fragment {
                     serviceHandler.requestRouteSelection();
                 }
             });
-            MapView mapView = getMapView(needUseExternalMap());
+            externalMapUsed = needUseExternalMap();
+            MapView mapView = getMapView(externalMapUsed);
             mapView.setVisibility(View.GONE);
             ((ViewGroup) view.findViewById(R.id.f__map__map_container)).addView(mapView, 0);
             setupMapController(mapView);
@@ -226,12 +205,9 @@ public class MapFragment extends Fragment {
         return view;
     }
 
-    private SharedPreferences getSharedPreferences() {
-        return PreferenceManager.getDefaultSharedPreferences(getActivity());
-    }
-
     private boolean needUseExternalMap() {
-        return getSharedPreferences().getBoolean(PREF_KEY_USE_EXTERNAL_MAP, false);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        return prefs.getBoolean(PREF_KEY_USE_EXTERNAL_MAP, false);
     }
 
     private MapView getMapView(boolean needUseExternalMap) {
@@ -265,7 +241,9 @@ public class MapFragment extends Fragment {
     public void onStart() {
         super.onStart();
         hideAllViews();
-        getSharedPreferences().registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
+        if (externalMapUsed != needUseExternalMap()) {
+            switchMapSource();
+        }
         serviceHandler.addOnUnselectAllRoutesListener(onUnselectAllRoutesListener);
         serviceHandler.addOnLoadServiceListener(onLoadServiceListener);
         serviceHandler.addOnLoadVehiclesListener(onLoadVehiclesListener);
@@ -283,6 +261,24 @@ public class MapFragment extends Fragment {
         hideView(R.id.f__map__no_route_selected);
         hideView(R.id.f__map__no_vehicles);
         hideView(R.id.f__map__map);
+    }
+
+    private void switchMapSource() {
+        ViewGroup containerView = ((ViewGroup) getView().findViewById(R.id.f__map__map_container));
+        MapView oldMapView = (MapView) containerView.getChildAt(0);
+        externalMapUsed = needUseExternalMap();
+        MapView newMapView = getMapView(externalMapUsed);
+        newMapView.setVisibility(oldMapView.getVisibility());
+        containerView.removeView(oldMapView);
+        containerView.addView(newMapView, 0);
+        setupMapController(newMapView);
+        List<Overlay> overlays = oldMapView.getOverlays();
+        if (!overlays.isEmpty()) {
+            newMapView.getOverlays().add(overlays.get(0));
+        }
+        if (needUseExternalMap()) {
+            CustomApplication.get().getAnalytics().reportEvent(Analytics.Category.MISC, Analytics.Action.CLICK, "use_external_map");
+        }
     }
 
     public void update(List<RouteInfo> vehicles) {
@@ -321,7 +317,6 @@ public class MapFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        getSharedPreferences().unregisterOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
         serviceHandler.removeOnUnselectAllRoutesListener(onUnselectAllRoutesListener);
         serviceHandler.removeOnLoadServiceListener(onLoadServiceListener);
         serviceHandler.removeOnLoadVehiclesListener(onLoadVehiclesListener);

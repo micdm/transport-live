@@ -3,8 +3,8 @@ package com.micdm.transportlive.fragments;
 import android.app.Activity;
 import android.os.Bundle;
 import android.preference.Preference;
-import android.support.v4.preference.PreferenceFragment;
 
+import com.github.machinarius.preferencefragment.PreferenceFragment;
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.donate.DonateProduct;
 import com.micdm.transportlive.interfaces.DonateHandler;
@@ -27,7 +27,7 @@ public class SettingsFragment extends PreferenceFragment {
                     getPreferenceScreen().removePreference(donatePreference);
                 }
             } else {
-                if (donatePreference != null) {
+                if (products.size() != 0 && donatePreference != null) {
                     getPreferenceScreen().addPreference(donatePreference);
                     donatePreference = null;
                 }

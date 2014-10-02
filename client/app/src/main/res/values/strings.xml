@@ -13,6 +13,7 @@
     <string name="tab_title_settings">Ещё</string>
     <!-- Меню -->
     <string name="menu_item_reload">Обновить</string>
+    <string name="menu_item_settings">Настройки</string>
     <!-- Расшаривание -->
     <string name="share_app_text">Троллейбусы и трамваи Томска на карте онлайн. https://play.google.com/store/apps/details?id=%s</string>
     <!-- Общее для фрагментов -->

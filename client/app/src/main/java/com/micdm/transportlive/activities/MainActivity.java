@@ -1,23 +1,21 @@
-package com.micdm.transportlive;
+package com.micdm.transportlive.activities;
 
-import android.app.PendingIntent;
-import android.content.ActivityNotFoundException;
+import android.app.ActionBar;
+import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.preference.PreferenceFragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.micdm.transportlive.CustomApplication;
+import com.micdm.transportlive.CustomViewPager;
+import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.Forecast;
 import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.RouteInfo;
@@ -26,24 +24,18 @@ import com.micdm.transportlive.data.SelectedStationInfo;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Station;
 import com.micdm.transportlive.data.Transport;
-import com.micdm.transportlive.donate.DonateManager;
-import com.micdm.transportlive.donate.DonateProduct;
-import com.micdm.transportlive.fragments.AboutFragment;
-import com.micdm.transportlive.fragments.DonateFragment;
 import com.micdm.transportlive.fragments.ForecastFragment;
 import com.micdm.transportlive.fragments.MapFragment;
 import com.micdm.transportlive.fragments.NoConnectionFragment;
 import com.micdm.transportlive.fragments.SelectRouteFragment;
 import com.micdm.transportlive.fragments.SelectStationFragment;
-import com.micdm.transportlive.fragments.SettingsFragment;
 import com.micdm.transportlive.interfaces.ConnectionHandler;
-import com.micdm.transportlive.interfaces.DonateHandler;
 import com.micdm.transportlive.interfaces.EventListener;
 import com.micdm.transportlive.interfaces.ForecastHandler;
 import com.micdm.transportlive.interfaces.ServiceHandler;
-import com.micdm.transportlive.misc.Analytics;
 import com.micdm.transportlive.misc.EventListenerManager;
 import com.micdm.transportlive.misc.ServiceLoader;
+import com.micdm.transportlive.misc.analytics.Analytics;
 import com.micdm.transportlive.server.pollers.ForecastPoller;
 import com.micdm.transportlive.server.pollers.VehiclePoller;
 import com.micdm.transportlive.stores.SelectedRouteStore;
@@ -53,8 +45,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class MainActivity extends ActionBarActivity implements PreferenceFragment.OnPreferenceStartFragmentCallback,
-        ConnectionHandler, ServiceHandler, ForecastHandler, DonateHandler {
+public class MainActivity extends FragmentActivity implements ConnectionHandler, ServiceHandler, ForecastHandler {
 
     private static class CustomPagerAdapter extends FragmentPagerAdapter {
 
@@ -96,11 +87,9 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         }
     }
 
-    private static final String FRAGMENT_ABOUT_TAG = "about";
     private static final String FRAGMENT_NO_CONNECTION_TAG = "no_connection";
     private static final String FRAGMENT_SELECT_STATION_TAG = "select_station";
     private static final String FRAGMENT_SELECT_ROUTE_TAG = "select_route";
-    private static final String FRAGMENT_DONATE_TAG = "donate";
 
     private static final String EVENT_LISTENER_KEY_ON_UNSELECT_ALL_ROUTES = "OnUnselectAllRoutes";
     private static final String EVENT_LISTENER_KEY_ON_LOAD_SERVICE = "OnLoadService";
@@ -110,10 +99,6 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     private static final String EVENT_LISTENER_KEY_ON_UNSELECT_STATION = "OnUnselectStation";
     private static final String EVENT_LISTENER_KEY_ON_UNSELECT_ALL_STATIONS = "OnUnselectAllStations";
     private static final String EVENT_LISTENER_KEY_ON_LOAD_FORECASTS = "OnLoadForecasts";
-    private static final String EVENT_LISTENER_KEY_ON_LOAD_DONATE_PRODUCTS = "OnLoadDonateProducts";
-    private static final String EVENT_LISTENER_KEY_ON_DONATE = "OnDonate";
-
-    private static final int BUY_REQUEST_CODE = 1001;
 
     private final EventListenerManager listeners = new EventListenerManager();
 
@@ -198,22 +183,9 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     private List<SelectedStationInfo> selectedStations;
     private List<Forecast> forecasts;
 
-    private final DonateManager donateManager = new DonateManager(this, new DonateManager.OnLoadProductsListener() {
-        @Override
-        public void onLoadProducts(final List<DonateProduct> products) {
-            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_DONATE_PRODUCTS, new EventListenerManager.OnIterateListener() {
-                @Override
-                public void onIterate(EventListener listener) {
-                    ((OnLoadDonateProductsListener) listener).onLoadDonateProducts(products);
-                }
-            });
-        }
-    });
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        donateManager.init();
         setContentView(R.layout.a__main);
         setupActionBar();
         setupPager();
@@ -221,7 +193,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     }
 
     private void setupActionBar() {
-        ActionBar actionBar = getSupportActionBar();
+        ActionBar actionBar = getActionBar();
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
     }
@@ -232,18 +204,17 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int i) {
-                getSupportActionBar().setSelectedNavigationItem(i);
-                ((CustomApplication) getApplication()).getAnalytics().reportEvent(Analytics.Category.TABS, Analytics.Action.SHOW, String.valueOf(i));
+                getActionBar().setSelectedNavigationItem(i);
+                CustomApplication.get().getAnalytics().reportEvent(Analytics.Category.TABS, Analytics.Action.SHOW, String.valueOf(i));
             }
         });
         addPage(pager, new CustomPagerAdapter.Page(getString(R.string.tab_title_forecast), new ForecastFragment()));
         addPage(pager, new CustomPagerAdapter.Page(getString(R.string.tab_title_map), new MapFragment()));
-        addPage(pager, new CustomPagerAdapter.Page(getString(R.string.tab_title_settings), new SettingsFragment()));
     }
 
     private void addPage(final CustomViewPager pager, CustomPagerAdapter.Page page) {
         ((CustomPagerAdapter) pager.getAdapter()).add(page);
-        ActionBar actionBar = getSupportActionBar();
+        ActionBar actionBar = getActionBar();
         ActionBar.Tab tab = actionBar.newTab();
         tab.setText(page.title);
         tab.setTabListener(new ActionBar.TabListener() {
@@ -296,7 +267,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     @Override
     protected void onStart() {
         super.onStart();
-        ((CustomApplication) getApplication()).getAnalytics().reportActivityStart(this);
+        CustomApplication.get().getAnalytics().reportActivityStart(this);
         loadVehicles();
         loadForecasts();
     }
@@ -306,13 +277,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         super.onStop();
         vehiclePoller.stop();
         forecastPoller.stop();
-        ((CustomApplication) getApplication()).getAnalytics().reportActivityStop(this);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        donateManager.deinit();
+        CustomApplication.get().getAnalytics().reportActivityStop(this);
     }
 
     @Override
@@ -329,56 +294,12 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
                 loadVehicles();
                 loadForecasts();
                 return true;
-            default:
-                return super.onOptionsItemSelected(item);
+            case R.id.settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+                return true;
         }
-    }
-
-    @Override
-    public boolean onPreferenceStartFragment(PreferenceFragment fragment, Preference pref) {
-        String key = pref.getKey();
-        if (key == null) {
-            return false;
-        }
-        if (key.equals(SettingsFragment.PREF_KEY_DONATE)) {
-            showDonateMessage();
-            return true;
-        }
-        if (key.equals(SettingsFragment.PREF_KEY_SHARE)) {
-            showShareMessage();
-            return true;
-        }
-        if (key.equals(SettingsFragment.PREF_KEY_ABOUT)) {
-            showAboutMessage();
-            return true;
-        }
-        return false;
-    }
-
-    private void showDonateMessage() {
-        FragmentManager manager = getSupportFragmentManager();
-        if (manager.findFragmentByTag(FRAGMENT_DONATE_TAG) == null) {
-            (new DonateFragment()).show(manager, FRAGMENT_DONATE_TAG);
-            ((CustomApplication) getApplication()).getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "donate");
-        }
-    }
-
-    private void showShareMessage() {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("plain/text");
-        intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_text, getPackageName()));
-        try {
-            startActivity(intent);
-        } catch (ActivityNotFoundException e) {}
-        ((CustomApplication) getApplication()).getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "share");
-    }
-
-    private void showAboutMessage() {
-        FragmentManager manager = getSupportFragmentManager();
-        if (manager.findFragmentByTag(FRAGMENT_ABOUT_TAG) == null) {
-            (new AboutFragment()).show(manager, FRAGMENT_ABOUT_TAG);
-            ((CustomApplication) getApplication()).getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "about");
-        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void showNoConnectionMessage() {
@@ -398,20 +319,6 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == BUY_REQUEST_CODE && resultCode == RESULT_OK) {
-            listeners.notify(EVENT_LISTENER_KEY_ON_DONATE, new EventListenerManager.OnIterateListener() {
-                @Override
-                public void onIterate(EventListener listener) {
-                    ((OnDonateListener) listener).onDonate();
-                }
-            });
-            donateManager.handleDonate(data.getStringExtra("INAPP_PURCHASE_DATA"));
-        }
-    }
-
-    @Override
     public void requestReconnect() {
         loadVehicles();
         loadForecasts();
@@ -422,7 +329,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         FragmentManager manager = getSupportFragmentManager();
         if (manager.findFragmentByTag(FRAGMENT_SELECT_ROUTE_TAG) == null) {
             (new SelectRouteFragment()).show(manager, FRAGMENT_SELECT_ROUTE_TAG);
-            ((CustomApplication) getApplication()).getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "select_route");
+            CustomApplication.get().getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "select_route");
         }
     }
 
@@ -523,7 +430,7 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
         FragmentManager manager = getSupportFragmentManager();
         if (manager.findFragmentByTag(FRAGMENT_SELECT_STATION_TAG) == null) {
             (new SelectStationFragment()).show(manager, FRAGMENT_SELECT_STATION_TAG);
-            ((CustomApplication) getApplication()).getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "select_station");
+            CustomApplication.get().getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "select_station");
         }
     }
 
@@ -669,38 +576,5 @@ public class MainActivity extends ActionBarActivity implements PreferenceFragmen
     @Override
     public void removeOnLoadForecastsListener(OnLoadForecastsListener listener) {
         listeners.remove(EVENT_LISTENER_KEY_ON_LOAD_FORECASTS, listener);
-    }
-
-    @Override
-    public void makeDonation(DonateProduct product) {
-        PendingIntent intent = donateManager.getDonateIntent(product);
-        if (intent == null) {
-            return;
-        }
-        try {
-            startIntentSenderForResult(intent.getIntentSender(), BUY_REQUEST_CODE, new Intent(), 0, 0, 0);
-            ((CustomApplication) getApplication()).getAnalytics().reportEvent(Analytics.Category.DONATE, Analytics.Action.CLICK, product.id);
-        } catch (IntentSender.SendIntentException e) {}
-    }
-
-    @Override
-    public void addOnLoadDonateProductsListener(OnLoadDonateProductsListener listener) {
-        listeners.add(EVENT_LISTENER_KEY_ON_LOAD_DONATE_PRODUCTS, listener);
-        listener.onLoadDonateProducts(donateManager.getProducts());
-    }
-
-    @Override
-    public void removeOnLoadDonateProductsListener(OnLoadDonateProductsListener listener) {
-        listeners.remove(EVENT_LISTENER_KEY_ON_LOAD_DONATE_PRODUCTS, listener);
-    }
-
-    @Override
-    public void addOnDonateListener(OnDonateListener listener) {
-        listeners.add(EVENT_LISTENER_KEY_ON_DONATE, listener);
-    }
-
-    @Override
-    public void removeOnDonateListener(OnDonateListener listener) {
-        listeners.remove(EVENT_LISTENER_KEY_ON_DONATE, listener);
     }
 }

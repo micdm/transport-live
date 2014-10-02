@@ -1,5 +1,5 @@
 <resources>
-    <style name="AppTheme" parent="Theme.AppCompat"/>
+    <style name="AppTheme" parent="android:Theme.Holo.Light"/>
     <style name="AppTheme.LoadingMessage">
         <item name="android:layout_gravity">bottom|center</item>
         <item name="android:padding">5dp</item>
