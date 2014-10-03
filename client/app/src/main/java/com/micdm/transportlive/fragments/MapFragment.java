@@ -255,7 +255,7 @@ public class MapFragment extends Fragment {
             mapView.setMaxZoomLevel(MAX_ZOOM);
         }
         mapView.setScrollableAreaLimit(new BoundingBoxE6(NORTH_EDGE, EAST_EDGE, SOUTH_EDGE, WEST_EDGE));
-        mapView.setMultiTouchControls(true);
+        mapView.setBuiltInZoomControls(true);
         return mapView;
     }
 
