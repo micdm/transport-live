@@ -6,24 +6,24 @@ import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 public class RouteColors {
 
-    private final Map<Route, Integer> colors;
+    private final Map<Integer, Integer> colors;
 
     public RouteColors(Service service) {
         this.colors = getColors(service);
     }
 
-    private Map<Route, Integer> getColors(Service service) {
-        Map<Route, Integer> colors = new Hashtable<Route, Integer>();
+    private Map<Integer, Integer> getColors(Service service) {
+        Map<Integer, Integer> colors = new HashMap<Integer, Integer>();
         int count = getRouteCount(service);
         int number = 0;
-        for (Transport transport: service.transports) {
-            for (Route route: transport.routes) {
-                colors.put(route, getColor(count, number));
+        for (Transport transport: service.getTransports()) {
+            for (Route route: transport.getRoutes()) {
+                colors.put(route.getNumber(), getColor(count, number));
                 number += 1;
             }
         }
@@ -32,8 +32,8 @@ public class RouteColors {
 
     private int getRouteCount(Service service) {
         int count = 0;
-        for (Transport transport: service.transports) {
-            count += transport.routes.size();
+        for (Transport transport: service.getTransports()) {
+            count += transport.getRoutes().size();
         }
         return count;
     }
@@ -42,7 +42,7 @@ public class RouteColors {
         return Color.HSVToColor(new float[] {(255.0f / count) * number, 1f, 0.8f});
     }
 
-    public int get(Route route) {
-        return colors.get(route);
+    public int get(int routeNumber) {
+        return colors.get(routeNumber);
     }
 }

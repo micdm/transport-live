@@ -127,7 +127,7 @@ public class DonateManager {
 
     public PendingIntent getDonateIntent(DonateProduct product) {
         try {
-            Bundle result = connection.getService().getBuyIntent(BILLING_API_VERSION, context.getPackageName(), product.id, PURCHASE_TYPE, "");
+            Bundle result = connection.getService().getBuyIntent(BILLING_API_VERSION, context.getPackageName(), product.getId(), PURCHASE_TYPE, "");
             if (result.getInt("RESPONSE_CODE") != 0) {
                 return null;
             }

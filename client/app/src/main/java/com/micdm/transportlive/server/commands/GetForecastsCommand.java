@@ -1,7 +1,7 @@
 package com.micdm.transportlive.server.commands;
 
 import com.micdm.transportlive.data.Forecast;
-import com.micdm.transportlive.data.SelectedStationInfo;
+import com.micdm.transportlive.data.SelectedStation;
 import com.micdm.transportlive.data.Service;
 
 import java.util.List;
@@ -18,9 +18,9 @@ public class GetForecastsCommand implements Command {
     }
 
     public final Service service;
-    public final List<SelectedStationInfo> selected;
+    public final List<SelectedStation> selected;
 
-    public GetForecastsCommand(Service service, List<SelectedStationInfo> selected) {
+    public GetForecastsCommand(Service service, List<SelectedStation> selected) {
         this.service = service;
         this.selected = selected;
     }

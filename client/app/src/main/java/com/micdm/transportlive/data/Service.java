@@ -1,15 +1,22 @@
 package com.micdm.transportlive.data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Service {
 
-    public final List<Transport> transports = new ArrayList<Transport>();
+    private final List<Transport> transports;
+
+    public Service(List<Transport> transports) {
+        this.transports = transports;
+    }
+
+    public List<Transport> getTransports() {
+        return transports;
+    }
 
     public Transport getTransportById(int id) {
         for (Transport transport: transports) {
-            if (transport.id == id) {
+            if (transport.getId() == id) {
                 return transport;
             }
         }

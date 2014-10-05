@@ -46,6 +46,7 @@
     <string name="f__map__no_vehicles">Похоже, весь транспорт в парке.</string>
     <!-- Фрагмент выбора маршрутов -->
     <string name="f__select_route__title">Выберите маршруты</string>
+    <string name="f__select_route__direction">%1$s\n%2$s</string>
     <!-- Фрагмент пожертвований -->
     <string name="f__donate__title">Выберите сумму</string>
     <string name="f__donate__thanks">Ваше пожертвование будет употреблено по назначению. Спасибо!</string>

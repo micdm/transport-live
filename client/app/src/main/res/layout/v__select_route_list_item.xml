@@ -1,39 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal">
+    android:layout_height="wrap_content"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="5dp"
+    android:paddingBottom="5dp">
     <FrameLayout
+        android:id="@+id/v__select_route_list_item__color"
         android:layout_width="15dp"
-        android:layout_height="match_parent"
-        android:id="@+id/v__select_route_list_item__color"/>
+        android:layout_height="15dp"
+        android:layout_centerVertical="true"/>
     <CheckBox
+        android:id="@+id/v__select_route_list_item__is_selected"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:id="@+id/v__select_route_list_item__is_selected"/>
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/v__select_route_list_item__color"
+        android:layout_centerVertical="true"/>
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
         android:id="@+id/v__select_route_list_item__number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/v__select_route_list_item__is_selected"
         android:gravity="center"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:textSize="40sp"/>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/v__select_route_list_item__start"
-            android:layout_weight="1"
-            android:gravity="bottom"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/v__select_route_list_item__finish"
-            android:layout_weight="1"
-            android:gravity="top"/>
-    </LinearLayout>
-</LinearLayout>
+    <TextView
+        android:id="@+id/v__select_route_list_item__direction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/v__select_route_list_item__number"
+        android:layout_centerVertical="true"/>
+</RelativeLayout>

@@ -10,7 +10,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/__app_name"
         android:theme="@style/AppTheme"
-        android:name="com.micdm.transportlive.CustomApplication">
+        android:name=".App">
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version"/>

@@ -1,31 +1,39 @@
 package com.micdm.transportlive.data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Direction {
 
-    public final int id;
-    public final List<Station> stations = new ArrayList<Station>();
+    private final int id;
+    private final List<Station> stations;
 
-    public Direction(int id) {
+    public Direction(int id, List<Station> stations) {
         this.id = id;
+        this.stations = stations;
     }
 
-    public String getStart() {
-        return stations.get(0).name;
+    public int getId() {
+        return id;
     }
 
-    public String getFinish() {
-        return stations.get(stations.size() - 1).name;
+    public List<Station> getStations() {
+        return stations;
     }
 
     public Station getStationById(int id) {
         for (Station station: stations) {
-            if (station.id == id) {
+            if (station.getId() == id) {
                 return station;
             }
         }
         return null;
+    }
+
+    public String getStart() {
+        return stations.get(0).getName();
+    }
+
+    public String getFinish() {
+        return stations.get(stations.size() - 1).getName();
     }
 }

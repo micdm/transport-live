@@ -3,9 +3,9 @@ package com.micdm.transportlive.server;
 import android.content.Context;
 
 import com.micdm.transportlive.data.Forecast;
-import com.micdm.transportlive.data.RouteInfo;
-import com.micdm.transportlive.data.SelectedRouteInfo;
-import com.micdm.transportlive.data.SelectedStationInfo;
+import com.micdm.transportlive.data.RoutePopulation;
+import com.micdm.transportlive.data.SelectedRoute;
+import com.micdm.transportlive.data.SelectedStation;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.server.commands.Command;
 import com.micdm.transportlive.server.commands.GetForecastsCommand;
@@ -16,7 +16,7 @@ import java.util.List;
 public class DataLoader {
 
     public static interface OnLoadVehiclesListener {
-        public void onLoad(List<RouteInfo> vehicles);
+        public void onLoad(List<RoutePopulation> vehicles);
         public void onError();
     }
 
@@ -44,11 +44,11 @@ public class DataLoader {
         this.context = context;
     }
 
-    public Task loadVehicles(Service service, List<SelectedRouteInfo> selected, final OnLoadVehiclesListener listener) {
+    public Task loadVehicles(Service service, List<SelectedRoute> selected, final OnLoadVehiclesListener listener) {
         ServerConnectTask task = new ServerConnectTask(context, new ServerConnectTask.OnResultListener() {
             @Override
             public void onResult(Command.Result result) {
-                List<RouteInfo> routes = ((GetVehiclesCommand.Result) result).routes;
+                List<RoutePopulation> routes = ((GetVehiclesCommand.Result) result).routes;
                 listener.onLoad(routes);
             }
             @Override
@@ -60,7 +60,7 @@ public class DataLoader {
         return new Task(task);
     }
 
-    public Task loadForecast(Service service, List<SelectedStationInfo> selected, final OnLoadForecastListener listener) {
+    public Task loadForecast(Service service, List<SelectedStation> selected, final OnLoadForecastListener listener) {
         ServerConnectTask task = new ServerConnectTask(context, new ServerConnectTask.OnResultListener() {
             @Override
             public void onResult(Command.Result result) {

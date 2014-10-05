@@ -6,7 +6,11 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
 import com.micdm.transportlive.R;
+import com.micdm.transportlive.data.SelectedRoute;
+import com.micdm.transportlive.data.SelectedStation;
 import com.micdm.transportlive.data.Transport;
+
+import java.util.List;
 
 public class Utils {
 
@@ -39,5 +43,23 @@ public class Utils {
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException("cannot get application version");
         }
+    }
+
+    public static boolean isRouteSelected(List<SelectedRoute> selectedRoutes, int transportId, int routeNumber) {
+        for (SelectedRoute selectedRoute: selectedRoutes) {
+            if (selectedRoute.getTransportId() == transportId && selectedRoute.getRouteNumber() == routeNumber) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isStationSelected(List<SelectedStation> selectedStations, int transportId, int stationId) {
+        for (SelectedStation selectedStation: selectedStations) {
+            if (selectedStation.getTransportId() == transportId && selectedStation.getStationId() == stationId) {
+                return true;
+            }
+        }
+        return false;
     }
 }

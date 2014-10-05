@@ -1,6 +1,5 @@
 package com.micdm.transportlive.fragments;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -14,15 +13,19 @@ import android.widget.BaseAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.micdm.transportlive.App;
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.Direction;
 import com.micdm.transportlive.data.Route;
-import com.micdm.transportlive.data.SelectedStationInfo;
+import com.micdm.transportlive.data.SelectedStation;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Station;
 import com.micdm.transportlive.data.Transport;
-import com.micdm.transportlive.interfaces.ForecastHandler;
-import com.micdm.transportlive.interfaces.ServiceHandler;
+import com.micdm.transportlive.events.EventManager;
+import com.micdm.transportlive.events.EventType;
+import com.micdm.transportlive.events.events.LoadServiceEvent;
+import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
+import com.micdm.transportlive.events.events.RequestSelectStationEvent;
 import com.micdm.transportlive.misc.Utils;
 
 import java.util.List;
@@ -88,7 +91,7 @@ public class SelectStationFragment extends DialogFragment {
 
         @Override
         protected String getItemName(int position) {
-            return getString(R.string.f__select_station__route_list_item, getItem(position).number);
+            return getString(R.string.f__select_station__route_list_item, getItem(position).getNumber());
         }
     }
 
@@ -113,29 +116,8 @@ public class SelectStationFragment extends DialogFragment {
 
         @Override
         protected String getItemName(int position) {
-            return getItem(position).name;
+            return getItem(position).getName();
         }
-    }
-
-    private ServiceHandler serviceHandler;
-    private final ServiceHandler.OnLoadServiceListener onLoadServiceListener = new ServiceHandler.OnLoadServiceListener() {
-        @Override
-        public void onLoadService(Service service) {
-            Transport transport = service.transports.get(0);
-            Route route = transport.routes.get(0);
-            Direction direction = route.directions.get(0);
-            Station station = direction.stations.get(0);
-            setup(service, transport, route, direction, station);
-        }
-    };
-
-    private ForecastHandler forecastHandler;
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        serviceHandler = (ServiceHandler) activity;
-        forecastHandler = (ForecastHandler) activity;
     }
 
     @Override
@@ -151,7 +133,8 @@ public class SelectStationFragment extends DialogFragment {
                 Route route = (Route) getRouteListSpinner().getSelectedItem();
                 Direction direction = (Direction) getDirectionListSpinner().getSelectedItem();
                 Station station = (Station) getStationListSpinner().getSelectedItem();
-                forecastHandler.selectStation(new SelectedStationInfo(transport, route, direction, station));
+                SelectedStation selectedStation = new SelectedStation(transport.getId(), route.getNumber(), direction.getId(), station.getId());
+                App.get().getEventManager().publish(new RequestSelectStationEvent(selectedStation));
             }
         });
         return builder.create();
@@ -176,14 +159,35 @@ public class SelectStationFragment extends DialogFragment {
     @Override
     public void onStart() {
         super.onStart();
-        serviceHandler.addOnLoadServiceListener(onLoadServiceListener);
+        subscribeForEvents();
+        requestForData();
+    }
+
+    private void subscribeForEvents() {
+        EventManager manager = App.get().getEventManager();
+        manager.subscribe(this, EventType.LOAD_SERVICE, new EventManager.OnEventListener<LoadServiceEvent>() {
+            @Override
+            public void onEvent(LoadServiceEvent event) {
+                Service service = event.getService();
+                Transport transport = service.getTransports().get(0);
+                Route route = transport.getRoutes().get(0);
+                Direction direction = route.getDirections().get(0);
+                Station station = direction.getStations().get(0);
+                setup(service, transport, route, direction, station);
+            }
+        });
+    }
+
+    private void requestForData() {
+        EventManager manager = App.get().getEventManager();
+        manager.publish(new RequestLoadServiceEvent());
     }
 
     private void setup(Service service, Transport transport, Route route, Direction direction, Station station) {
-        setupTransportListSpinner(service.transports, transport);
-        setupRouteListSpinner(transport.routes, route);
-        setupDirectionListSpinner(route.directions, direction);
-        setupStationListSpinner(direction.stations, station);
+        setupTransportListSpinner(service.getTransports(), transport);
+        setupRouteListSpinner(transport.getRoutes(), route);
+        setupDirectionListSpinner(route.getDirections(), direction);
+        setupStationListSpinner(direction.getStations(), station);
     }
 
     private void setupTransportListSpinner(List<Transport> transports, Transport transport) {
@@ -196,7 +200,7 @@ public class SelectStationFragment extends DialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Transport transport = (Transport) parent.getAdapter().getItem(position);
-                getRouteListSpinner().setAdapter(new RouteListAdapter(transport.routes));
+                getRouteListSpinner().setAdapter(new RouteListAdapter(transport.getRoutes()));
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
@@ -213,7 +217,7 @@ public class SelectStationFragment extends DialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Route route = (Route) parent.getAdapter().getItem(position);
-                getDirectionListSpinner().setAdapter(new DirectionListAdapter(route.directions));
+                getDirectionListSpinner().setAdapter(new DirectionListAdapter(route.getDirections()));
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
@@ -230,7 +234,7 @@ public class SelectStationFragment extends DialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Direction direction = (Direction) parent.getAdapter().getItem(position);
-                getStationListSpinner().setAdapter(new StationListAdapter(direction.stations));
+                getStationListSpinner().setAdapter(new StationListAdapter(direction.getStations()));
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
@@ -248,6 +252,6 @@ public class SelectStationFragment extends DialogFragment {
     @Override
     public void onStop() {
         super.onStop();
-        serviceHandler.removeOnLoadServiceListener(onLoadServiceListener);
+        App.get().getEventManager().unsubscribeAll(this);
     }
 }

@@ -5,7 +5,7 @@ import android.content.Context;
 import com.micdm.transportlive.data.Forecast;
 import com.micdm.transportlive.data.ForecastVehicle;
 import com.micdm.transportlive.data.Route;
-import com.micdm.transportlive.data.SelectedStationInfo;
+import com.micdm.transportlive.data.SelectedStation;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Station;
 import com.micdm.transportlive.data.Transport;
@@ -29,7 +29,7 @@ public class GetForecastsCommandHandler extends CommandHandler {
 
     @Override
     public GetForecastsCommand.Result handle() {
-        List<SelectedStationInfo> selected = ((GetForecastsCommand) command).selected;
+        List<SelectedStation> selected = ((GetForecastsCommand) command).selected;
         List<RequestParam> params = getRequestParams(selected);
         JSONObject response = sendRequest(API_METHOD, params);
         if (response == null) {
@@ -44,10 +44,10 @@ public class GetForecastsCommandHandler extends CommandHandler {
         }
     }
 
-    private List<RequestParam> getRequestParams(List<SelectedStationInfo> selected) {
+    private List<RequestParam> getRequestParams(List<SelectedStation> selected) {
         List<RequestParam> params = new ArrayList<RequestParam>();
-        for (SelectedStationInfo info: selected) {
-            params.add(new RequestParam("station", String.format("%s-%s", info.transport.id, info.station.id)));
+        for (SelectedStation station: selected) {
+            params.add(new RequestParam("station", String.format("%s-%s", station.getTransportId(), station.getStationId())));
         }
         return params;
     }
@@ -64,11 +64,8 @@ public class GetForecastsCommandHandler extends CommandHandler {
     private Forecast getForecast(JSONObject forecastJson, Service service) throws JSONException {
         Transport transport = service.getTransportById(forecastJson.getInt("transport"));
         Station station = transport.getStationById(forecastJson.getInt("station"));
-        Forecast forecast = new Forecast(transport, station);
-        for (ForecastVehicle vehicle: getForecastVehicles(forecastJson.getJSONArray("vehicles"), transport)) {
-            forecast.vehicles.add(vehicle);
-        }
-        return forecast;
+        List<ForecastVehicle> vehicles = getForecastVehicles(forecastJson.getJSONArray("vehicles"), transport);
+        return new Forecast(transport.getId(), station.getId(), vehicles);
     }
 
     private List<ForecastVehicle> getForecastVehicles(JSONArray vehicleListJson, Transport transport) throws JSONException {
@@ -84,6 +81,6 @@ public class GetForecastsCommandHandler extends CommandHandler {
         Route route = transport.getRouteByNumber(vehicleJson.getInt("route"));
         int time = vehicleJson.getInt("time");
         boolean isLowFloor = vehicleJson.has("is_low_floor");
-        return new ForecastVehicle(route, time, isLowFloor);
+        return new ForecastVehicle(route.getNumber(), time, isLowFloor);
     }
 }

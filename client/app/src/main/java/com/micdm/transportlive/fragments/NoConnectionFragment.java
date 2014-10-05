@@ -1,6 +1,5 @@
 package com.micdm.transportlive.fragments;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -9,18 +8,11 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.View;
 
+import com.micdm.transportlive.App;
 import com.micdm.transportlive.R;
-import com.micdm.transportlive.interfaces.ConnectionHandler;
+import com.micdm.transportlive.events.events.RequestReconnectEvent;
 
 public class NoConnectionFragment extends DialogFragment {
-
-    private ConnectionHandler handler;
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        handler = (ConnectionHandler) activity;
-    }
 
     @Override
     @NonNull
@@ -44,6 +36,6 @@ public class NoConnectionFragment extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
-        handler.requestReconnect();
+        App.get().getEventManager().publish(new RequestReconnectEvent());
     }
 }

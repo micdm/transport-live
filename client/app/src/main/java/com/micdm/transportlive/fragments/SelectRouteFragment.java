@@ -1,6 +1,5 @@
 package com.micdm.transportlive.fragments;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -12,56 +11,69 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
+import com.micdm.transportlive.App;
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.Route;
-import com.micdm.transportlive.data.SelectedRouteInfo;
+import com.micdm.transportlive.data.SelectedRoute;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
-import com.micdm.transportlive.interfaces.ServiceHandler;
+import com.micdm.transportlive.events.Event;
+import com.micdm.transportlive.events.EventManager;
+import com.micdm.transportlive.events.EventType;
+import com.micdm.transportlive.events.events.LoadRoutesEvent;
+import com.micdm.transportlive.events.events.LoadServiceEvent;
+import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
+import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
+import com.micdm.transportlive.events.events.RequestSelectRouteEvent;
+import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
 import com.micdm.transportlive.misc.RouteColors;
 import com.micdm.transportlive.misc.Utils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SelectRouteFragment extends DialogFragment {
 
     private class RouteListAdapter extends BaseExpandableListAdapter {
 
-        private final RouteColors colors;
-        private final List<Transport> transports;
-        public final List<SelectedRouteInfo> selected;
+        private class ChildViewHolder {
 
-        public RouteListAdapter(Service service) {
-            this.colors = new RouteColors(service);
-            this.transports = service.transports;
-            this.selected = getSelectedRoutes(service);
+            public final View colorView;
+            public final CheckBox checkboxView;
+            public final TextView numberView;
+            public final TextView directionView;
+
+            private ChildViewHolder(View colorView, CheckBox checkboxView, TextView numberView, TextView directionView) {
+                this.colorView = colorView;
+                this.checkboxView = checkboxView;
+                this.numberView = numberView;
+                this.directionView = directionView;
+            }
         }
 
-        private List<SelectedRouteInfo> getSelectedRoutes(Service service) {
-            List<SelectedRouteInfo> selected = new ArrayList<SelectedRouteInfo>();
-            for (Transport transport: service.transports) {
-                for (Route route: transport.routes) {
-                    if (handler.isRouteSelected(transport, route)) {
-                        selected.add(new SelectedRouteInfo(transport, route));
-                    }
-                }
-            }
-            return selected;
+        private RouteColors colors;
+        private List<Transport> transports;
+        private List<SelectedRoute> selectedRoutes;
+
+        public void setService(Service service) {
+            colors = new RouteColors(service);
+            transports = service.getTransports();
+        }
+
+        public void setSelectedRoutes(List<SelectedRoute> selectedRoutes) {
+            this.selectedRoutes = selectedRoutes;
         }
 
         @Override
         public int getGroupCount() {
-            return transports.size();
+            return (transports == null) ? 0 : transports.size();
         }
 
         @Override
         public int getChildrenCount(int position) {
-            return getGroup(position).routes.size();
+            return getGroup(position).getRoutes().size();
         }
 
         @Override
@@ -71,17 +83,17 @@ public class SelectRouteFragment extends DialogFragment {
 
         @Override
         public Route getChild(int groupPosition, int childPosition) {
-            return getGroup(groupPosition).routes.get(childPosition);
+            return getGroup(groupPosition).getRoutes().get(childPosition);
         }
 
         @Override
         public long getGroupId(int position) {
-            return getGroup(position).id;
+            return getGroup(position).getId();
         }
 
         @Override
         public long getChildId(int groupPosition, int childPodition) {
-            return getChild(groupPosition, childPodition).number;
+            return getChild(groupPosition, childPodition).getNumber();
         }
 
         @Override
@@ -91,62 +103,56 @@ public class SelectRouteFragment extends DialogFragment {
 
         @Override
         public View getGroupView(int position, boolean isExpanded, View view, ViewGroup viewGroup) {
-            Transport transport = getGroup(position);
             if (view == null) {
                 view = View.inflate(getActivity(), R.layout.v__select_route_title, null);
             }
+            Transport transport = getGroup(position);
             ((TextView) view).setText(Utils.getTransportName(getActivity(), transport));
             return view;
         }
 
         @Override
         public View getChildView(int groupPosition, int childPosition, boolean isExpanded, View view, ViewGroup viewGroup) {
-            final Transport transport = getGroup(groupPosition);
-            final Route route = getChild(groupPosition, childPosition);
             if (view == null) {
                 view = View.inflate(getActivity(), R.layout.v__select_route_list_item, null);
             }
-            View colorView = view.findViewById(R.id.v__select_route_list_item__color);
-            colorView.setBackgroundColor(colors.get(route));
-            final CheckBox checkbox = (CheckBox) view.findViewById(R.id.v__select_route_list_item__is_selected);
-            checkbox.setOnCheckedChangeListener(null);
-            checkbox.setChecked(handler.isRouteSelected(transport, route));
-            checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            final ChildViewHolder holder = getChildViewHolder(view);
+            final Transport transport = getGroup(groupPosition);
+            final Route route = getChild(groupPosition, childPosition);
+            holder.colorView.setBackgroundColor(colors.get(route.getNumber()));
+            holder.checkboxView.setOnCheckedChangeListener(null);
+            holder.checkboxView.setChecked(Utils.isRouteSelected(selectedRoutes, transport.getId(), route.getNumber()));
+            holder.checkboxView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton checkbox, boolean isChecked) {
-                    if (isChecked) {
-                        addSelectedRoute(transport, route);
-                    } else {
-                        removeSelectedRoute(transport, route);
-                    }
+                    SelectedRoute selectedRoute = new SelectedRoute(transport.getId(), route.getNumber());
+                    Event event = isChecked ? new RequestSelectRouteEvent(selectedRoute) : new RequestUnselectRouteEvent(selectedRoute);
+                    App.get().getEventManager().publish(event);
                 }
             });
-            TextView numberView = (TextView) view.findViewById(R.id.v__select_route_list_item__number);
-            numberView.setText(String.valueOf(route.number));
-            TextView startView = (TextView) view.findViewById(R.id.v__select_route_list_item__start);
-            startView.setText(route.getStart());
-            TextView finishView = (TextView) view.findViewById(R.id.v__select_route_list_item__finish);
-            finishView.setText(route.getFinish());
+            holder.numberView.setText(String.valueOf(route.getNumber()));
+            holder.directionView.setText(getString(R.string.f__select_route__direction, route.getStart(), route.getFinish()));
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    checkbox.toggle();
+                    holder.checkboxView.toggle();
                 }
             });
             return view;
         }
 
-        private void addSelectedRoute(Transport transport, Route route) {
-            selected.add(new SelectedRouteInfo(transport, route));
-        }
-
-        private void removeSelectedRoute(Transport transport, Route route) {
-            for (SelectedRouteInfo info: selected) {
-                if (info.transport.equals(transport) && info.route.equals(route)) {
-                    selected.remove(info);
-                    break;
-                }
+        private ChildViewHolder getChildViewHolder(View view) {
+            ChildViewHolder holder = (ChildViewHolder) view.getTag();
+            if (holder != null) {
+                return holder;
             }
+            View colorView = view.findViewById(R.id.v__select_route_list_item__color);
+            CheckBox checkboxView = (CheckBox) view.findViewById(R.id.v__select_route_list_item__is_selected);
+            TextView numberView = (TextView) view.findViewById(R.id.v__select_route_list_item__number);
+            TextView directionView = (TextView) view.findViewById(R.id.v__select_route_list_item__direction);
+            holder = new ChildViewHolder(colorView, checkboxView, numberView, directionView);
+            view.setTag(holder);
+            return holder;
         }
 
         @Override
@@ -155,51 +161,81 @@ public class SelectRouteFragment extends DialogFragment {
         }
     }
 
-    private ServiceHandler handler;
-    private final ServiceHandler.OnLoadServiceListener onLoadServiceListener = new ServiceHandler.OnLoadServiceListener() {
-        @Override
-        public void onLoadService(Service service) {
-            ExpandableListView listView = (ExpandableListView) getDialog().findViewById(R.id.f__select_route__route_list);
-            ExpandableListAdapter adapter = new RouteListAdapter(service);
-            listView.setAdapter(adapter);
-            for (int i = 0; i < adapter.getGroupCount(); i += 1) {
-                listView.expandGroup(i);
-            }
-        }
-    };
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        handler = (ServiceHandler) activity;
-    }
+    private ExpandableListView routesView;
 
     @Override
     @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.f__select_route__title);
-        builder.setView(View.inflate(getActivity(), R.layout.f__select_route, null));
+        builder.setView(setupView());
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                ExpandableListView view = (ExpandableListView) getDialog().findViewById(R.id.f__select_route__route_list);
-                RouteListAdapter adapter = (RouteListAdapter) view.getExpandableListAdapter();
-                handler.selectRoutes(adapter.selected);
-            }
+            public void onClick(DialogInterface dialog, int which) {}
         });
         return builder.create();
+    }
+
+    private View setupView() {
+        View view = View.inflate(getActivity(), R.layout.f__select_route, null);
+        routesView = (ExpandableListView) view.findViewById(R.id.f__select_route__route_list);
+        return view;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        handler.addOnLoadServiceListener(onLoadServiceListener);
+        subscribeForEvents();
+        requestForData();
+    }
+
+    private void subscribeForEvents() {
+        EventManager manager = App.get().getEventManager();
+        manager.subscribe(this, EventType.LOAD_SERVICE, new EventManager.OnEventListener<LoadServiceEvent>() {
+            @Override
+            public void onEvent(LoadServiceEvent event) {
+                RouteListAdapter adapter = getAdapter();
+                adapter.setService(event.getService());
+                adapter.notifyDataSetChanged();
+                expandAllGroups();
+            }
+        });
+        manager.subscribe(this, EventType.LOAD_ROUTES, new EventManager.OnEventListener<LoadRoutesEvent>() {
+            @Override
+            public void onEvent(LoadRoutesEvent event) {
+                RouteListAdapter adapter = getAdapter();
+                adapter.setSelectedRoutes(event.getRoutes());
+                adapter.notifyDataSetChanged();
+                expandAllGroups();
+            }
+        });
+    }
+
+    private void requestForData() {
+        EventManager manager = App.get().getEventManager();
+        manager.publish(new RequestLoadServiceEvent());
+        manager.publish(new RequestLoadRoutesEvent());
+    }
+
+    private RouteListAdapter getAdapter() {
+        RouteListAdapter adapter = (RouteListAdapter) routesView.getExpandableListAdapter();
+        if (adapter == null) {
+            adapter = new RouteListAdapter();
+            routesView.setAdapter(adapter);
+        }
+        return adapter;
+    }
+
+    private void expandAllGroups() {
+        RouteListAdapter adapter = getAdapter();
+        for (int i = 0; i < adapter.getGroupCount(); i += 1) {
+            routesView.expandGroup(i);
+        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        handler.removeOnLoadServiceListener(onLoadServiceListener);
+        App.get().getEventManager().unsubscribeAll(this);
     }
 }

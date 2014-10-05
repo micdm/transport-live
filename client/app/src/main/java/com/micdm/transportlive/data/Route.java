@@ -1,20 +1,28 @@
 package com.micdm.transportlive.data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Route {
 
-    public final int number;
-    public final List<Direction> directions = new ArrayList<Direction>();
+    private final int number;
+    private final List<Direction> directions;
 
-    public Route(int number) {
+    public Route(int number, List<Direction> directions) {
         this.number = number;
+        this.directions = directions;
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public List<Direction> getDirections() {
+        return directions;
     }
 
     public Direction getDirectionById(int id) {
         for (Direction direction: directions) {
-            if (direction.id == id) {
+            if (direction.getId() == id) {
                 return direction;
             }
         }

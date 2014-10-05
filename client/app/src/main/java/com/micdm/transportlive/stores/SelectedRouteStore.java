@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.Xml;
 
 import com.micdm.transportlive.data.Route;
-import com.micdm.transportlive.data.SelectedRouteInfo;
+import com.micdm.transportlive.data.SelectedRoute;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 
@@ -25,7 +25,7 @@ public class SelectedRouteStore {
     private static class ContentHandler extends DefaultHandler {
 
         private final Service service;
-        public final List<SelectedRouteInfo> selected = new ArrayList<SelectedRouteInfo>();
+        public final List<SelectedRoute> selected = new ArrayList<SelectedRoute>();
 
         public ContentHandler(Service service) {
             this.service = service;
@@ -36,7 +36,7 @@ public class SelectedRouteStore {
             if (localName.equals("route")) {
                 Transport transport = service.getTransportById(getTransportId(attrs));
                 Route route = transport.getRouteByNumber(getRouteNumber(attrs));
-                selected.add(new SelectedRouteInfo(transport, route));
+                selected.add(new SelectedRoute(transport.getId(), route.getNumber()));
             }
         }
 
@@ -57,26 +57,26 @@ public class SelectedRouteStore {
         this.context = context;
     }
 
-    public List<SelectedRouteInfo> load(Service service) {
+    public List<SelectedRoute> load(Service service) {
         try {
             InputStream input = context.openFileInput(FILE_NAME);
-            List<SelectedRouteInfo> selected = unserialize(input, service);
+            List<SelectedRoute> selected = unserialize(input, service);
             input.close();
             return selected;
         } catch (SAXException e) {
-            return new ArrayList<SelectedRouteInfo>();
+            return new ArrayList<SelectedRoute>();
         } catch (IOException e) {
-            return new ArrayList<SelectedRouteInfo>();
+            return new ArrayList<SelectedRoute>();
         }
     }
 
-    private List<SelectedRouteInfo> unserialize(InputStream input, Service service) throws SAXException, IOException {
+    private List<SelectedRoute> unserialize(InputStream input, Service service) throws SAXException, IOException {
         ContentHandler handler = new ContentHandler(service);
         Xml.parse(input, Xml.Encoding.UTF_8, handler);
         return handler.selected;
     }
 
-    public void put(List<SelectedRouteInfo> selected) {
+    public void put(List<SelectedRoute> selected) {
         try {
             OutputStream output = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE);
             serialize(output, selected);
@@ -88,15 +88,15 @@ public class SelectedRouteStore {
         }
     }
 
-    private void serialize(OutputStream output, List<SelectedRouteInfo> selected) throws IOException {
+    private void serialize(OutputStream output, List<SelectedRoute> selected) throws IOException {
         XmlSerializer serializer = Xml.newSerializer();
         serializer.setOutput(output, "utf-8");
         serializer.startDocument("utf-8", true);
         serializer.startTag("", "routes");
-        for (SelectedRouteInfo info: selected) {
+        for (SelectedRoute route: selected) {
             serializer.startTag("", "route");
-            serializer.attribute("", "transport", String.valueOf(info.transport.id));
-            serializer.attribute("", "route", String.valueOf(info.route.number));
+            serializer.attribute("", "transport", String.valueOf(route.getTransportId()));
+            serializer.attribute("", "route", String.valueOf(route.getRouteNumber()));
             serializer.endTag("", "route");
         }
         serializer.endTag("", "routes");

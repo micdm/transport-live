@@ -5,7 +5,7 @@ import android.util.Xml;
 
 import com.micdm.transportlive.data.Direction;
 import com.micdm.transportlive.data.Route;
-import com.micdm.transportlive.data.SelectedStationInfo;
+import com.micdm.transportlive.data.SelectedStation;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Station;
 import com.micdm.transportlive.data.Transport;
@@ -27,7 +27,7 @@ public class SelectedStationStore {
     private static class ContentHandler extends DefaultHandler {
 
         private final Service service;
-        public final List<SelectedStationInfo> selected = new ArrayList<SelectedStationInfo>();
+        public final List<SelectedStation> selected = new ArrayList<SelectedStation>();
 
         public ContentHandler(Service service) {
             this.service = service;
@@ -40,7 +40,7 @@ public class SelectedStationStore {
                 Route route = transport.getRouteByNumber(getRouteNumber(attrs));
                 Direction direction = route.getDirectionById(getDirectionId(attrs));
                 Station station = direction.getStationById(getStationId(attrs));
-                selected.add(new SelectedStationInfo(transport, route, direction, station));
+                selected.add(new SelectedStation(transport.getId(), route.getNumber(), direction.getId(), station.getId()));
             }
         }
 
@@ -69,26 +69,26 @@ public class SelectedStationStore {
         this.context = context;
     }
 
-    public List<SelectedStationInfo> load(Service service) {
+    public List<SelectedStation> load(Service service) {
         try {
             InputStream input = context.openFileInput(FILE_NAME);
-            List<SelectedStationInfo> selected = unserialize(input, service);
+            List<SelectedStation> selected = unserialize(input, service);
             input.close();
             return selected;
         } catch (SAXException e) {
-            return new ArrayList<SelectedStationInfo>();
+            return new ArrayList<SelectedStation>();
         } catch (IOException e) {
-            return new ArrayList<SelectedStationInfo>();
+            return new ArrayList<SelectedStation>();
         }
     }
 
-    private List<SelectedStationInfo> unserialize(InputStream input, Service service) throws SAXException, IOException {
+    private List<SelectedStation> unserialize(InputStream input, Service service) throws SAXException, IOException {
         ContentHandler handler = new ContentHandler(service);
         Xml.parse(input, Xml.Encoding.UTF_8, handler);
         return handler.selected;
     }
 
-    public void put(List<SelectedStationInfo> selected) {
+    public void put(List<SelectedStation> selected) {
         try {
             OutputStream output = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE);
             serialize(output, selected);
@@ -100,17 +100,17 @@ public class SelectedStationStore {
         }
     }
 
-    private void serialize(OutputStream output, List<SelectedStationInfo> selected) throws IOException {
+    private void serialize(OutputStream output, List<SelectedStation> selected) throws IOException {
         XmlSerializer serializer = Xml.newSerializer();
         serializer.setOutput(output, "utf-8");
         serializer.startDocument("utf-8", true);
         serializer.startTag("", "stations");
-        for (SelectedStationInfo info: selected) {
+        for (SelectedStation station: selected) {
             serializer.startTag("", "station");
-            serializer.attribute("", "transport", String.valueOf(info.transport.id));
-            serializer.attribute("", "route", String.valueOf(info.route.number));
-            serializer.attribute("", "direction", String.valueOf(info.direction.id));
-            serializer.attribute("", "station", String.valueOf(info.station.id));
+            serializer.attribute("", "transport", String.valueOf(station.getTransportId()));
+            serializer.attribute("", "route", String.valueOf(station.getRouteNumber()));
+            serializer.attribute("", "direction", String.valueOf(station.getDirectionId()));
+            serializer.attribute("", "station", String.valueOf(station.getStationId()));
             serializer.endTag("", "station");
         }
         serializer.endTag("", "stations");

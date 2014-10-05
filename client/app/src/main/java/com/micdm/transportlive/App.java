@@ -1,18 +1,21 @@
 package com.micdm.transportlive;
 
-import android.app.Application;
 import android.content.Context;
 
+import com.micdm.transportlive.events.EventManager;
+import com.micdm.transportlive.events.intents.IntentBasedEventManager;
 import com.micdm.transportlive.misc.analytics.Analytics;
 import com.micdm.transportlive.misc.analytics.DevModeAnalytics;
 import com.micdm.transportlive.misc.analytics.ProdModeAnalytics;
 
-public class CustomApplication extends Application {
+public class App extends android.app.Application {
 
-    private static CustomApplication instance;
+    private static App instance;
+
+    private EventManager eventManager;
     private Analytics analytics;
 
-    public static CustomApplication get() {
+    public static App get() {
         if (instance == null) {
             throw new RuntimeException("application not ready yet");
         }
@@ -27,6 +30,13 @@ public class CustomApplication extends Application {
 
     public boolean isDevMode() {
         return getPackageName().endsWith(".dev");
+    }
+
+    public EventManager getEventManager() {
+        if (eventManager == null) {
+            eventManager = new IntentBasedEventManager(getApplicationContext());
+        }
+        return eventManager;
     }
 
     public Analytics getAnalytics() {

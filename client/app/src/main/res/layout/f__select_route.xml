@@ -3,4 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/f__select_route__route_list"
-    android:groupIndicator="@null"/>
+    android:listSelector="@android:color/transparent"
+    android:groupIndicator="@null"
+    android:childDivider="@android:color/transparent"/>

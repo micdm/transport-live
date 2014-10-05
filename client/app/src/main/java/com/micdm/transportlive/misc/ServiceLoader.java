@@ -15,39 +15,63 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ServiceLoader {
 
     private static class ContentHandler extends DefaultHandler {
 
-        public Service service;
-        private Transport transport;
-        private Route route;
-        private Direction direction;
-        private Station station;
+        private Service service;
+        private List<Transport> transports = new ArrayList<Transport>();
+        private int transportId;
+        private List<Station> transportStations = new ArrayList<Station>();
+        private int stationId;
+        private String stationName;
+        private List<Route> routes = new ArrayList<Route>();
+        private int routeNumber;
+        private List<Direction> directions = new ArrayList<Direction>();
+        private int directionId;
+        private List<Station> directionStations = new ArrayList<Station>();
+
+        private boolean isTransportDescription;
+
+        public Service getService() {
+            return service;
+        }
 
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attrs) {
-            if (localName.equals("service")) {
-                service = new Service();
+            if (localName.equals("transports")) {
+                transports = new ArrayList<Transport>();
             }
             if (localName.equals("transport")) {
-                transport = new Transport(getTransportId(attrs));
+                transportId = getTransportId(attrs);
+                isTransportDescription = true;
+            }
+            if (localName.equals("routes")) {
+                routes = new ArrayList<Route>();
             }
             if (localName.equals("route")) {
-                route = new Route(getRouteNumber(attrs));
+                routeNumber = getRouteNumber(attrs);
+            }
+            if (localName.equals("directions")) {
+                directions = new ArrayList<Direction>();
             }
             if (localName.equals("direction")) {
-                direction = new Direction(getDirectionId(attrs));
+                directionId = getDirectionId(attrs);
+                isTransportDescription = false;
+            }
+            if (localName.equals("stations")) {
+                if (isTransportDescription) {
+                    transportStations = new ArrayList<Station>();
+                } else {
+                    directionStations = new ArrayList<Station>();
+                }
             }
             if (localName.equals("station")) {
-                int stationId = getStationId(attrs);
-                String stationName = getStationName(attrs);
-                if (stationName == null) {
-                    station = transport.getStationById(stationId);
-                } else {
-                    station = new Station(stationId, stationName);
-                }
+                stationId = getStationId(attrs);
+                stationName = getStationName(attrs);
             }
         }
 
@@ -74,25 +98,33 @@ public class ServiceLoader {
         @Override
         public void endElement(String uri, String localName, String qName) {
             if (localName.equals("station")) {
-                if (direction == null) {
-                    transport.stations.add(station);
+                if (isTransportDescription) {
+                    transportStations.add(new Station(stationId, stationName));
                 } else {
-                    direction.stations.add(station);
+                    directionStations.add(getStationById(stationId));
                 }
-                station = null;
             }
             if (localName.equals("direction")) {
-                route.directions.add(direction);
-                direction = null;
+                directions.add(new Direction(directionId, directionStations));
             }
             if (localName.equals("route")) {
-                transport.routes.add(route);
-                route = null;
+                routes.add(new Route(routeNumber, directions));
             }
             if (localName.equals("transport")) {
-                service.transports.add(transport);
-                transport = null;
+                transports.add(new Transport(transportId, transportStations, routes));
             }
+            if (localName.equals("service")) {
+                service = new Service(transports);
+            }
+        }
+
+        private Station getStationById(int id) {
+            for (Station station: transportStations) {
+                if (station.getId() == id) {
+                    return station;
+                }
+            }
+            throw new RuntimeException(String.format("no station %s", id));
         }
     }
 
@@ -120,6 +152,6 @@ public class ServiceLoader {
     private Service unserialize(InputStream input) throws SAXException, IOException {
         ContentHandler handler = new ContentHandler();
         Xml.parse(input, Xml.Encoding.UTF_8, handler);
-        return handler.service;
+        return handler.getService();
     }
 }

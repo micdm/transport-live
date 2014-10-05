@@ -8,33 +8,40 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.micdm.transportlive.CustomApplication;
-import com.micdm.transportlive.CustomViewPager;
+import com.micdm.transportlive.App;
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.Forecast;
-import com.micdm.transportlive.data.Route;
-import com.micdm.transportlive.data.RouteInfo;
-import com.micdm.transportlive.data.SelectedRouteInfo;
-import com.micdm.transportlive.data.SelectedStationInfo;
+import com.micdm.transportlive.data.RoutePopulation;
+import com.micdm.transportlive.data.SelectedRoute;
+import com.micdm.transportlive.data.SelectedStation;
 import com.micdm.transportlive.data.Service;
-import com.micdm.transportlive.data.Station;
-import com.micdm.transportlive.data.Transport;
+import com.micdm.transportlive.events.EventManager;
+import com.micdm.transportlive.events.EventType;
+import com.micdm.transportlive.events.events.LoadForecastsEvent;
+import com.micdm.transportlive.events.events.LoadRoutesEvent;
+import com.micdm.transportlive.events.events.LoadServiceEvent;
+import com.micdm.transportlive.events.events.LoadStationsEvent;
+import com.micdm.transportlive.events.events.LoadVehiclesEvent;
+import com.micdm.transportlive.events.events.RequestLoadForecastsEvent;
+import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
+import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
+import com.micdm.transportlive.events.events.RequestLoadStationsEvent;
+import com.micdm.transportlive.events.events.RequestLoadVehiclesEvent;
+import com.micdm.transportlive.events.events.RequestReconnectEvent;
+import com.micdm.transportlive.events.events.RequestSelectRouteEvent;
+import com.micdm.transportlive.events.events.RequestSelectStationEvent;
+import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
+import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
 import com.micdm.transportlive.fragments.ForecastFragment;
 import com.micdm.transportlive.fragments.MapFragment;
 import com.micdm.transportlive.fragments.NoConnectionFragment;
-import com.micdm.transportlive.fragments.SelectRouteFragment;
-import com.micdm.transportlive.fragments.SelectStationFragment;
-import com.micdm.transportlive.interfaces.ConnectionHandler;
-import com.micdm.transportlive.interfaces.EventListener;
-import com.micdm.transportlive.interfaces.ForecastHandler;
-import com.micdm.transportlive.interfaces.ServiceHandler;
-import com.micdm.transportlive.misc.EventListenerManager;
 import com.micdm.transportlive.misc.ServiceLoader;
+import com.micdm.transportlive.misc.Utils;
+import com.micdm.transportlive.misc.ViewPager;
 import com.micdm.transportlive.misc.analytics.Analytics;
 import com.micdm.transportlive.server.pollers.ForecastPoller;
 import com.micdm.transportlive.server.pollers.VehiclePoller;
@@ -45,7 +52,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class MainActivity extends FragmentActivity implements ConnectionHandler, ServiceHandler, ForecastHandler {
+public class MainActivity extends FragmentActivity {
 
     private static class CustomPagerAdapter extends FragmentPagerAdapter {
 
@@ -88,49 +95,21 @@ public class MainActivity extends FragmentActivity implements ConnectionHandler,
     }
 
     private static final String FRAGMENT_NO_CONNECTION_TAG = "no_connection";
-    private static final String FRAGMENT_SELECT_STATION_TAG = "select_station";
-    private static final String FRAGMENT_SELECT_ROUTE_TAG = "select_route";
-
-    private static final String EVENT_LISTENER_KEY_ON_UNSELECT_ALL_ROUTES = "OnUnselectAllRoutes";
-    private static final String EVENT_LISTENER_KEY_ON_LOAD_SERVICE = "OnLoadService";
-    private static final String EVENT_LISTENER_KEY_ON_LOAD_VEHICLES = "OnLoadVehicles";
-    private static final String EVENT_LISTENER_KEY_ON_LOAD_STATIONS = "OnLoadStations";
-    private static final String EVENT_LISTENER_KEY_ON_SELECT_STATION = "OnSelectStation";
-    private static final String EVENT_LISTENER_KEY_ON_UNSELECT_STATION = "OnUnselectStation";
-    private static final String EVENT_LISTENER_KEY_ON_UNSELECT_ALL_STATIONS = "OnUnselectAllStations";
-    private static final String EVENT_LISTENER_KEY_ON_LOAD_FORECASTS = "OnLoadForecasts";
-
-    private final EventListenerManager listeners = new EventListenerManager();
 
     private final VehiclePoller vehiclePoller = new VehiclePoller(this, new VehiclePoller.OnLoadListener() {
         @Override
         public void onStart() {
-            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, new EventListenerManager.OnIterateListener() {
-                @Override
-                public void onIterate(EventListener listener) {
-                    ((OnLoadVehiclesListener) listener).onStart();
-                }
-            });
+            App.get().getEventManager().publish(new LoadVehiclesEvent(LoadVehiclesEvent.STATE_START));
         }
         @Override
         public void onFinish() {
-            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, new EventListenerManager.OnIterateListener() {
-                @Override
-                public void onIterate(EventListener listener) {
-                    ((OnLoadVehiclesListener) listener).onFinish();
-                }
-            });
+            App.get().getEventManager().publish(new LoadVehiclesEvent(LoadVehiclesEvent.STATE_FINISH));
         }
         @Override
-        public void onLoad(final List<RouteInfo> loaded) {
+        public void onLoad(List<RoutePopulation> loaded) {
             hideNoConnectionMessage();
             vehicles = loaded;
-            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, new EventListenerManager.OnIterateListener() {
-                @Override
-                public void onIterate(EventListener listener) {
-                    ((OnLoadVehiclesListener) listener).onLoadVehicles(loaded);
-                }
-            });
+            App.get().getEventManager().publish(new LoadVehiclesEvent(LoadVehiclesEvent.STATE_COMPLETE, loaded));
         }
         @Override
         public void onError() {
@@ -140,38 +119,23 @@ public class MainActivity extends FragmentActivity implements ConnectionHandler,
         }
     });
     private Service service;
-    private List<SelectedRouteInfo> selectedRoutes;
-    private List<RouteInfo> vehicles;
+    private List<SelectedRoute> selectedRoutes;
+    private List<RoutePopulation> vehicles;
 
     private final ForecastPoller forecastPoller = new ForecastPoller(this, new ForecastPoller.OnLoadListener() {
         @Override
         public void onStart() {
-            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_FORECASTS, new EventListenerManager.OnIterateListener() {
-                @Override
-                public void onIterate(EventListener listener) {
-                    ((OnLoadForecastsListener) listener).onStart();
-                }
-            });
+            App.get().getEventManager().publish(new LoadForecastsEvent(LoadForecastsEvent.STATE_START));
         }
         @Override
         public void onFinish() {
-            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_FORECASTS, new EventListenerManager.OnIterateListener() {
-                @Override
-                public void onIterate(EventListener listener) {
-                    ((OnLoadForecastsListener) listener).onFinish();
-                }
-            });
+            App.get().getEventManager().publish(new LoadForecastsEvent(LoadForecastsEvent.STATE_FINISH));
         }
         @Override
         public void onLoad(final List<Forecast> loaded) {
             hideNoConnectionMessage();
             forecasts = loaded;
-            listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_FORECASTS, new EventListenerManager.OnIterateListener() {
-                @Override
-                public void onIterate(EventListener listener) {
-                    ((OnLoadForecastsListener) listener).onLoadForecasts(forecasts);
-                }
-            });
+            App.get().getEventManager().publish(new LoadForecastsEvent(LoadForecastsEvent.STATE_COMPLETE, loaded));
         }
         @Override
         public void onError() {
@@ -180,7 +144,7 @@ public class MainActivity extends FragmentActivity implements ConnectionHandler,
             showNoConnectionMessage();
         }
     });
-    private List<SelectedStationInfo> selectedStations;
+    private List<SelectedStation> selectedStations;
     private List<Forecast> forecasts;
 
     @Override
@@ -189,7 +153,7 @@ public class MainActivity extends FragmentActivity implements ConnectionHandler,
         setContentView(R.layout.a__main);
         setupActionBar();
         setupPager();
-        loadData();
+        subscribeForEvents();
     }
 
     private void setupActionBar() {
@@ -198,20 +162,20 @@ public class MainActivity extends FragmentActivity implements ConnectionHandler,
     }
 
     private void setupPager() {
-        CustomViewPager pager = (CustomViewPager) findViewById(R.id.a__main__pager);
+        ViewPager pager = (ViewPager) findViewById(R.id.a__main__pager);
         pager.setAdapter(new CustomPagerAdapter(getSupportFragmentManager()));
         pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int i) {
                 getActionBar().setSelectedNavigationItem(i);
-                CustomApplication.get().getAnalytics().reportEvent(Analytics.Category.TABS, Analytics.Action.SHOW, String.valueOf(i));
+                App.get().getAnalytics().reportEvent(Analytics.Category.TABS, Analytics.Action.SHOW, String.valueOf(i));
             }
         });
         addPage(pager, new CustomPagerAdapter.Page(getString(R.string.__tab_title_map), new MapFragment()));
         addPage(pager, new CustomPagerAdapter.Page(getString(R.string.__tab_title_forecast), new ForecastFragment()));
     }
 
-    private void addPage(final CustomViewPager pager, CustomPagerAdapter.Page page) {
+    private void addPage(final ViewPager pager, CustomPagerAdapter.Page page) {
         ((CustomPagerAdapter) pager.getAdapter()).add(page);
         ActionBar actionBar = getActionBar();
         ActionBar.Tab tab = actionBar.newTab();
@@ -221,54 +185,202 @@ public class MainActivity extends FragmentActivity implements ConnectionHandler,
             public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
                 pager.setCurrentItem(tab.getPosition());
             }
+
             @Override
-            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {}
+            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+            }
+
             @Override
-            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {}
+            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+            }
         });
         actionBar.addTab(tab);
     }
 
-    private void loadData() {
-        service = (new ServiceLoader(this)).load();
-        selectedRoutes = (new SelectedRouteStore(this)).load(service);
-        if (selectedRoutes.isEmpty()) {
-            listeners.notify(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_ROUTES, new EventListenerManager.OnIterateListener() {
-                @Override
-                public void onIterate(EventListener listener) {
-                    ((OnUnselectAllRoutesListener) listener).onUnselectAllRoutes();
-                }
-            });
-        }
-        listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_SERVICE, new EventListenerManager.OnIterateListener() {
+    private void subscribeForEvents() {
+        final EventManager manager = App.get().getEventManager();
+        manager.subscribe(this, EventType.REQUEST_RECONNECT, new EventManager.OnEventListener<RequestReconnectEvent>() {
             @Override
-            public void onIterate(EventListener listener) {
-                ((OnLoadServiceListener) listener).onLoadService(service);
+            public void onEvent(RequestReconnectEvent event) {
+                loadVehicles();
+                loadForecasts();
             }
         });
-        selectedStations = (new SelectedStationStore(this)).load(service);
-        listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_STATIONS, new EventListenerManager.OnIterateListener() {
+        manager.subscribe(this, EventType.REQUEST_LOAD_SERVICE, new EventManager.OnEventListener<RequestLoadServiceEvent>() {
             @Override
-            public void onIterate(EventListener listener) {
-                ((OnLoadStationsListener) listener).onLoadStations(selectedStations);
+            public void onEvent(RequestLoadServiceEvent event) {
+                if (service == null) {
+                    service = (new ServiceLoader(MainActivity.this)).load();
+                }
+                manager.publish(new LoadServiceEvent(service));
             }
         });
-        if (selectedStations.isEmpty()) {
-            listeners.notify(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_STATIONS, new EventListenerManager.OnIterateListener() {
-                @Override
-                public void onIterate(EventListener listener) {
-                    ((OnUnselectAllStationsListener) listener).onUnselectAllStations();
+        manager.subscribe(this, EventType.REQUEST_LOAD_ROUTES, new EventManager.OnEventListener<RequestLoadRoutesEvent>() {
+            @Override
+            public void onEvent(RequestLoadRoutesEvent event) {
+                if (selectedRoutes == null) {
+                    selectedRoutes = (new SelectedRouteStore(MainActivity.this)).load(service);
                 }
-            });
-        }
+                manager.publish(new LoadRoutesEvent(selectedRoutes));
+            }
+        });
+        manager.subscribe(this, EventType.REQUEST_SELECT_ROUTE, new EventManager.OnEventListener<RequestSelectRouteEvent>() {
+            @Override
+            public void onEvent(RequestSelectRouteEvent event) {
+                SelectedRoute selectedRoute = event.getRoute();
+                if (Utils.isRouteSelected(selectedRoutes, selectedRoute.getTransportId(), selectedRoute.getRouteNumber())) {
+                    return;
+                }
+                vehiclePoller.stop();
+                selectedRoutes.add(selectedRoute);
+                (new SelectedRouteStore(MainActivity.this)).put(selectedRoutes);
+                manager.publish(new LoadRoutesEvent(selectedRoutes));
+                loadVehicles();
+            }
+        });
+        manager.subscribe(this, EventType.REQUEST_UNSELECT_ROUTE, new EventManager.OnEventListener<RequestUnselectRouteEvent>() {
+            @Override
+            public void onEvent(RequestUnselectRouteEvent event) {
+                SelectedRoute selectedRoute = event.getRoute();
+                vehiclePoller.stop();
+                removeSelectedRoute(selectedRoute.getTransportId(), selectedRoute.getRouteNumber());
+                (new SelectedRouteStore(MainActivity.this)).put(selectedRoutes);
+                manager.publish(new LoadRoutesEvent(selectedRoutes));
+                if (vehicles != null && cleanupVehicles()) {
+                    manager.publish(new LoadVehiclesEvent(LoadVehiclesEvent.STATE_COMPLETE, vehicles));
+                }
+                loadVehicles();
+            }
+        });
+        manager.subscribe(this, EventType.REQUEST_LOAD_VEHICLES, new EventManager.OnEventListener<RequestLoadVehiclesEvent>() {
+            @Override
+            public void onEvent(RequestLoadVehiclesEvent event) {
+                loadVehicles();
+            }
+        });
+        manager.subscribe(this, EventType.REQUEST_LOAD_STATIONS, new EventManager.OnEventListener<RequestLoadStationsEvent>() {
+            @Override
+            public void onEvent(RequestLoadStationsEvent event) {
+                if (selectedStations == null) {
+                    selectedStations = (new SelectedStationStore(MainActivity.this)).load(service);
+                }
+                manager.publish(new LoadStationsEvent(selectedStations));
+            }
+        });
+        manager.subscribe(this, EventType.REQUEST_SELECT_STATION, new EventManager.OnEventListener<RequestSelectStationEvent>() {
+            @Override
+            public void onEvent(RequestSelectStationEvent event) {
+                SelectedStation selectedStation = event.getStation();
+                if (Utils.isStationSelected(selectedStations, selectedStation.getTransportId(), selectedStation.getStationId())) {
+                    return;
+                }
+                forecastPoller.stop();
+                selectedStations.add(selectedStation);
+                (new SelectedStationStore(MainActivity.this)).put(selectedStations);
+                manager.publish(new LoadStationsEvent(selectedStations));
+                loadForecasts();
+            }
+        });
+        manager.subscribe(this, EventType.REQUEST_UNSELECT_STATION, new EventManager.OnEventListener<RequestUnselectStationEvent>() {
+            @Override
+            public void onEvent(RequestUnselectStationEvent event) {
+                SelectedStation selectedStation = event.getStation();
+                forecastPoller.stop();
+                removeSelectedStation(selectedStation.getTransportId(), selectedStation.getStationId());
+                (new SelectedStationStore(MainActivity.this)).put(selectedStations);
+                manager.publish(new LoadStationsEvent(selectedStations));
+                if (forecasts != null && cleanupForecasts(selectedStation.getTransportId(), selectedStation.getStationId())) {
+                    manager.publish(new LoadForecastsEvent(LoadForecastsEvent.STATE_COMPLETE, forecasts));
+                }
+                loadForecasts();
+            }
+        });
+        manager.subscribe(this, EventType.REQUEST_LOAD_FORECASTS, new EventManager.OnEventListener<RequestLoadForecastsEvent>() {
+            @Override
+            public void onEvent(RequestLoadForecastsEvent event) {
+                loadForecasts();
+            }
+        });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        CustomApplication.get().getAnalytics().reportActivityStart(this);
-        loadVehicles();
-        loadForecasts();
+        App.get().getAnalytics().reportActivityStart(this);
+    }
+
+    private void showNoConnectionMessage() {
+
+        FragmentManager manager = getSupportFragmentManager();
+        if (manager.findFragmentByTag(FRAGMENT_NO_CONNECTION_TAG) == null) {
+            (new NoConnectionFragment()).show(manager, FRAGMENT_NO_CONNECTION_TAG);
+        }
+    }
+
+    private void hideNoConnectionMessage() {
+        FragmentManager manager = getSupportFragmentManager();
+        NoConnectionFragment fragment = (NoConnectionFragment) manager.findFragmentByTag(FRAGMENT_NO_CONNECTION_TAG);
+        if (fragment != null) {
+            fragment.dismiss();
+        }
+    }
+
+    private void removeSelectedRoute(int transportId, int routeNumber) {
+        Iterator<SelectedRoute> iterator = selectedRoutes.iterator();
+        while (iterator.hasNext()) {
+            SelectedRoute route = iterator.next();
+            if (route.getTransportId() == transportId && route.getRouteNumber() == routeNumber) {
+                iterator.remove();
+            }
+        }
+    }
+
+    private void loadVehicles() {
+        vehiclePoller.stop();
+        if (service != null && !selectedRoutes.isEmpty()) {
+            vehiclePoller.start(service, selectedRoutes);
+        }
+    }
+
+    private boolean cleanupVehicles() {
+        int count = vehicles.size();
+        Iterator<RoutePopulation> iterator = vehicles.iterator();
+        while (iterator.hasNext()) {
+            RoutePopulation population = iterator.next();
+            if (!Utils.isRouteSelected(selectedRoutes, population.getTransportId(), population.getRouteNumber())) {
+                iterator.remove();
+            }
+        }
+        return vehicles.size() != count;
+    }
+
+    private void removeSelectedStation(int transportId, int stationId) {
+        Iterator<SelectedStation> iterator = selectedStations.iterator();
+        while (iterator.hasNext()) {
+            SelectedStation station = iterator.next();
+            if (station.getTransportId() == transportId && station.getStationId() == stationId) {
+                iterator.remove();
+            }
+        }
+    }
+
+    private void loadForecasts() {
+        forecastPoller.stop();
+        if (service != null && !selectedStations.isEmpty()) {
+            forecastPoller.start(service, selectedStations);
+        }
+    }
+
+    private boolean cleanupForecasts(int transportId, int stationId) {
+        int count = forecasts.size();
+        Iterator<Forecast> iterator = forecasts.iterator();
+        while (iterator.hasNext()) {
+            Forecast forecast = iterator.next();
+            if (forecast.getTransportId() == transportId && forecast.getStationId() == stationId) {
+                iterator.remove();
+            }
+        }
+        return forecasts.size() != count;
     }
 
     @Override
@@ -276,7 +388,7 @@ public class MainActivity extends FragmentActivity implements ConnectionHandler,
         super.onStop();
         vehiclePoller.stop();
         forecastPoller.stop();
-        CustomApplication.get().getAnalytics().reportActivityStop(this);
+        App.get().getAnalytics().reportActivityStop(this);
     }
 
     @Override
@@ -301,279 +413,9 @@ public class MainActivity extends FragmentActivity implements ConnectionHandler,
         return super.onOptionsItemSelected(item);
     }
 
-    private void showNoConnectionMessage() {
-
-        FragmentManager manager = getSupportFragmentManager();
-        if (manager.findFragmentByTag(FRAGMENT_NO_CONNECTION_TAG) == null) {
-            (new NoConnectionFragment()).show(manager, FRAGMENT_NO_CONNECTION_TAG);
-        }
-    }
-
-    private void hideNoConnectionMessage() {
-        FragmentManager manager = getSupportFragmentManager();
-        NoConnectionFragment fragment = (NoConnectionFragment) manager.findFragmentByTag(FRAGMENT_NO_CONNECTION_TAG);
-        if (fragment != null) {
-            fragment.dismiss();
-        }
-    }
-
     @Override
-    public void requestReconnect() {
-        loadVehicles();
-        loadForecasts();
-    }
-
-    @Override
-    public void requestRouteSelection() {
-        FragmentManager manager = getSupportFragmentManager();
-        if (manager.findFragmentByTag(FRAGMENT_SELECT_ROUTE_TAG) == null) {
-            (new SelectRouteFragment()).show(manager, FRAGMENT_SELECT_ROUTE_TAG);
-            CustomApplication.get().getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "select_route");
-        }
-    }
-
-    @Override
-    public boolean isRouteSelected(Transport transport, Route route) {
-        for (SelectedRouteInfo info: selectedRoutes) {
-            if (info.transport.equals(transport) && info.route.equals(route)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public void selectRoutes(List<SelectedRouteInfo> selected) {
-        vehiclePoller.stop();
-        selectedRoutes = selected;
-        (new SelectedRouteStore(this)).put(selected);
-        if (vehicles != null) {
-            if (cleanupVehicles()) {
-                listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, new EventListenerManager.OnIterateListener() {
-                    @Override
-                    public void onIterate(EventListener listener) {
-                        ((OnLoadVehiclesListener) listener).onLoadVehicles(vehicles);
-                    }
-                });
-            }
-        }
-        if (selectedRoutes.isEmpty()) {
-            listeners.notify(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_ROUTES, new EventListenerManager.OnIterateListener() {
-                @Override
-                public void onIterate(EventListener listener) {
-                    ((OnUnselectAllRoutesListener) listener).onUnselectAllRoutes();
-                }
-            });
-        }
-        loadVehicles();
-    }
-
-    private boolean cleanupVehicles() {
-        int count = vehicles.size();
-        Iterator<RouteInfo> iterator = vehicles.iterator();
-        while (iterator.hasNext()) {
-            RouteInfo info = iterator.next();
-            if (!isRouteSelected(info.transport, info.route)) {
-                iterator.remove();
-            }
-        }
-        return vehicles.size() != count;
-    }
-
-    private void loadVehicles() {
-        vehiclePoller.stop();
-        if (service != null && !selectedRoutes.isEmpty()) {
-            vehiclePoller.start(service, selectedRoutes);
-        }
-    }
-
-    @Override
-    public void addOnUnselectAllRoutesListener(OnUnselectAllRoutesListener listener) {
-        listeners.add(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_ROUTES, listener);
-        if (selectedRoutes.isEmpty()) {
-            listener.onUnselectAllRoutes();
-        }
-    }
-
-    @Override
-    public void removeOnUnselectAllRoutesListener(OnUnselectAllRoutesListener listener) {
-        listeners.remove(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_ROUTES, listener);
-    }
-
-    @Override
-    public void addOnLoadServiceListener(OnLoadServiceListener listener) {
-        listeners.add(EVENT_LISTENER_KEY_ON_LOAD_SERVICE, listener);
-        listener.onLoadService(service);
-    }
-
-    @Override
-    public void removeOnLoadServiceListener(OnLoadServiceListener listener) {
-        listeners.remove(EVENT_LISTENER_KEY_ON_LOAD_SERVICE, listener);
-    }
-
-    @Override
-    public void addOnLoadVehiclesListener(OnLoadVehiclesListener listener) {
-        listeners.add(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, listener);
-        if (vehicles != null) {
-            listener.onLoadVehicles(vehicles);
-        }
-    }
-
-    @Override
-    public void removeOnLoadVehiclesListener(OnLoadVehiclesListener listener) {
-        listeners.remove(EVENT_LISTENER_KEY_ON_LOAD_VEHICLES, listener);
-    }
-
-    @Override
-    public void requestStationSelection() {
-        FragmentManager manager = getSupportFragmentManager();
-        if (manager.findFragmentByTag(FRAGMENT_SELECT_STATION_TAG) == null) {
-            (new SelectStationFragment()).show(manager, FRAGMENT_SELECT_STATION_TAG);
-            CustomApplication.get().getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "select_station");
-        }
-    }
-
-    @Override
-    public void selectStation(final SelectedStationInfo selected) {
-        if (isStationSelected(selected.transport, selected.station)) {
-            return;
-        }
-        forecastPoller.stop();
-        selectedStations.add(selected);
-        (new SelectedStationStore(this)).put(selectedStations);
-        listeners.notify(EVENT_LISTENER_KEY_ON_SELECT_STATION, new EventListenerManager.OnIterateListener() {
-            @Override
-            public void onIterate(EventListener listener) {
-                ((OnSelectStationListener) listener).onSelectStation(selected);
-            }
-        });
-        loadForecasts();
-    }
-
-    private boolean isStationSelected(Transport transport, Station station) {
-        for (SelectedStationInfo info: selectedStations) {
-            if (info.transport.equals(transport) && info.station.equals(station)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public void unselectStation(final Transport transport, final Station station) {
-        forecastPoller.stop();
-        removeSelectedStation(transport, station);
-        (new SelectedStationStore(this)).put(selectedStations);
-        listeners.notify(EVENT_LISTENER_KEY_ON_UNSELECT_STATION, new EventListenerManager.OnIterateListener() {
-            @Override
-            public void onIterate(EventListener listener) {
-                ((OnUnselectStationListener) listener).onUnselectStation(transport, station);
-            }
-        });
-        if (forecasts != null) {
-            if (cleanupForecasts(transport, station)) {
-                listeners.notify(EVENT_LISTENER_KEY_ON_LOAD_FORECASTS, new EventListenerManager.OnIterateListener() {
-                    @Override
-                    public void onIterate(EventListener listener) {
-                        ((OnLoadForecastsListener) listener).onLoadForecasts(forecasts);
-                    }
-                });
-            }
-        }
-        if (selectedStations.isEmpty()) {
-            listeners.notify(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_STATIONS, new EventListenerManager.OnIterateListener() {
-                @Override
-                public void onIterate(EventListener listener) {
-                    ((OnUnselectAllStationsListener) listener).onUnselectAllStations();
-                }
-            });
-        }
-        loadForecasts();
-    }
-
-    private void removeSelectedStation(Transport transport, Station station) {
-        Iterator<SelectedStationInfo> iterator = selectedStations.iterator();
-        while (iterator.hasNext()) {
-            SelectedStationInfo info = iterator.next();
-            if (info.transport.equals(transport) && info.station.equals(station)) {
-                iterator.remove();
-            }
-        }
-    }
-
-    private boolean cleanupForecasts(Transport transport, Station station) {
-        int count = forecasts.size();
-        Iterator<Forecast> iterator = forecasts.iterator();
-        while (iterator.hasNext()) {
-            Forecast forecast = iterator.next();
-            if (forecast.transport.equals(transport) && forecast.station.equals(station)) {
-                iterator.remove();
-            }
-        }
-        return forecasts.size() != count;
-    }
-
-    private void loadForecasts() {
-        forecastPoller.stop();
-        if (service != null && !selectedStations.isEmpty()) {
-            forecastPoller.start(service, selectedStations);
-        }
-    }
-
-    @Override
-    public void addOnLoadStationsListener(OnLoadStationsListener listener) {
-        listeners.add(EVENT_LISTENER_KEY_ON_LOAD_STATIONS, listener);
-        listener.onLoadStations(selectedStations);
-    }
-
-    @Override
-    public void removeOnLoadStationsListener(OnLoadStationsListener listener) {
-        listeners.remove(EVENT_LISTENER_KEY_ON_LOAD_STATIONS, listener);
-    }
-
-    @Override
-    public void addOnSelectStationListener(OnSelectStationListener listener) {
-        listeners.add(EVENT_LISTENER_KEY_ON_SELECT_STATION, listener);
-    }
-
-    @Override
-    public void removeOnSelectStationListener(OnSelectStationListener listener) {
-        listeners.remove(EVENT_LISTENER_KEY_ON_SELECT_STATION, listener);
-    }
-
-    @Override
-    public void addOnUnselectStationListener(OnUnselectStationListener listener) {
-        listeners.add(EVENT_LISTENER_KEY_ON_UNSELECT_STATION, listener);
-    }
-
-    @Override
-    public void removeOnUnselectStationListener(OnUnselectStationListener listener) {
-        listeners.remove(EVENT_LISTENER_KEY_ON_UNSELECT_STATION, listener);
-    }
-
-    @Override
-    public void addOnUnselectAllStationsListener(OnUnselectAllStationsListener listener) {
-        listeners.add(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_STATIONS, listener);
-        if (selectedStations.isEmpty()) {
-            listener.onUnselectAllStations();
-        }
-    }
-
-    @Override
-    public void removeOnUnselectAllStationsListener(OnUnselectAllStationsListener listener) {
-        listeners.remove(EVENT_LISTENER_KEY_ON_UNSELECT_ALL_STATIONS, listener);
-    }
-
-    @Override
-    public void addOnLoadForecastsListener(OnLoadForecastsListener listener) {
-        listeners.add(EVENT_LISTENER_KEY_ON_LOAD_FORECASTS, listener);
-        if (forecasts != null) {
-            listener.onLoadForecasts(forecasts);
-        }
-    }
-
-    @Override
-    public void removeOnLoadForecastsListener(OnLoadForecastsListener listener) {
-        listeners.remove(EVENT_LISTENER_KEY_ON_LOAD_FORECASTS, listener);
+    public void onDestroy() {
+        super.onDestroy();
+        App.get().getEventManager().unsubscribeAll(this);
     }
 }
