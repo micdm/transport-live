@@ -192,6 +192,8 @@ public class MapFragment extends Fragment {
     private View noRouteSelectedView;
     private View noVehiclesView;
     private MapView mapView;
+    private View zoomInView;
+    private View zoomOutView;
     private View loadingView;
 
     @Override
@@ -205,6 +207,20 @@ public class MapFragment extends Fragment {
         mapView.setVisibility(View.GONE);
         mapContainerView.addView(mapView, 0);
         setupMapController(mapView);
+        zoomInView = view.findViewById(R.id.f__map__zoom_in);
+        zoomInView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mapView.getController().zoomIn();
+            }
+        });
+        zoomOutView = view.findViewById(R.id.f__map__zoom_out);
+        zoomOutView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mapView.getController().zoomOut();
+            }
+        });
         loadingView = view.findViewById(R.id.f__map__loading);
         View selectRoutesView = view.findViewById(R.id.f__map__select_route);
         selectRoutesView.setOnClickListener(new View.OnClickListener() {
@@ -234,7 +250,6 @@ public class MapFragment extends Fragment {
             mapView.setMaxZoomLevel(MAX_ZOOM);
         }
         mapView.setScrollableAreaLimit(new BoundingBoxE6(NORTH_EDGE, EAST_EDGE, SOUTH_EDGE, WEST_EDGE));
-        mapView.setBuiltInZoomControls(true);
         return mapView;
     }
 
