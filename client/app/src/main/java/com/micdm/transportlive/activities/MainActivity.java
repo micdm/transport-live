@@ -37,6 +37,7 @@ import com.micdm.transportlive.events.events.RequestSelectStationEvent;
 import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
 import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
 import com.micdm.transportlive.fragments.ForecastFragment;
+import com.micdm.transportlive.fragments.FragmentTag;
 import com.micdm.transportlive.fragments.MapFragment;
 import com.micdm.transportlive.fragments.NoConnectionFragment;
 import com.micdm.transportlive.misc.ServiceLoader;
@@ -93,8 +94,6 @@ public class MainActivity extends FragmentActivity {
             return pages.get(i).title;
         }
     }
-
-    private static final String FRAGMENT_NO_CONNECTION_TAG = "no_connection";
 
     private final VehiclePoller vehiclePoller = new VehiclePoller(this, new VehiclePoller.OnLoadListener() {
         @Override
@@ -310,16 +309,15 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void showNoConnectionMessage() {
-
         FragmentManager manager = getSupportFragmentManager();
-        if (manager.findFragmentByTag(FRAGMENT_NO_CONNECTION_TAG) == null) {
-            (new NoConnectionFragment()).show(manager, FRAGMENT_NO_CONNECTION_TAG);
+        if (manager.findFragmentByTag(FragmentTag.NO_CONNECTION) == null) {
+            (new NoConnectionFragment()).show(manager, FragmentTag.NO_CONNECTION);
         }
     }
 
     private void hideNoConnectionMessage() {
         FragmentManager manager = getSupportFragmentManager();
-        NoConnectionFragment fragment = (NoConnectionFragment) manager.findFragmentByTag(FRAGMENT_NO_CONNECTION_TAG);
+        NoConnectionFragment fragment = (NoConnectionFragment) manager.findFragmentByTag(FragmentTag.NO_CONNECTION);
         if (fragment != null) {
             fragment.dismiss();
         }

@@ -239,8 +239,6 @@ public class ForecastFragment extends Fragment {
         }
     }
 
-    private static final String SELECT_STATION_FRAGMENT_TAG = "select_station";
-
     private View noStationSelectedView;
     private ExpandableListView forecastsView;
     private View loadingView;
@@ -262,8 +260,8 @@ public class ForecastFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 FragmentManager manager = getChildFragmentManager();
-                if (manager.findFragmentByTag(SELECT_STATION_FRAGMENT_TAG) == null) {
-                    (new SelectStationFragment()).show(manager, SELECT_STATION_FRAGMENT_TAG);
+                if (manager.findFragmentByTag(FragmentTag.SELECT_STATION) == null) {
+                    (new SelectStationFragment()).show(manager, FragmentTag.SELECT_STATION);
                     App.get().getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "select_station");
                 }
             }

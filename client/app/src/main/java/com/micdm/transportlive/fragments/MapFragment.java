@@ -171,8 +171,6 @@ public class MapFragment extends Fragment {
         }
     }
 
-    private static final String SELECT_ROUTE_FRAGMENT_TAG = "select_route";
-
     private static final String PREF_KEY_USE_EXTERNAL_MAP = "pref_use_external_map";
 
     private static final int TILE_SIZE = 256;
@@ -192,8 +190,6 @@ public class MapFragment extends Fragment {
     private View noRouteSelectedView;
     private View noVehiclesView;
     private MapView mapView;
-    private View zoomInView;
-    private View zoomOutView;
     private View loadingView;
 
     @Override
@@ -207,14 +203,14 @@ public class MapFragment extends Fragment {
         mapView.setVisibility(View.GONE);
         mapContainerView.addView(mapView, 0);
         setupMapController(mapView);
-        zoomInView = view.findViewById(R.id.f__map__zoom_in);
+        View zoomInView = view.findViewById(R.id.f__map__zoom_in);
         zoomInView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mapView.getController().zoomIn();
             }
         });
-        zoomOutView = view.findViewById(R.id.f__map__zoom_out);
+        View zoomOutView = view.findViewById(R.id.f__map__zoom_out);
         zoomOutView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -227,8 +223,8 @@ public class MapFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 FragmentManager manager = getChildFragmentManager();
-                if (manager.findFragmentByTag(SELECT_ROUTE_FRAGMENT_TAG) == null) {
-                    (new SelectRouteFragment()).show(manager, SELECT_ROUTE_FRAGMENT_TAG);
+                if (manager.findFragmentByTag(FragmentTag.SELECT_ROUTE) == null) {
+                    (new SelectRouteFragment()).show(manager, FragmentTag.SELECT_ROUTE);
                     App.get().getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "select_route");
                 }
             }

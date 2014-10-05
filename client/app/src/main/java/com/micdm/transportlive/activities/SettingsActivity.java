@@ -21,15 +21,13 @@ import com.micdm.transportlive.events.events.LoadDonateProductsEvent;
 import com.micdm.transportlive.events.events.RequestDonateEvent;
 import com.micdm.transportlive.fragments.AboutFragment;
 import com.micdm.transportlive.fragments.DonateFragment;
+import com.micdm.transportlive.fragments.FragmentTag;
 import com.micdm.transportlive.fragments.SettingsFragment;
 import com.micdm.transportlive.misc.analytics.Analytics;
 
 import java.util.List;
 
 public class SettingsActivity extends FragmentActivity implements PreferenceFragment.OnPreferenceStartFragmentCallback {
-
-    private static final String FRAGMENT_ABOUT_TAG = "about";
-    private static final String FRAGMENT_DONATE_TAG = "donate";
 
     private static final int BUY_REQUEST_CODE = 1001;
 
@@ -94,8 +92,8 @@ public class SettingsActivity extends FragmentActivity implements PreferenceFrag
 
     private void showDonateMessage() {
         FragmentManager manager = getSupportFragmentManager();
-        if (manager.findFragmentByTag(FRAGMENT_DONATE_TAG) == null) {
-            (new DonateFragment()).show(manager, FRAGMENT_DONATE_TAG);
+        if (manager.findFragmentByTag(FragmentTag.DONATE) == null) {
+            (new DonateFragment()).show(manager, FragmentTag.DONATE);
             App.get().getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "donate");
         }
     }
@@ -112,8 +110,8 @@ public class SettingsActivity extends FragmentActivity implements PreferenceFrag
 
     private void showAboutMessage() {
         FragmentManager manager = getSupportFragmentManager();
-        if (manager.findFragmentByTag(FRAGMENT_ABOUT_TAG) == null) {
-            (new AboutFragment()).show(manager, FRAGMENT_ABOUT_TAG);
+        if (manager.findFragmentByTag(FragmentTag.ABOUT) == null) {
+            (new AboutFragment()).show(manager, FragmentTag.ABOUT);
             App.get().getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "about");
         }
     }
