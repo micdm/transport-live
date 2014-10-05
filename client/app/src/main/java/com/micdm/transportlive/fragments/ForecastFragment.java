@@ -15,6 +15,7 @@ import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.Direction;
 import com.micdm.transportlive.data.Forecast;
 import com.micdm.transportlive.data.ForecastVehicle;
+import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.SelectedStation;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Station;
@@ -202,10 +203,11 @@ public class ForecastFragment extends Fragment {
                 holder.noVehiclesView.setVisibility(View.VISIBLE);
                 holder.vehicleInfoView.setVisibility(View.GONE);
             } else {
+                Transport transport = service.getTransportById(selectedStation.getTransportId());
+                Route route = transport.getRouteByNumber(selectedStation.getRouteNumber());
                 holder.noVehiclesView.setVisibility(View.GONE);
                 holder.vehicleInfoView.setVisibility(View.VISIBLE);
-                holder.colorView.setBackgroundColor(colors.get(vehicle.getRouteNumber()));
-                Transport transport = service.getTransportById(selectedStation.getTransportId());
+                holder.colorView.setBackgroundColor(colors.get(route));
                 holder.routeView.setText(getString(R.string.f__forecast__route, Utils.getTransportName(getActivity(), transport), vehicle.getRouteNumber()));
                 holder.lowFloorView.setVisibility(vehicle.isLowFloor() ? View.VISIBLE : View.GONE);
                 holder.arrivalTimeView.setText(getArrivalTimeInMinutes(vehicle.getArrivalTime()));

@@ -72,13 +72,15 @@ public class MapFragment extends Fragment {
         private static final Matrix matrix = new Matrix();
         private static final Rect bounds = new Rect();
 
+        private final Service service;
         private final Resources resources;
         private final Bitmap original;
         private final Pools.Pool<Bitmap> bitmapPool;
-        private final Map<Integer, Paint> routePaints;
+        private final Map<Route, Paint> routePaints;
         private final Paint textPaint;
 
         public MarkerBuilder(Service service, Resources resources) {
+            this.service = service;
             this.resources = resources;
             original = getOriginalBitmap();
             bitmapPool = getBitmapPool();
@@ -98,12 +100,12 @@ public class MapFragment extends Fragment {
             return pool;
         }
 
-        private Map<Integer, Paint> getRoutePaints(Service service) {
-            Map<Integer, Paint> paints = new HashMap<Integer, Paint>();
+        private Map<Route, Paint> getRoutePaints(Service service) {
+            Map<Route, Paint> paints = new HashMap<Route, Paint>();
             RouteColors colors = new RouteColors(service);
             for (Transport transport: service.getTransports()) {
                 for (Route route: transport.getRoutes()) {
-                    paints.put(route.getNumber(), getRoutePaint(colors.get(route.getNumber())));
+                    paints.put(route, getRoutePaint(colors.get(route)));
                 }
             }
             return paints;
@@ -128,8 +130,10 @@ public class MapFragment extends Fragment {
         public List<OverlayItem> build(List<RoutePopulation> populations) {
             List<OverlayItem> markers = new ArrayList<OverlayItem>();
             for (RoutePopulation population: populations) {
+                Transport transport = service.getTransportById(population.getTransportId());
+                Route route = transport.getRouteByNumber(population.getRouteNumber());
                 for (Vehicle vehicle: population.getVehicles()) {
-                    OverlayItem marker = getMarker(population.getRouteNumber(), vehicle);
+                    OverlayItem marker = getMarker(route, vehicle);
                     if (marker != null) {
                         markers.add(marker);
                     }
@@ -138,8 +142,8 @@ public class MapFragment extends Fragment {
             return markers;
         }
 
-        private OverlayItem getMarker(int routeNumber, Vehicle vehicle) {
-            Bitmap bitmap = getBitmap(routeNumber, vehicle);
+        private OverlayItem getMarker(Route route, Vehicle vehicle) {
+            Bitmap bitmap = getBitmap(route, vehicle);
             if (bitmap == null) {
                 return null;
             }
@@ -150,15 +154,15 @@ public class MapFragment extends Fragment {
             return marker;
         }
 
-        private Bitmap getBitmap(int routeNumber, Vehicle vehicle) {
+        private Bitmap getBitmap(Route route, Vehicle vehicle) {
             Bitmap result = bitmapPool.acquire();
             if (result == null) {
                 return null;
             }
             Canvas canvas = new Canvas(result);
             matrix.setRotate(vehicle.getCourse(), original.getWidth() / 2, original.getHeight() / 2);
-            canvas.drawBitmap(original, matrix, routePaints.get(routeNumber));
-            String text = String.valueOf(routeNumber);
+            canvas.drawBitmap(original, matrix, routePaints.get(route));
+            String text = String.valueOf(route.getNumber());
             textPaint.getTextBounds(text, 0, text.length(), bounds);
             canvas.drawText(text, canvas.getWidth() / 2 - bounds.width() / 2, canvas.getHeight() / 2 + bounds.height() / 2 - SHADOW_SIZE, textPaint);
             return result;

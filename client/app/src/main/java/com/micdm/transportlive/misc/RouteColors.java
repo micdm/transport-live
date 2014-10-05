@@ -11,19 +11,19 @@ import java.util.Map;
 
 public class RouteColors {
 
-    private final Map<Integer, Integer> colors;
+    private final Map<Route, Integer> colors;
 
     public RouteColors(Service service) {
-        this.colors = getColors(service);
+        colors = getColors(service);
     }
 
-    private Map<Integer, Integer> getColors(Service service) {
-        Map<Integer, Integer> colors = new HashMap<Integer, Integer>();
+    private Map<Route, Integer> getColors(Service service) {
+        Map<Route, Integer> colors = new HashMap<Route, Integer>();
         int count = getRouteCount(service);
         int number = 0;
         for (Transport transport: service.getTransports()) {
             for (Route route: transport.getRoutes()) {
-                colors.put(route.getNumber(), getColor(count, number));
+                colors.put(route, getColor(count, number));
                 number += 1;
             }
         }
@@ -42,7 +42,7 @@ public class RouteColors {
         return Color.HSVToColor(new float[] {(255.0f / count) * number, 1f, 0.8f});
     }
 
-    public int get(int routeNumber) {
-        return colors.get(routeNumber);
+    public int get(Route route) {
+        return colors.get(route);
     }
 }

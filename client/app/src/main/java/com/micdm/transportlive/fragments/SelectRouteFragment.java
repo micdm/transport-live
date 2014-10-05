@@ -119,7 +119,7 @@ public class SelectRouteFragment extends DialogFragment {
             final ChildViewHolder holder = getChildViewHolder(view);
             final Transport transport = getGroup(groupPosition);
             final Route route = getChild(groupPosition, childPosition);
-            holder.colorView.setBackgroundColor(colors.get(route.getNumber()));
+            holder.colorView.setBackgroundColor(colors.get(route));
             holder.checkboxView.setOnCheckedChangeListener(null);
             holder.checkboxView.setChecked(Utils.isRouteSelected(selectedRoutes, transport.getId(), route.getNumber()));
             holder.checkboxView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
