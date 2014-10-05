@@ -7,6 +7,8 @@ import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.SelectedRoute;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
+import com.micdm.transportlive.misc.RandomItemSelector;
+import com.micdm.transportlive.misc.Utils;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -50,6 +52,7 @@ public class SelectedRouteStore {
     }
 
     private static final String FILE_NAME = "selected_routes_1.2.1.xml";
+    private static final int DEFAULT_COUNT = 3;
 
     private final Context context;
 
@@ -58,6 +61,9 @@ public class SelectedRouteStore {
     }
 
     public List<SelectedRoute> load(Service service) {
+        if (!isFileExist()) {
+            return getDefaultRoutes(service);
+        }
         try {
             InputStream input = context.openFileInput(FILE_NAME);
             List<SelectedRoute> selected = unserialize(input, service);
@@ -68,6 +74,24 @@ public class SelectedRouteStore {
         } catch (IOException e) {
             return new ArrayList<SelectedRoute>();
         }
+    }
+
+    private boolean isFileExist() {
+        return context.getFileStreamPath(FILE_NAME).exists();
+    }
+
+    private List<SelectedRoute> getDefaultRoutes(Service service) {
+        List<SelectedRoute> routes = new ArrayList<SelectedRoute>();
+        while (routes.size() < DEFAULT_COUNT) {
+            Transport transport = RandomItemSelector.get(service.getTransports());
+            Route route = RandomItemSelector.get(transport.getRoutes());
+            int transportId = transport.getId();
+            int routeNumber = route.getNumber();
+            if (!Utils.isRouteSelected(routes, transportId, routeNumber)) {
+                routes.add(new SelectedRoute(transportId, routeNumber));
+            }
+        }
+        return routes;
     }
 
     private List<SelectedRoute> unserialize(InputStream input, Service service) throws SAXException, IOException {

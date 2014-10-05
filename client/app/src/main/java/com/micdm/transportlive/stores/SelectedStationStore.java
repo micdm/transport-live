@@ -9,6 +9,8 @@ import com.micdm.transportlive.data.SelectedStation;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Station;
 import com.micdm.transportlive.data.Transport;
+import com.micdm.transportlive.misc.RandomItemSelector;
+import com.micdm.transportlive.misc.Utils;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -62,6 +64,7 @@ public class SelectedStationStore {
     }
 
     private static final String FILE_NAME = "selected_stations_1.2.1.xml";
+    private static final int DEFAULT_COUNT = 3;
 
     private final Context context;
 
@@ -70,6 +73,9 @@ public class SelectedStationStore {
     }
 
     public List<SelectedStation> load(Service service) {
+        if (!isFileExist()) {
+            return getDefaultStations(service);
+        }
         try {
             InputStream input = context.openFileInput(FILE_NAME);
             List<SelectedStation> selected = unserialize(input, service);
@@ -80,6 +86,27 @@ public class SelectedStationStore {
         } catch (IOException e) {
             return new ArrayList<SelectedStation>();
         }
+    }
+
+    private boolean isFileExist() {
+        return context.getFileStreamPath(FILE_NAME).exists();
+    }
+
+    private List<SelectedStation> getDefaultStations(Service service) {
+        List<SelectedStation> stations = new ArrayList<SelectedStation>();
+        while (stations.size() < DEFAULT_COUNT) {
+            Transport transport = RandomItemSelector.get(service.getTransports());
+            Route route = RandomItemSelector.get(transport.getRoutes());
+            Direction direction = RandomItemSelector.get(route.getDirections());
+            Station station = RandomItemSelector.get(direction.getStations());
+            int transportId = transport.getId();
+            int routeNumber = route.getNumber();
+            int stationId = station.getId();
+            if (!Utils.isStationSelected(stations, transportId, stationId)) {
+                stations.add(new SelectedStation(transportId, routeNumber, direction.getId(), stationId));
+            }
+        }
+        return stations;
     }
 
     private List<SelectedStation> unserialize(InputStream input, Service service) throws SAXException, IOException {
