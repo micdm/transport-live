@@ -179,6 +179,12 @@ public class SelectRouteFragment extends DialogFragment {
     private View setupView() {
         View view = View.inflate(getActivity(), R.layout.f__select_route, null);
         routesView = (ExpandableListView) view.findViewById(R.id.f__select_route__route_list);
+        routesView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+                return true;
+            }
+        });
         return view;
     }
 
