@@ -194,6 +194,8 @@ public class MapFragment extends Fragment {
     private View noRouteSelectedView;
     private View noVehiclesView;
     private MapView mapView;
+    private View zoomInView;
+    private View zoomOutView;
     private View loadingView;
 
     @Override
@@ -207,14 +209,14 @@ public class MapFragment extends Fragment {
         mapView.setVisibility(View.GONE);
         mapContainerView.addView(mapView, 0);
         setupMapController(mapView);
-        View zoomInView = view.findViewById(R.id.f__map__zoom_in);
+        zoomInView = view.findViewById(R.id.f__map__zoom_in);
         zoomInView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mapView.getController().zoomIn();
             }
         });
-        View zoomOutView = view.findViewById(R.id.f__map__zoom_out);
+        zoomOutView = view.findViewById(R.id.f__map__zoom_out);
         zoomOutView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -282,6 +284,8 @@ public class MapFragment extends Fragment {
         noRouteSelectedView.setVisibility(View.GONE);
         noVehiclesView.setVisibility(View.GONE);
         mapView.setVisibility(View.GONE);
+        zoomInView.setVisibility(View.GONE);
+        zoomOutView.setVisibility(View.GONE);
     }
 
     private void switchMapSource() {
@@ -356,6 +360,8 @@ public class MapFragment extends Fragment {
         overlay.removeAllItems();
         overlay.addItems(builder.build(populations));
         mapView.setVisibility(View.VISIBLE);
+        zoomInView.setVisibility(View.VISIBLE);
+        zoomOutView.setVisibility(View.VISIBLE);
     }
 
     private ItemizedIconOverlay<OverlayItem> getOverlay() {
