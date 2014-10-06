@@ -4,10 +4,10 @@ import android.content.Intent;
 import android.os.Parcelable;
 
 import com.micdm.transportlive.data.Forecast;
-import com.micdm.transportlive.data.RoutePopulation;
 import com.micdm.transportlive.data.SelectedRoute;
 import com.micdm.transportlive.data.SelectedStation;
 import com.micdm.transportlive.data.Service;
+import com.micdm.transportlive.data.Vehicle;
 import com.micdm.transportlive.donate.DonateProduct;
 import com.micdm.transportlive.donate.DonateProductParcel;
 import com.micdm.transportlive.events.Event;
@@ -18,7 +18,6 @@ import com.micdm.transportlive.events.events.LoadForecastsEvent;
 import com.micdm.transportlive.events.events.LoadRoutesEvent;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
-import com.micdm.transportlive.events.events.LoadVehiclesEvent;
 import com.micdm.transportlive.events.events.RequestDonateEvent;
 import com.micdm.transportlive.events.events.RequestLoadDonateProductsEvent;
 import com.micdm.transportlive.events.events.RequestLoadForecastsEvent;
@@ -31,11 +30,12 @@ import com.micdm.transportlive.events.events.RequestSelectRouteEvent;
 import com.micdm.transportlive.events.events.RequestSelectStationEvent;
 import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
 import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
+import com.micdm.transportlive.events.events.UpdateVehicleEvent;
 import com.micdm.transportlive.parcels.ForecastParcel;
-import com.micdm.transportlive.parcels.RoutePopulationParcel;
 import com.micdm.transportlive.parcels.SelectedRouteParcel;
 import com.micdm.transportlive.parcels.SelectedStationParcel;
 import com.micdm.transportlive.parcels.ServiceParcel;
+import com.micdm.transportlive.parcels.VehicleParcel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,8 +60,8 @@ public class IntentConverter {
                 return getRequestUnselectRouteEvent(intent);
             case REQUEST_LOAD_VEHICLES:
                 return new RequestLoadVehiclesEvent();
-            case LOAD_VEHICLES:
-                return getLoadVehiclesEvent(intent);
+            case UPDATE_VEHICLE:
+                return getUpdateVehicleEvent(intent);
             case REQUEST_LOAD_STATIONS:
                 return new RequestLoadStationsEvent();
             case LOAD_STATIONS:
@@ -122,19 +122,9 @@ public class IntentConverter {
         return new RequestUnselectRouteEvent(route);
     }
 
-    private LoadVehiclesEvent getLoadVehiclesEvent(Intent intent) {
-        int state = intent.getIntExtra("state", 0);
-        List<Parcelable> parcels = intent.getParcelableArrayListExtra("vehicles");
-        List<RoutePopulation> vehicles;
-        if (parcels == null) {
-            vehicles = null;
-        } else {
-            vehicles = new ArrayList<RoutePopulation>();
-            for (Parcelable parcel: parcels) {
-                vehicles.add(((RoutePopulationParcel) parcel).getPopulation());
-            }
-        }
-        return new LoadVehiclesEvent(state, vehicles);
+    private UpdateVehicleEvent getUpdateVehicleEvent(Intent intent) {
+        Vehicle vehicle = ((VehicleParcel) intent.getParcelableExtra("vehicle")).getVehicle();
+        return new UpdateVehicleEvent(vehicle);
     }
 
     private LoadStationsEvent getLoadStationsEvent(Intent intent) {

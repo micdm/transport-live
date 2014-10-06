@@ -1,7 +1,6 @@
 package com.micdm.transportlive.fragments;
 
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -23,7 +22,6 @@ import android.view.ViewGroup;
 import com.micdm.transportlive.App;
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.Route;
-import com.micdm.transportlive.data.RoutePopulation;
 import com.micdm.transportlive.data.Service;
 import com.micdm.transportlive.data.Transport;
 import com.micdm.transportlive.data.Vehicle;
@@ -31,10 +29,10 @@ import com.micdm.transportlive.events.EventManager;
 import com.micdm.transportlive.events.EventType;
 import com.micdm.transportlive.events.events.LoadRoutesEvent;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
-import com.micdm.transportlive.events.events.LoadVehiclesEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestLoadVehiclesEvent;
+import com.micdm.transportlive.events.events.UpdateVehicleEvent;
 import com.micdm.transportlive.misc.AssetArchive;
 import com.micdm.transportlive.misc.RouteColors;
 import com.micdm.transportlive.misc.analytics.Analytics;
@@ -54,9 +52,11 @@ import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.ItemizedIconOverlay;
+import org.osmdroid.views.overlay.ItemizedOverlay;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,32 +64,28 @@ import java.util.Map;
 
 public class MapFragment extends Fragment {
 
-    private static class MarkerBuilder {
+    private class MarkerBuilder {
 
         private static final int BITMAP_POOL_SIZE = 100;
         private static final int SHADOW_SIZE = 2;
 
-        private static final Matrix matrix = new Matrix();
-        private static final Rect bounds = new Rect();
+        private final Matrix matrix = new Matrix();
+        private final Rect bounds = new Rect();
 
-        private final Service service;
-        private final Resources resources;
         private final Bitmap original;
         private final Pools.Pool<Bitmap> bitmapPool;
         private final Map<Route, Paint> routePaints;
         private final Paint textPaint;
 
-        public MarkerBuilder(Service service, Resources resources) {
-            this.service = service;
-            this.resources = resources;
+        public MarkerBuilder() {
             original = getOriginalBitmap();
             bitmapPool = getBitmapPool();
-            routePaints = getRoutePaints(service);
+            routePaints = getRoutePaints();
             textPaint = getTextPaint();
         }
 
         private Bitmap getOriginalBitmap() {
-            return BitmapFactory.decodeResource(resources, R.drawable.ic_vehicle);
+            return BitmapFactory.decodeResource(getResources(), R.drawable.ic_vehicle);
         }
 
         private Pools.Pool<Bitmap> getBitmapPool() {
@@ -100,7 +96,7 @@ public class MapFragment extends Fragment {
             return pool;
         }
 
-        private Map<Route, Paint> getRoutePaints(Service service) {
+        private Map<Route, Paint> getRoutePaints() {
             Map<Route, Paint> paints = new HashMap<Route, Paint>();
             RouteColors colors = new RouteColors(service);
             for (Transport transport: service.getTransports()) {
@@ -127,49 +123,23 @@ public class MapFragment extends Fragment {
             return paint;
         }
 
-        public List<OverlayItem> build(List<RoutePopulation> populations) {
-            List<OverlayItem> markers = new ArrayList<OverlayItem>();
-            for (RoutePopulation population: populations) {
-                Transport transport = service.getTransportById(population.getTransportId());
-                Route route = transport.getRouteByNumber(population.getRouteNumber());
-                for (Vehicle vehicle: population.getVehicles()) {
-                    OverlayItem marker = getMarker(route, vehicle);
-                    if (marker != null) {
-                        markers.add(marker);
-                    }
-                }
-            }
-            return markers;
-        }
-
-        private OverlayItem getMarker(Route route, Vehicle vehicle) {
-            Bitmap bitmap = getBitmap(route, vehicle);
+        public Bitmap build(Vehicle vehicle) {
+            Bitmap bitmap = bitmapPool.acquire();
             if (bitmap == null) {
                 return null;
             }
-            GeoPoint coords = new GeoPoint(vehicle.getLatitude().doubleValue(), vehicle.getLongitude().doubleValue());
-            OverlayItem marker = new OverlayItem(vehicle.getNumber(), "", coords);
-            marker.setMarker(new BitmapDrawable(resources, bitmap));
-            marker.setMarkerHotspot(OverlayItem.HotspotPlace.CENTER);
-            return marker;
-        }
-
-        private Bitmap getBitmap(Route route, Vehicle vehicle) {
-            Bitmap result = bitmapPool.acquire();
-            if (result == null) {
-                return null;
-            }
-            Canvas canvas = new Canvas(result);
+            Canvas canvas = new Canvas(bitmap);
             matrix.setRotate(vehicle.getCourse(), original.getWidth() / 2, original.getHeight() / 2);
+            Transport transport = service.getTransportById(vehicle.getTransportId());
+            Route route = transport.getRouteByNumber(vehicle.getRouteNumber());
             canvas.drawBitmap(original, matrix, routePaints.get(route));
             String text = String.valueOf(route.getNumber());
             textPaint.getTextBounds(text, 0, text.length(), bounds);
             canvas.drawText(text, canvas.getWidth() / 2 - bounds.width() / 2, canvas.getHeight() / 2 + bounds.height() / 2 - SHADOW_SIZE, textPaint);
-            return result;
+            return bitmap;
         }
 
-        public void release(OverlayItem marker) {
-            Bitmap bitmap = ((BitmapDrawable) marker.getDrawable()).getBitmap();
+        public void release(Bitmap bitmap) {
             bitmap.eraseColor(Color.TRANSPARENT);
             bitmapPool.release(bitmap);
         }
@@ -189,6 +159,8 @@ public class MapFragment extends Fragment {
     private boolean externalMapUsed;
     private MarkerBuilder builder;
     private ItemizedIconOverlay<OverlayItem> overlay;
+
+    private Service service;
 
     private ViewGroup mapContainerView;
     private View noRouteSelectedView;
@@ -310,7 +282,8 @@ public class MapFragment extends Fragment {
         manager.subscribe(this, EventType.LOAD_SERVICE, new EventManager.OnEventListener<LoadServiceEvent>() {
             @Override
             public void onEvent(LoadServiceEvent event) {
-                builder = new MarkerBuilder(event.getService(), getResources());
+                service = event.getService();
+                builder = new MarkerBuilder();
             }
         });
         manager.subscribe(this, EventType.LOAD_ROUTES, new EventManager.OnEventListener<LoadRoutesEvent>() {
@@ -322,20 +295,10 @@ public class MapFragment extends Fragment {
                 }
             }
         });
-        manager.subscribe(this, EventType.LOAD_VEHICLES, new EventManager.OnEventListener<LoadVehiclesEvent>() {
+        manager.subscribe(this, EventType.UPDATE_VEHICLE, new EventManager.OnEventListener<UpdateVehicleEvent>() {
             @Override
-            public void onEvent(LoadVehiclesEvent event) {
-                switch (event.getState()) {
-                    case LoadVehiclesEvent.STATE_START:
-                        loadingView.setVisibility(View.VISIBLE);
-                        break;
-                    case LoadVehiclesEvent.STATE_FINISH:
-                        loadingView.setVisibility(View.GONE);
-                        break;
-                    case LoadVehiclesEvent.STATE_COMPLETE:
-                        update(event.getPopulations());
-                        break;
-                }
+            public void onEvent(UpdateVehicleEvent event) {
+                updateVehicle(event.getVehicle());
             }
         });
     }
@@ -347,21 +310,18 @@ public class MapFragment extends Fragment {
         manager.publish(new RequestLoadVehiclesEvent());
     }
 
-    public void update(List<RoutePopulation> populations) {
-        hideAllViews();
-        if (populations.size() == 0) {
-            noVehiclesView.setVisibility(View.VISIBLE);
-            return;
-        }
+    private void updateVehicle(Vehicle vehicle) {
         ItemizedIconOverlay<OverlayItem> overlay = getOverlay();
-        for (int i = 0; i < overlay.size(); i += 1) {
-            builder.release(overlay.getItem(i));
+        String number = vehicle.getNumber();
+        OverlayItem item = getOverlayItem(overlay, number);
+        if (item != null) {
+            builder.release(((BitmapDrawable) item.getDrawable()).getBitmap());
+            overlay.removeItem(item);
         }
-        overlay.removeAllItems();
-        overlay.addItems(builder.build(populations));
-        mapView.setVisibility(View.VISIBLE);
-        zoomInView.setVisibility(View.VISIBLE);
-        zoomOutView.setVisibility(View.VISIBLE);
+        item = new OverlayItem(number, null, null, getVehicleGeoPoint(vehicle));
+        item.setMarker(new BitmapDrawable(getResources(), builder.build(vehicle)));
+        item.setMarkerHotspot(OverlayItem.HotspotPlace.CENTER);
+        overlay.addItem(item);
     }
 
     private ItemizedIconOverlay<OverlayItem> getOverlay() {
@@ -379,6 +339,23 @@ public class MapFragment extends Fragment {
             mapView.getOverlays().add(overlay);
         }
         return overlay;
+    }
+
+    private OverlayItem getOverlayItem(ItemizedOverlay<OverlayItem> overlay, String id) {
+        for (int i = 0; i < overlay.size(); i += 1) {
+            OverlayItem item = overlay.getItem(i);
+            if (item.getUid().equals(id)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    private GeoPoint getVehicleGeoPoint(Vehicle vehicle) {
+        BigDecimal multiplier = new BigDecimal(1e6);
+        int latitude = vehicle.getLatitude().multiply(multiplier).intValue();
+        int longitude = vehicle.getLongitude().multiply(multiplier).intValue();
+        return new GeoPoint(latitude, longitude);
     }
 
     @Override

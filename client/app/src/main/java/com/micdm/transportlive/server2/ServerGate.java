@@ -4,11 +4,14 @@ import android.content.Context;
 import android.os.Build;
 
 import com.micdm.transportlive.R;
+import com.micdm.transportlive.data.SelectedRoute;
 import com.micdm.transportlive.misc.Utils;
 import com.micdm.transportlive.server2.converters.IncomingMessageConverter;
 import com.micdm.transportlive.server2.converters.OutcomingMessageConverter;
 import com.micdm.transportlive.server2.messages.Message;
 import com.micdm.transportlive.server2.messages.outcoming.GreetingMessage;
+import com.micdm.transportlive.server2.messages.outcoming.SelectRouteMessage;
+import com.micdm.transportlive.server2.messages.outcoming.UnselectRouteMessage;
 import com.micdm.transportlive.server2.transport.ClientManager;
 
 public class ServerGate {
@@ -57,18 +60,29 @@ public class ServerGate {
         clientManager.connect();
     }
 
-    public void disconnect() {
-        clientManager.disconnect();
-    }
-
     private void sendGreeting() {
         String version = context.getString(R.string.__user_agent, Utils.getAppVersion(context), Build.VERSION.RELEASE);
-        Message message = new GreetingMessage(version);
+        send(new GreetingMessage(version));
+    }
+
+    public void selectRoute(SelectedRoute route) {
+        send(new SelectRouteMessage(route.getTransportId(), route.getRouteNumber()));
+    }
+
+    public void unselectRoute(SelectedRoute route) {
+        send(new UnselectRouteMessage(route.getTransportId(), route.getRouteNumber()));
+    }
+
+    private void send(Message message) {
         clientManager.send(outcomingMessageConverter.convert(message));
     }
 
     private void handleMessage(String text) {
         Message message = incomingMessageConverter.convert(text);
         onMessageListener.onMessage(message);
+    }
+
+    public void disconnect() {
+        clientManager.disconnect();
     }
 }

@@ -1,8 +1,9 @@
 package com.micdm.transportlive.server2.converters;
 
 import com.micdm.transportlive.server2.messages.Message;
-import com.micdm.transportlive.server2.messages.outcoming.GetRoutePopulationMessage;
 import com.micdm.transportlive.server2.messages.outcoming.GreetingMessage;
+import com.micdm.transportlive.server2.messages.outcoming.SelectRouteMessage;
+import com.micdm.transportlive.server2.messages.outcoming.UnselectRouteMessage;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,7 +13,8 @@ public class OutcomingMessageConverter {
     private static class MessageType {
 
         private static final int GREETING = 0;
-        private static final int GET_ROUTE_POPULATION = 1;
+        private static final int SELECT_ROUTE = 1;
+        private static final int UNSELECT_ROUTE = 2;
     }
 
     public String convert(Message message) {
@@ -24,8 +26,11 @@ public class OutcomingMessageConverter {
                 case MessageType.GREETING:
                     buildJsonForGreetingMessage((GreetingMessage) message, json);
                     break;
-                case MessageType.GET_ROUTE_POPULATION:
-                    buildJsonForGetRoutePopulationMessage((GetRoutePopulationMessage) message, json);
+                case MessageType.SELECT_ROUTE:
+                    buildJsonForSelectRouteMessage((SelectRouteMessage) message, json);
+                    break;
+                case MessageType.UNSELECT_ROUTE:
+                    buildJsonForUnselectRouteMessage((UnselectRouteMessage) message, json);
                     break;
             }
             return serialize(json);
@@ -38,6 +43,12 @@ public class OutcomingMessageConverter {
         if (message instanceof GreetingMessage) {
             return MessageType.GREETING;
         }
+        if (message instanceof SelectRouteMessage) {
+            return MessageType.SELECT_ROUTE;
+        }
+        if (message instanceof UnselectRouteMessage) {
+            return MessageType.UNSELECT_ROUTE;
+        }
         throw new RuntimeException("unknown message type");
     }
 
@@ -45,7 +56,12 @@ public class OutcomingMessageConverter {
         json.put("version", message.getVersion());
     }
 
-    private void buildJsonForGetRoutePopulationMessage(GetRoutePopulationMessage message, JSONObject json) throws JSONException {
+    private void buildJsonForSelectRouteMessage(SelectRouteMessage message, JSONObject json) throws JSONException {
+        json.put("transport_id", message.getTransportId());
+        json.put("route_number", message.getRouteNumber());
+    }
+
+    private void buildJsonForUnselectRouteMessage(UnselectRouteMessage message, JSONObject json) throws JSONException {
         json.put("transport_id", message.getTransportId());
         json.put("route_number", message.getRouteNumber());
     }

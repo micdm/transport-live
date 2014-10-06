@@ -5,6 +5,7 @@
     <string name="__contact_email">demerzov@gmail.com</string>
     <string name="__user_agent">transport-live %1$s @ Android %2$s</string>
     <string name="__loading">Обновление…</string>
+    <string name="__connecting">Подключение…</string>
     <string name="__share">Троллейбусы и трамваи Томска на карте онлайн. https://play.google.com/store/apps/details?id=%s</string>
     <!-- Названия транспорта -->
     <string name="__transport_type_trolleybus">Троллейбус</string>
@@ -12,9 +13,7 @@
     <!-- Вкладки -->
     <string name="__tab_title_forecast">Расписание</string>
     <string name="__tab_title_map">Карта</string>
-    <string name="__tab_title_settings">Ещё</string>
     <!-- Меню -->
-    <string name="m__reload">Обновить</string>
     <string name="m__settings">Настройки</string>
     <!-- Фрагмент о приложении -->
     <string name="f__about__title">О приложении</string>
@@ -24,10 +23,6 @@
         По любым вопросам пишите на %3$s.&lt;br&gt;&lt;br&gt;
         Работает на основе openstreetmap.org.
     </string>
-    <!-- Фрагмент про ошибку сети -->
-    <string name="f__no_connection__title">Нет сети</string>
-    <string name="f__no_connection__text">Невозможно подключиться к серверу.\nПроверьте, есть ли у вас доступ в Интернет.</string>
-    <string name="f__no_connection__retry">Ещё раз</string>
     <!-- Фрагмент с прогнозами -->
     <string name="f__forecast__select_station">Добавить остановку…</string>
     <string name="f__forecast__no_station_selected">Здесь будет показано ориентировочное время прибытия транспорта на остановки, которые вы выберете.</string>

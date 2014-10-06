@@ -13,10 +13,12 @@ public class VehicleParcel implements Parcelable {
 
         public Vehicle createFromParcel(Parcel in) {
             String number = in.readString();
+            int transportId = in.readInt();
+            int routeNumber = in.readInt();
             BigDecimal latitude = new BigDecimal(in.readString());
             BigDecimal longitude = new BigDecimal(in.readString());
             int course = in.readInt();
-            return new Vehicle(number, latitude, longitude, course);
+            return new Vehicle(number, transportId, routeNumber, latitude, longitude, course);
         }
 
         public Vehicle[] newArray(int size) {
@@ -38,6 +40,8 @@ public class VehicleParcel implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(vehicle.getNumber());
+        dest.writeInt(vehicle.getTransportId());
+        dest.writeInt(vehicle.getRouteNumber());
         dest.writeString(vehicle.getLatitude().toString());
         dest.writeString(vehicle.getLongitude().toString());
         dest.writeInt(vehicle.getCourse());

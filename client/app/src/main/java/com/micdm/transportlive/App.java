@@ -4,17 +4,23 @@ import android.content.Context;
 
 import com.micdm.transportlive.events.EventManager;
 import com.micdm.transportlive.events.intents.IntentBasedEventManager;
+import com.micdm.transportlive.misc.ServiceLoader;
 import com.micdm.transportlive.misc.analytics.Analytics;
 import com.micdm.transportlive.misc.analytics.DevModeAnalytics;
 import com.micdm.transportlive.misc.analytics.ProdModeAnalytics;
 import com.micdm.transportlive.server2.ServerGate;
+import com.micdm.transportlive.stores.SelectedRouteStore;
+import com.micdm.transportlive.stores.SelectedStationStore;
 
 public class App extends android.app.Application {
 
     private static App instance;
 
-    private EventManager eventManager;
     private ServerGate serverGate;
+    private EventManager eventManager;
+    private ServiceLoader serviceLoader;
+    private SelectedRouteStore selectedRouteStore;
+    private SelectedStationStore selectedStationStore;
     private Analytics analytics;
 
     public static App get() {
@@ -34,6 +40,13 @@ public class App extends android.app.Application {
         return getPackageName().endsWith(".dev");
     }
 
+    public ServerGate getServerGate() {
+        if (serverGate == null) {
+            serverGate = new ServerGate(getApplicationContext());
+        }
+        return serverGate;
+    }
+
     public EventManager getEventManager() {
         if (eventManager == null) {
             eventManager = new IntentBasedEventManager(getApplicationContext());
@@ -41,11 +54,25 @@ public class App extends android.app.Application {
         return eventManager;
     }
 
-    public ServerGate getServerGate() {
-        if (serverGate == null) {
-            serverGate = new ServerGate(getApplicationContext());
+    public ServiceLoader getServiceLoader() {
+        if (serviceLoader == null) {
+            serviceLoader = new ServiceLoader(getApplicationContext());
         }
-        return serverGate;
+        return serviceLoader;
+    }
+
+    public SelectedRouteStore getSelectedRouteStore() {
+        if (selectedRouteStore == null) {
+            selectedRouteStore = new SelectedRouteStore(getApplicationContext());
+        }
+        return selectedRouteStore;
+    }
+
+    public SelectedStationStore getSelectedStationStore() {
+        if (selectedStationStore == null) {
+            selectedStationStore = new SelectedStationStore(getApplicationContext());
+        }
+        return selectedStationStore;
     }
 
     public Analytics getAnalytics() {
