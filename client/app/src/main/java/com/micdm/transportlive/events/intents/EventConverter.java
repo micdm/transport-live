@@ -15,6 +15,7 @@ import com.micdm.transportlive.events.events.LoadForecastsEvent;
 import com.micdm.transportlive.events.events.LoadRoutesEvent;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
+import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestDonateEvent;
 import com.micdm.transportlive.events.events.RequestSelectRouteEvent;
 import com.micdm.transportlive.events.events.RequestSelectStationEvent;
@@ -55,6 +56,9 @@ public class EventConverter {
                 break;
             case UPDATE_VEHICLE:
                 buildIntentForUpdateVehicleEvent((UpdateVehicleEvent) event, intent);
+                break;
+            case REMOVE_VEHICLE:
+                buildIntentForRemoveVehicleEvent((RemoveVehicleEvent) event, intent);
                 break;
             case LOAD_STATIONS:
                 buildIntentForLoadStationsEvent((LoadStationsEvent) event, intent);
@@ -104,6 +108,10 @@ public class EventConverter {
 
     private void buildIntentForUpdateVehicleEvent(UpdateVehicleEvent event, Intent intent) {
         intent.putExtra("vehicle", new VehicleParcel(event.getVehicle()));
+    }
+
+    private void buildIntentForRemoveVehicleEvent(RemoveVehicleEvent event, Intent intent) {
+        intent.putExtra("number", event.getNumber());
     }
 
     private void buildIntentForLoadStationsEvent(LoadStationsEvent event, Intent intent) {

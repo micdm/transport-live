@@ -25,6 +25,7 @@ import com.micdm.transportlive.events.events.LoadForecastsEvent;
 import com.micdm.transportlive.events.events.LoadRoutesEvent;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
+import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadForecastsEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
@@ -48,6 +49,7 @@ import com.micdm.transportlive.server2.messages.incoming.VehicleMessage;
 import com.micdm.transportlive.stores.SelectedRouteStore;
 import com.micdm.transportlive.stores.SelectedStationStore;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -204,10 +206,7 @@ public class MainActivity extends FragmentActivity {
                 selectedRouteStore.put(selectedRoutes);
                 gate.unselectRoute(route);
                 manager.publish(new LoadRoutesEvent(selectedRoutes));
-                // TODO
-//                if (vehicles != null && cleanupVehicles()) {
-//                    manager.publish(new LoadVehiclesEvent(LoadVehiclesEvent.STATE_COMPLETE, vehicles));
-//                }
+                cleanupVehicles();
             }
         });
         manager.subscribe(this, EventType.REQUEST_LOAD_VEHICLES, new EventManager.OnEventListener<RequestLoadVehiclesEvent>() {
@@ -298,12 +297,20 @@ public class MainActivity extends FragmentActivity {
             vehicle = new Vehicle(number);
             vehicles.add(vehicle);
         }
-        vehicle.setTransportId(message.getTransportId());
-        vehicle.setRouteNumber(message.getRouteNumber());
-        vehicle.setLatitude(message.getLatitude());
-        vehicle.setLongitude(message.getLongitude());
-        vehicle.setCourse(message.getCourse());
-        App.get().getEventManager().publish(new UpdateVehicleEvent(vehicle));
+        BigDecimal latitude = message.getLatitude();
+        BigDecimal longitude = message.getLongitude();
+        EventManager manager = App.get().getEventManager();
+        if (latitude.equals(BigDecimal.ZERO) && longitude.equals(BigDecimal.ZERO)) {
+            vehicles.remove(vehicle);
+            manager.publish(new RemoveVehicleEvent(number));
+        } else {
+            vehicle.setTransportId(message.getTransportId());
+            vehicle.setRouteNumber(message.getRouteNumber());
+            vehicle.setLatitude(latitude);
+            vehicle.setLongitude(longitude);
+            vehicle.setCourse(message.getCourse());
+            manager.publish(new UpdateVehicleEvent(vehicle));
+        }
     }
 
     private Vehicle getVehicle(List<Vehicle> vehicles, String number) {
@@ -325,16 +332,19 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    private boolean cleanupVehicles() {
-        int count = vehicles.size();
+    private void cleanupVehicles() {
+        if (vehicles == null) {
+            return;
+        }
         Iterator<Vehicle> iterator = vehicles.iterator();
+        EventManager manager = App.get().getEventManager();
         while (iterator.hasNext()) {
             Vehicle vehicle = iterator.next();
             if (!Utils.isRouteSelected(selectedRoutes, vehicle.getTransportId(), vehicle.getRouteNumber())) {
+                manager.publish(new RemoveVehicleEvent(vehicle.getNumber()));
                 iterator.remove();
             }
         }
-        return vehicles.size() != count;
     }
 
     private void removeSelectedStation(int transportId, int stationId) {

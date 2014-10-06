@@ -29,6 +29,7 @@ import com.micdm.transportlive.events.EventManager;
 import com.micdm.transportlive.events.EventType;
 import com.micdm.transportlive.events.events.LoadRoutesEvent;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
+import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestLoadVehiclesEvent;
@@ -301,6 +302,12 @@ public class MapFragment extends Fragment {
                 updateVehicle(event.getVehicle());
             }
         });
+        manager.subscribe(this, EventType.REMOVE_VEHICLE, new EventManager.OnEventListener<RemoveVehicleEvent>() {
+            @Override
+            public void onEvent(RemoveVehicleEvent event) {
+                removeVehicle(event.getNumber());
+            }
+        });
     }
 
     private void requestForData() {
@@ -322,6 +329,14 @@ public class MapFragment extends Fragment {
         item.setMarker(new BitmapDrawable(getResources(), builder.build(vehicle)));
         item.setMarkerHotspot(OverlayItem.HotspotPlace.CENTER);
         overlay.addItem(item);
+    }
+
+    private void removeVehicle(String number) {
+        ItemizedIconOverlay<OverlayItem> overlay = getOverlay();
+        OverlayItem item = getOverlayItem(overlay, number);
+        if (item != null) {
+            overlay.removeItem(item);
+        }
     }
 
     private ItemizedIconOverlay<OverlayItem> getOverlay() {
