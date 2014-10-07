@@ -99,7 +99,6 @@ public class MainActivity extends FragmentActivity {
     private Service service;
 
     private List<SelectedRoute> selectedRoutes;
-    private List<Vehicle> vehicles;
 
     private List<SelectedStation> selectedStations;
     private List<Forecast> forecasts;
@@ -202,11 +201,12 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void onEvent(RequestUnselectRouteEvent event) {
                 SelectedRoute route = event.getRoute();
-                removeSelectedRoute(route.getTransportId(), route.getRouteNumber());
+                int transportId = route.getTransportId();
+                int routeNumber = route.getRouteNumber();
+                removeSelectedRoute(transportId, routeNumber);
                 selectedRouteStore.put(selectedRoutes);
                 gate.unselectRoute(route);
                 manager.publish(new LoadRoutesEvent(selectedRoutes));
-                cleanupVehicles();
             }
         });
         manager.subscribe(this, EventType.REQUEST_LOAD_VEHICLES, new EventManager.OnEventListener<RequestLoadVehiclesEvent>() {
@@ -292,34 +292,15 @@ public class MainActivity extends FragmentActivity {
 
     private void handleVehicleMessage(VehicleMessage message) {
         String number = message.getNumber();
-        Vehicle vehicle = getVehicle(vehicles, number);
-        if (vehicle == null) {
-            vehicle = new Vehicle(number);
-            vehicles.add(vehicle);
-        }
         BigDecimal latitude = message.getLatitude();
         BigDecimal longitude = message.getLongitude();
         EventManager manager = App.get().getEventManager();
         if (latitude.equals(BigDecimal.ZERO) && longitude.equals(BigDecimal.ZERO)) {
-            vehicles.remove(vehicle);
             manager.publish(new RemoveVehicleEvent(number));
         } else {
-            vehicle.setTransportId(message.getTransportId());
-            vehicle.setRouteNumber(message.getRouteNumber());
-            vehicle.setLatitude(latitude);
-            vehicle.setLongitude(longitude);
-            vehicle.setCourse(message.getCourse());
+            Vehicle vehicle = new Vehicle(number, message.getTransportId(), message.getRouteNumber(), latitude, longitude, message.getCourse());
             manager.publish(new UpdateVehicleEvent(vehicle));
         }
-    }
-
-    private Vehicle getVehicle(List<Vehicle> vehicles, String number) {
-        for (Vehicle vehicle: vehicles) {
-            if (vehicle.getNumber().equals(number)) {
-                return vehicle;
-            }
-        }
-        return null;
     }
 
     private void removeSelectedRoute(int transportId, int routeNumber) {
@@ -327,21 +308,6 @@ public class MainActivity extends FragmentActivity {
         while (iterator.hasNext()) {
             SelectedRoute route = iterator.next();
             if (route.getTransportId() == transportId && route.getRouteNumber() == routeNumber) {
-                iterator.remove();
-            }
-        }
-    }
-
-    private void cleanupVehicles() {
-        if (vehicles == null) {
-            return;
-        }
-        Iterator<Vehicle> iterator = vehicles.iterator();
-        EventManager manager = App.get().getEventManager();
-        while (iterator.hasNext()) {
-            Vehicle vehicle = iterator.next();
-            if (!Utils.isRouteSelected(selectedRoutes, vehicle.getTransportId(), vehicle.getRouteNumber())) {
-                manager.publish(new RemoveVehicleEvent(vehicle.getNumber()));
                 iterator.remove();
             }
         }
