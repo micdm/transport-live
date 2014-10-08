@@ -16,10 +16,10 @@ import android.widget.TextView;
 
 import com.micdm.transportlive.App;
 import com.micdm.transportlive.R;
-import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.SelectedRoute;
-import com.micdm.transportlive.data.Service;
-import com.micdm.transportlive.data.Transport;
+import com.micdm.transportlive.data.service.Route;
+import com.micdm.transportlive.data.service.Service;
+import com.micdm.transportlive.data.service.Transport;
 import com.micdm.transportlive.events.Event;
 import com.micdm.transportlive.events.EventManager;
 import com.micdm.transportlive.events.EventType;

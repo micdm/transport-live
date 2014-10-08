@@ -10,10 +10,13 @@ public class ForecastVehicleParcel implements Parcelable {
     public static final Creator<ForecastVehicle> CREATOR = new Creator<ForecastVehicle>() {
 
         public ForecastVehicle createFromParcel(Parcel in) {
+            String number = in.readString();
+            int transportId = in.readInt();
             int routeNumber = in.readInt();
+            int stationId = in.readInt();
             int arrivalTime = in.readInt();
             boolean isLowFloor = (in.readInt() == 1);
-            return new ForecastVehicle(routeNumber, arrivalTime, isLowFloor);
+            return new ForecastVehicle(number, transportId, routeNumber, stationId, arrivalTime, isLowFloor);
         }
 
         public ForecastVehicle[] newArray(int size) {
@@ -34,7 +37,10 @@ public class ForecastVehicleParcel implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(vehicle.getNumber());
+        dest.writeInt(vehicle.getTransportId());
         dest.writeInt(vehicle.getRouteNumber());
+        dest.writeInt(vehicle.getStationId());
         dest.writeInt(vehicle.getArrivalTime());
         dest.writeInt(vehicle.isLowFloor() ? 1 : 0);
     }

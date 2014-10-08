@@ -1,6 +1,8 @@
-package com.micdm.transportlive.data;
+package com.micdm.transportlive.server2.messages.incoming;
 
-public class ForecastVehicle {
+import com.micdm.transportlive.server2.messages.Message;
+
+public class ForecastMessage implements Message {
 
     private final String number;
     private final int transportId;
@@ -9,7 +11,7 @@ public class ForecastVehicle {
     private final int arrivalTime;
     private final boolean isLowFloor;
 
-    public ForecastVehicle(String number, int transportId, int routeNumber, int stationId, int arrivalTime, boolean isLowFloor) {
+    public ForecastMessage(String number, int transportId, int routeNumber, int stationId, int arrivalTime, boolean isLowFloor) {
         this.number = number;
         this.transportId = transportId;
         this.routeNumber = routeNumber;

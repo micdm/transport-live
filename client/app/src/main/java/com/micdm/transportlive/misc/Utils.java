@@ -8,7 +8,7 @@ import android.content.pm.PackageManager;
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.SelectedRoute;
 import com.micdm.transportlive.data.SelectedStation;
-import com.micdm.transportlive.data.Transport;
+import com.micdm.transportlive.data.service.Transport;
 
 import java.util.List;
 

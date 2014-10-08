@@ -2,9 +2,9 @@ package com.micdm.transportlive.misc;
 
 import android.graphics.Color;
 
-import com.micdm.transportlive.data.Route;
-import com.micdm.transportlive.data.Service;
-import com.micdm.transportlive.data.Transport;
+import com.micdm.transportlive.data.service.Route;
+import com.micdm.transportlive.data.service.Service;
+import com.micdm.transportlive.data.service.Transport;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -2,7 +2,7 @@ package com.micdm.transportlive.data;
 
 import java.math.BigDecimal;
 
-public class Vehicle {
+public class MapVehicle {
 
     private final String number;
     private final int transportId;
@@ -11,7 +11,7 @@ public class Vehicle {
     private final BigDecimal longitude;
     private final int course;
 
-    public Vehicle(String number, int transportId, int routeNumber, BigDecimal latitude, BigDecimal longitude, int course) {
+    public MapVehicle(String number, int transportId, int routeNumber, BigDecimal latitude, BigDecimal longitude, int course) {
         this.number = number;
         this.transportId = transportId;
         this.routeNumber = routeNumber;

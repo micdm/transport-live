@@ -3,12 +3,12 @@ package com.micdm.transportlive.stores;
 import android.content.Context;
 import android.util.Xml;
 
-import com.micdm.transportlive.data.Direction;
-import com.micdm.transportlive.data.Route;
 import com.micdm.transportlive.data.SelectedStation;
-import com.micdm.transportlive.data.Service;
-import com.micdm.transportlive.data.Station;
-import com.micdm.transportlive.data.Transport;
+import com.micdm.transportlive.data.service.Direction;
+import com.micdm.transportlive.data.service.Route;
+import com.micdm.transportlive.data.service.Service;
+import com.micdm.transportlive.data.service.Station;
+import com.micdm.transportlive.data.service.Transport;
 import com.micdm.transportlive.misc.RandomItemSelector;
 import com.micdm.transportlive.misc.Utils;
 

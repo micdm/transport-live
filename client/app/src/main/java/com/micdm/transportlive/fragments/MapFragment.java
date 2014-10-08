@@ -21,10 +21,10 @@ import android.view.ViewGroup;
 
 import com.micdm.transportlive.App;
 import com.micdm.transportlive.R;
-import com.micdm.transportlive.data.Route;
-import com.micdm.transportlive.data.Service;
-import com.micdm.transportlive.data.Transport;
-import com.micdm.transportlive.data.Vehicle;
+import com.micdm.transportlive.data.MapVehicle;
+import com.micdm.transportlive.data.service.Route;
+import com.micdm.transportlive.data.service.Service;
+import com.micdm.transportlive.data.service.Transport;
 import com.micdm.transportlive.events.EventManager;
 import com.micdm.transportlive.events.EventType;
 import com.micdm.transportlive.events.events.LoadRoutesEvent;
@@ -32,7 +32,6 @@ import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
-import com.micdm.transportlive.events.events.RequestLoadVehiclesEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
 import com.micdm.transportlive.misc.AssetArchive;
 import com.micdm.transportlive.misc.RouteColors;
@@ -124,7 +123,7 @@ public class MapFragment extends Fragment {
             return paint;
         }
 
-        public Bitmap build(Vehicle vehicle) {
+        public Bitmap build(MapVehicle vehicle) {
             Bitmap bitmap = bitmapPool.acquire();
             if (bitmap == null) {
                 return null;
@@ -314,10 +313,9 @@ public class MapFragment extends Fragment {
         EventManager manager = App.get().getEventManager();
         manager.publish(new RequestLoadServiceEvent());
         manager.publish(new RequestLoadRoutesEvent());
-        manager.publish(new RequestLoadVehiclesEvent());
     }
 
-    private void updateVehicle(Vehicle vehicle) {
+    private void updateVehicle(MapVehicle vehicle) {
         ItemizedIconOverlay<OverlayItem> overlay = getOverlay();
         String number = vehicle.getNumber();
         OverlayItem item = getOverlayItem(overlay, number);
@@ -366,7 +364,7 @@ public class MapFragment extends Fragment {
         return null;
     }
 
-    private GeoPoint getVehicleGeoPoint(Vehicle vehicle) {
+    private GeoPoint getVehicleGeoPoint(MapVehicle vehicle) {
         BigDecimal multiplier = new BigDecimal(1e6);
         int latitude = vehicle.getLatitude().multiply(multiplier).intValue();
         int longitude = vehicle.getLongitude().multiply(multiplier).intValue();

@@ -1,4 +1,4 @@
-package com.micdm.transportlive.data;
+package com.micdm.transportlive.data.service;
 
 import java.util.List;
 

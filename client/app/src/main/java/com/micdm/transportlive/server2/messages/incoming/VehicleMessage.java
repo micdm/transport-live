@@ -6,20 +6,24 @@ import java.math.BigDecimal;
 
 public class VehicleMessage implements Message {
 
+    private final String number;
     private final int transportId;
     private final int routeNumber;
-    private final String number;
     private final BigDecimal latitude;
     private final BigDecimal longitude;
     private final int course;
 
-    public VehicleMessage(int transportId, int routeNumber, String number, BigDecimal latitude, BigDecimal longitude, int course) {
+    public VehicleMessage(String number, int transportId, int routeNumber, BigDecimal latitude, BigDecimal longitude, int course) {
+        this.number = number;
         this.transportId = transportId;
         this.routeNumber = routeNumber;
-        this.number = number;
         this.latitude = latitude;
         this.longitude = longitude;
         this.course = course;
+    }
+
+    public String getNumber() {
+        return number;
     }
 
     public int getTransportId() {
@@ -28,10 +32,6 @@ public class VehicleMessage implements Message {
 
     public int getRouteNumber() {
         return routeNumber;
-    }
-
-    public String getNumber() {
-        return number;
     }
 
     public BigDecimal getLatitude() {

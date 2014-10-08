@@ -3,36 +3,35 @@ package com.micdm.transportlive.events.intents;
 import android.content.Intent;
 import android.os.Parcelable;
 
-import com.micdm.transportlive.data.Forecast;
+import com.micdm.transportlive.data.ForecastVehicle;
+import com.micdm.transportlive.data.MapVehicle;
 import com.micdm.transportlive.data.SelectedRoute;
 import com.micdm.transportlive.data.SelectedStation;
-import com.micdm.transportlive.data.Service;
-import com.micdm.transportlive.data.Vehicle;
+import com.micdm.transportlive.data.service.Service;
 import com.micdm.transportlive.donate.DonateProduct;
 import com.micdm.transportlive.donate.DonateProductParcel;
 import com.micdm.transportlive.events.Event;
 import com.micdm.transportlive.events.EventType;
 import com.micdm.transportlive.events.events.DonateEvent;
 import com.micdm.transportlive.events.events.LoadDonateProductsEvent;
-import com.micdm.transportlive.events.events.LoadForecastsEvent;
 import com.micdm.transportlive.events.events.LoadRoutesEvent;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
+import com.micdm.transportlive.events.events.RemoveForecastEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestDonateEvent;
 import com.micdm.transportlive.events.events.RequestLoadDonateProductsEvent;
-import com.micdm.transportlive.events.events.RequestLoadForecastsEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestLoadStationsEvent;
-import com.micdm.transportlive.events.events.RequestLoadVehiclesEvent;
 import com.micdm.transportlive.events.events.RequestReconnectEvent;
 import com.micdm.transportlive.events.events.RequestSelectRouteEvent;
 import com.micdm.transportlive.events.events.RequestSelectStationEvent;
 import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
 import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
+import com.micdm.transportlive.events.events.UpdateForecastEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
-import com.micdm.transportlive.parcels.ForecastParcel;
+import com.micdm.transportlive.parcels.ForecastVehicleParcel;
 import com.micdm.transportlive.parcels.SelectedRouteParcel;
 import com.micdm.transportlive.parcels.SelectedStationParcel;
 import com.micdm.transportlive.parcels.ServiceParcel;
@@ -59,8 +58,6 @@ public class IntentConverter {
                 return getRequestSelectRouteEvent(intent);
             case REQUEST_UNSELECT_ROUTE:
                 return getRequestUnselectRouteEvent(intent);
-            case REQUEST_LOAD_VEHICLES:
-                return new RequestLoadVehiclesEvent();
             case UPDATE_VEHICLE:
                 return getUpdateVehicleEvent(intent);
             case REMOVE_VEHICLE:
@@ -73,10 +70,10 @@ public class IntentConverter {
                 return getRequestSelectStationEvent(intent);
             case REQUEST_UNSELECT_STATION:
                 return getRequestUnselectStationEvent(intent);
-            case REQUEST_LOAD_FORECASTS:
-                return new RequestLoadForecastsEvent();
-            case LOAD_FORECASTS:
-                return getLoadForecastsEvent(intent);
+            case UPDATE_FORECAST:
+                return getUpdateForecastEvent(intent);
+            case REMOVE_FORECAST:
+                return getRemoveForecastEvent(intent);
             case REQUEST_LOAD_DONATE_PRODUCTS:
                 return new RequestLoadDonateProductsEvent();
             case LOAD_DONATE_PRODUCTS:
@@ -126,7 +123,7 @@ public class IntentConverter {
     }
 
     private UpdateVehicleEvent getUpdateVehicleEvent(Intent intent) {
-        Vehicle vehicle = ((VehicleParcel) intent.getParcelableExtra("vehicle")).getVehicle();
+        MapVehicle vehicle = ((VehicleParcel) intent.getParcelableExtra("vehicle")).getVehicle();
         return new UpdateVehicleEvent(vehicle);
     }
 
@@ -153,19 +150,16 @@ public class IntentConverter {
         return new RequestUnselectStationEvent(station);
     }
 
-    private LoadForecastsEvent getLoadForecastsEvent(Intent intent) {
-        int state = intent.getIntExtra("state", 0);
-        List<Parcelable> parcels = intent.getParcelableArrayListExtra("forecasts");
-        List<Forecast> forecasts;
-        if (parcels == null) {
-            forecasts = null;
-        } else {
-            forecasts = new ArrayList<Forecast>();
-            for (Parcelable parcel: parcels) {
-                forecasts.add(((ForecastParcel) parcel).getForecast());
-            }
-        }
-        return new LoadForecastsEvent(state, forecasts);
+    private UpdateForecastEvent getUpdateForecastEvent(Intent intent) {
+        ForecastVehicle vehicle = ((ForecastVehicleParcel) intent.getParcelableExtra("vehicle")).getVehicle();
+        return new UpdateForecastEvent(vehicle);
+    }
+
+    private RemoveForecastEvent getRemoveForecastEvent(Intent intent) {
+        int transportId = intent.getIntExtra("transport_id", 0);
+        int stationId = intent.getIntExtra("station_id", 0);
+        String number = intent.getStringExtra("number");
+        return new RemoveForecastEvent(transportId, stationId, number);
     }
 
     private LoadDonateProductsEvent getLoadDonateProductsEvent(Intent intent) {

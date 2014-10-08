@@ -1,6 +1,6 @@
 package com.micdm.transportlive.events.events;
 
-import com.micdm.transportlive.data.Service;
+import com.micdm.transportlive.data.service.Service;
 import com.micdm.transportlive.events.Event;
 import com.micdm.transportlive.events.EventType;
 

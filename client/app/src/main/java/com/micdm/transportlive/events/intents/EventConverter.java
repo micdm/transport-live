@@ -3,7 +3,6 @@ package com.micdm.transportlive.events.intents;
 import android.content.Context;
 import android.content.Intent;
 
-import com.micdm.transportlive.data.Forecast;
 import com.micdm.transportlive.data.SelectedRoute;
 import com.micdm.transportlive.data.SelectedStation;
 import com.micdm.transportlive.donate.DonateProduct;
@@ -11,25 +10,25 @@ import com.micdm.transportlive.donate.DonateProductParcel;
 import com.micdm.transportlive.events.Event;
 import com.micdm.transportlive.events.EventType;
 import com.micdm.transportlive.events.events.LoadDonateProductsEvent;
-import com.micdm.transportlive.events.events.LoadForecastsEvent;
 import com.micdm.transportlive.events.events.LoadRoutesEvent;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
+import com.micdm.transportlive.events.events.RemoveForecastEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestDonateEvent;
 import com.micdm.transportlive.events.events.RequestSelectRouteEvent;
 import com.micdm.transportlive.events.events.RequestSelectStationEvent;
 import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
 import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
+import com.micdm.transportlive.events.events.UpdateForecastEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
-import com.micdm.transportlive.parcels.ForecastParcel;
+import com.micdm.transportlive.parcels.ForecastVehicleParcel;
 import com.micdm.transportlive.parcels.SelectedRouteParcel;
 import com.micdm.transportlive.parcels.SelectedStationParcel;
 import com.micdm.transportlive.parcels.ServiceParcel;
 import com.micdm.transportlive.parcels.VehicleParcel;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class EventConverter {
 
@@ -69,8 +68,11 @@ public class EventConverter {
             case REQUEST_UNSELECT_STATION:
                 buildIntentForRequestUnselectStationEvent((RequestUnselectStationEvent) event, intent);
                 break;
-            case LOAD_FORECASTS:
-                buildIntentForLoadForecastsEvent((LoadForecastsEvent) event, intent);
+            case UPDATE_FORECAST:
+                buildIntentForUpdateForecastEvent((UpdateForecastEvent) event, intent);
+                break;
+            case REMOVE_FORECAST:
+                buildIntentForRemoveForecastEvent((RemoveForecastEvent) event, intent);
                 break;
             case LOAD_DONATE_PRODUCTS:
                 buildIntentForLoadDonateProductsEvent((LoadDonateProductsEvent) event, intent);
@@ -130,19 +132,14 @@ public class EventConverter {
         intent.putExtra("station", new SelectedStationParcel(event.getStation()));
     }
 
-    private void buildIntentForLoadForecastsEvent(LoadForecastsEvent event, Intent intent) {
-        intent.putExtra("state", event.getState());
-        List<Forecast> forecasts = event.getForecasts();
-        ArrayList<ForecastParcel> parcels;
-        if (forecasts == null) {
-            parcels = null;
-        } else {
-            parcels = new ArrayList<ForecastParcel>();
-            for (Forecast forecast: event.getForecasts()) {
-                parcels.add(new ForecastParcel(forecast));
-            }
-        }
-        intent.putParcelableArrayListExtra("forecasts", parcels);
+    private void buildIntentForUpdateForecastEvent(UpdateForecastEvent event, Intent intent) {
+        intent.putExtra("vehicle", new ForecastVehicleParcel(event.getVehicle()));
+    }
+
+    private void buildIntentForRemoveForecastEvent(RemoveForecastEvent event, Intent intent) {
+        intent.putExtra("transport_id", event.getTransportId());
+        intent.putExtra("station_id", event.getStationId());
+        intent.putExtra("number", event.getNumber());
     }
 
     private void buildIntentForLoadDonateProductsEvent(LoadDonateProductsEvent event, Intent intent) {

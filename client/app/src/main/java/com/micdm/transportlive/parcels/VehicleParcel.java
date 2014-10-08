@@ -3,32 +3,32 @@ package com.micdm.transportlive.parcels;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.micdm.transportlive.data.Vehicle;
+import com.micdm.transportlive.data.MapVehicle;
 
 import java.math.BigDecimal;
 
 public class VehicleParcel implements Parcelable {
 
-    public static final Creator<Vehicle> CREATOR = new Creator<Vehicle>() {
+    public static final Creator<MapVehicle> CREATOR = new Creator<MapVehicle>() {
 
-        public Vehicle createFromParcel(Parcel in) {
+        public MapVehicle createFromParcel(Parcel in) {
             String number = in.readString();
             int transportId = in.readInt();
             int routeNumber = in.readInt();
             BigDecimal latitude = new BigDecimal(in.readString());
             BigDecimal longitude = new BigDecimal(in.readString());
             int course = in.readInt();
-            return new Vehicle(number, transportId, routeNumber, latitude, longitude, course);
+            return new MapVehicle(number, transportId, routeNumber, latitude, longitude, course);
         }
 
-        public Vehicle[] newArray(int size) {
-            return new Vehicle[size];
+        public MapVehicle[] newArray(int size) {
+            return new MapVehicle[size];
         }
     };
 
-    private final Vehicle vehicle;
+    private final MapVehicle vehicle;
 
-    public VehicleParcel(Vehicle vehicle) {
+    public VehicleParcel(MapVehicle vehicle) {
         this.vehicle = vehicle;
     }
 
@@ -47,7 +47,7 @@ public class VehicleParcel implements Parcelable {
         dest.writeInt(vehicle.getCourse());
     }
 
-    public Vehicle getVehicle() {
+    public MapVehicle getVehicle() {
         return vehicle;
     }
 }

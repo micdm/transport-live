@@ -3,7 +3,7 @@ package com.micdm.transportlive.parcels;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.micdm.transportlive.data.Station;
+import com.micdm.transportlive.data.service.Station;
 
 public class StationParcel implements Parcelable {
 

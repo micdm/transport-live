@@ -14,28 +14,27 @@ import android.view.MenuItem;
 
 import com.micdm.transportlive.App;
 import com.micdm.transportlive.R;
-import com.micdm.transportlive.data.Forecast;
+import com.micdm.transportlive.data.ForecastVehicle;
+import com.micdm.transportlive.data.MapVehicle;
 import com.micdm.transportlive.data.SelectedRoute;
 import com.micdm.transportlive.data.SelectedStation;
-import com.micdm.transportlive.data.Service;
-import com.micdm.transportlive.data.Vehicle;
+import com.micdm.transportlive.data.service.Service;
 import com.micdm.transportlive.events.EventManager;
 import com.micdm.transportlive.events.EventType;
-import com.micdm.transportlive.events.events.LoadForecastsEvent;
 import com.micdm.transportlive.events.events.LoadRoutesEvent;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
+import com.micdm.transportlive.events.events.RemoveForecastEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
-import com.micdm.transportlive.events.events.RequestLoadForecastsEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestLoadStationsEvent;
-import com.micdm.transportlive.events.events.RequestLoadVehiclesEvent;
 import com.micdm.transportlive.events.events.RequestReconnectEvent;
 import com.micdm.transportlive.events.events.RequestSelectRouteEvent;
 import com.micdm.transportlive.events.events.RequestSelectStationEvent;
 import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
 import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
+import com.micdm.transportlive.events.events.UpdateForecastEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
 import com.micdm.transportlive.fragments.ForecastFragment;
 import com.micdm.transportlive.fragments.MapFragment;
@@ -45,6 +44,7 @@ import com.micdm.transportlive.misc.ViewPager;
 import com.micdm.transportlive.misc.analytics.Analytics;
 import com.micdm.transportlive.server2.ServerGate;
 import com.micdm.transportlive.server2.messages.Message;
+import com.micdm.transportlive.server2.messages.incoming.ForecastMessage;
 import com.micdm.transportlive.server2.messages.incoming.VehicleMessage;
 import com.micdm.transportlive.stores.SelectedRouteStore;
 import com.micdm.transportlive.stores.SelectedStationStore;
@@ -99,9 +99,7 @@ public class MainActivity extends FragmentActivity {
     private Service service;
 
     private List<SelectedRoute> selectedRoutes;
-
     private List<SelectedStation> selectedStations;
-    private List<Forecast> forecasts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -209,12 +207,6 @@ public class MainActivity extends FragmentActivity {
                 manager.publish(new LoadRoutesEvent(selectedRoutes));
             }
         });
-        manager.subscribe(this, EventType.REQUEST_LOAD_VEHICLES, new EventManager.OnEventListener<RequestLoadVehiclesEvent>() {
-            @Override
-            public void onEvent(RequestLoadVehiclesEvent event) {
-
-            }
-        });
         manager.subscribe(this, EventType.REQUEST_LOAD_STATIONS, new EventManager.OnEventListener<RequestLoadStationsEvent>() {
             @Override
             public void onEvent(RequestLoadStationsEvent event) {
@@ -227,33 +219,46 @@ public class MainActivity extends FragmentActivity {
         manager.subscribe(this, EventType.REQUEST_SELECT_STATION, new EventManager.OnEventListener<RequestSelectStationEvent>() {
             @Override
             public void onEvent(RequestSelectStationEvent event) {
-                SelectedStation selectedStation = event.getStation();
-                if (Utils.isStationSelected(selectedStations, selectedStation.getTransportId(), selectedStation.getStationId())) {
+                SelectedStation station = event.getStation();
+                if (Utils.isStationSelected(selectedStations, station.getTransportId(), station.getStationId())) {
                     return;
                 }
-                selectedStations.add(selectedStation);
+                selectedStations.add(station);
                 selectedStationStore.put(selectedStations);
+                gate.selectStation(station);
                 manager.publish(new LoadStationsEvent(selectedStations));
             }
         });
         manager.subscribe(this, EventType.REQUEST_UNSELECT_STATION, new EventManager.OnEventListener<RequestUnselectStationEvent>() {
             @Override
             public void onEvent(RequestUnselectStationEvent event) {
-                SelectedStation selectedStation = event.getStation();
-                removeSelectedStation(selectedStation.getTransportId(), selectedStation.getStationId());
+                SelectedStation station = event.getStation();
+                removeSelectedStation(station.getTransportId(), station.getStationId());
                 selectedStationStore.put(selectedStations);
+                gate.unselectStation(station);
                 manager.publish(new LoadStationsEvent(selectedStations));
-                if (forecasts != null && cleanupForecasts(selectedStation.getTransportId(), selectedStation.getStationId())) {
-                    manager.publish(new LoadForecastsEvent(LoadForecastsEvent.STATE_COMPLETE, forecasts));
-                }
             }
         });
-        manager.subscribe(this, EventType.REQUEST_LOAD_FORECASTS, new EventManager.OnEventListener<RequestLoadForecastsEvent>() {
-            @Override
-            public void onEvent(RequestLoadForecastsEvent event) {
+    }
 
+    private void removeSelectedRoute(int transportId, int routeNumber) {
+        Iterator<SelectedRoute> iterator = selectedRoutes.iterator();
+        while (iterator.hasNext()) {
+            SelectedRoute route = iterator.next();
+            if (route.getTransportId() == transportId && route.getRouteNumber() == routeNumber) {
+                iterator.remove();
             }
-        });
+        }
+    }
+
+    private void removeSelectedStation(int transportId, int stationId) {
+        Iterator<SelectedStation> iterator = selectedStations.iterator();
+        while (iterator.hasNext()) {
+            SelectedStation station = iterator.next();
+            if (station.getTransportId() == transportId && station.getStationId() == stationId) {
+                iterator.remove();
+            }
+        }
     }
 
     @Override
@@ -286,6 +291,9 @@ public class MainActivity extends FragmentActivity {
                 if (message instanceof VehicleMessage) {
                     handleVehicleMessage((VehicleMessage) message);
                 }
+                if (message instanceof ForecastMessage) {
+                    handleForecastMessage((ForecastMessage) message);
+                }
             }
         });
     }
@@ -298,41 +306,23 @@ public class MainActivity extends FragmentActivity {
         if (latitude.equals(BigDecimal.ZERO) && longitude.equals(BigDecimal.ZERO)) {
             manager.publish(new RemoveVehicleEvent(number));
         } else {
-            Vehicle vehicle = new Vehicle(number, message.getTransportId(), message.getRouteNumber(), latitude, longitude, message.getCourse());
+            MapVehicle vehicle = new MapVehicle(number, message.getTransportId(), message.getRouteNumber(), latitude, longitude, message.getCourse());
             manager.publish(new UpdateVehicleEvent(vehicle));
         }
     }
 
-    private void removeSelectedRoute(int transportId, int routeNumber) {
-        Iterator<SelectedRoute> iterator = selectedRoutes.iterator();
-        while (iterator.hasNext()) {
-            SelectedRoute route = iterator.next();
-            if (route.getTransportId() == transportId && route.getRouteNumber() == routeNumber) {
-                iterator.remove();
-            }
+    private void handleForecastMessage(ForecastMessage message) {
+        int transportId = message.getTransportId();
+        int stationId = message.getStationId();
+        String number = message.getNumber();
+        int arrivalTime = message.getArrivalTime();
+        EventManager manager = App.get().getEventManager();
+        if (arrivalTime == 0) {
+            manager.publish(new RemoveForecastEvent(transportId, stationId, number));
+        } else {
+            ForecastVehicle vehicle = new ForecastVehicle(number, transportId, message.getRouteNumber(), stationId, arrivalTime, message.isLowFloor());
+            manager.publish(new UpdateForecastEvent(vehicle));
         }
-    }
-
-    private void removeSelectedStation(int transportId, int stationId) {
-        Iterator<SelectedStation> iterator = selectedStations.iterator();
-        while (iterator.hasNext()) {
-            SelectedStation station = iterator.next();
-            if (station.getTransportId() == transportId && station.getStationId() == stationId) {
-                iterator.remove();
-            }
-        }
-    }
-
-    private boolean cleanupForecasts(int transportId, int stationId) {
-        int count = forecasts.size();
-        Iterator<Forecast> iterator = forecasts.iterator();
-        while (iterator.hasNext()) {
-            Forecast forecast = iterator.next();
-            if (forecast.getTransportId() == transportId && forecast.getStationId() == stationId) {
-                iterator.remove();
-            }
-        }
-        return forecasts.size() != count;
     }
 
     @Override

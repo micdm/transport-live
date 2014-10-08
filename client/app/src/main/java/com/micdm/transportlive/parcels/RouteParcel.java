@@ -3,8 +3,8 @@ package com.micdm.transportlive.parcels;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.micdm.transportlive.data.Direction;
-import com.micdm.transportlive.data.Route;
+import com.micdm.transportlive.data.service.Direction;
+import com.micdm.transportlive.data.service.Route;
 
 import java.util.ArrayList;
 import java.util.List;
