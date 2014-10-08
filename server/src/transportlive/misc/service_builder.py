@@ -1,11 +1,11 @@
 # coding=utf-8
 
+from decimal import Decimal
 import os.path
 import xml.etree.ElementTree as etree
 
 from tornado.options import options
 
-from transportlive.misc.decimal_impl import Decimal
 from transportlive.models import Service, Station, Transport, Route, Direction, Coords
 
 class ServiceBuilder(object):

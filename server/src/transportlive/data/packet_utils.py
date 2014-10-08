@@ -1,10 +1,11 @@
 # coding=utf-8
 
+from decimal import Decimal, ROUND_FLOOR
 from datetime import datetime
 import re
 
 from transportlive.data.packets import LoginPacket, LoginAnswerPacket, PingPacket, PingAnswerPacket, DataPacket, DataAnswerPacket
-from transportlive.misc.decimal_impl import Decimal, ROUND_FLOOR, normalize_coordinate
+from transportlive.misc.utils import normalize_coordinate
 
 class PacketSerializer(object):
 

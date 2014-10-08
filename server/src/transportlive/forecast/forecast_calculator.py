@@ -3,7 +3,7 @@
 from logging import getLogger
 import math
 
-from transportlive.misc.decimal_impl import normalize_coordinate
+from transportlive.misc.utils import normalize_coordinate
 from transportlive.models import Forecast, Coords
 
 logger = getLogger(__name__)

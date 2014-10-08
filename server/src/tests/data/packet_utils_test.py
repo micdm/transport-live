@@ -1,10 +1,10 @@
 # coding=utf-8
 
+from decimal import Decimal
 import unittest
 
 from transportlive.data.packet_utils import PacketBuilder
 from transportlive.misc.dataproviders import use_dataproviders, dataprovider
-from transportlive.misc.decimal_impl import Decimal
 
 @use_dataproviders
 class PacketBuilderTest(unittest.TestCase):
