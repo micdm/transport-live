@@ -1,5 +1,6 @@
 # coding=utf-8
 
+from datetime import timedelta
 import os.path
 
 DEBUG = False
@@ -45,6 +46,8 @@ WEB_SERVER = {
     "host": "localhost",
     "port": 8001
 }
+
+VEHICLE_OUTDATE_INTERVAL = timedelta(minutes=1)
 
 try:
     from settings_local import *

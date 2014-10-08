@@ -1,7 +1,9 @@
 # coding=utf-8
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from logging import getLogger
+
+from tornado.options import options
 
 from transportlive.forecast.forecast_calculator import ForecastCalculator
 from transportlive.misc.low_floor_vehicles_builder import LowFloorVehiclesBuilder
@@ -13,7 +15,6 @@ logger = getLogger(__name__)
 class DataStore(object):
 
     MAX_MARK_COUNT = 30
-    VEHICLE_OUTDATE_INTERVAL = timedelta(minutes=1)
 
     def __init__(self):
         self._service = ServiceBuilder().build()
@@ -48,7 +49,7 @@ class DataStore(object):
         self._remove_unnecessary_vehicle_marks()
 
     def _remove_outdated_vehicles(self):
-        time = datetime.utcnow() - self.VEHICLE_OUTDATE_INTERVAL
+        time = datetime.utcnow() - options.VEHICLE_OUTDATE_INTERVAL
         logger.debug("Removing vehicles last updated before %s...", time)
         count = 0
         for vehicle_id, vehicle in dict(self._vehicles).items():
