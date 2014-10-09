@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import com.micdm.transportlive.App;
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.MapVehicle;
+import com.micdm.transportlive.data.SelectedRoute;
 import com.micdm.transportlive.data.service.Route;
 import com.micdm.transportlive.data.service.Service;
 import com.micdm.transportlive.data.service.Transport;
@@ -32,6 +33,7 @@ import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
+import com.micdm.transportlive.events.events.UnselectRouteEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
 import com.micdm.transportlive.misc.AssetArchive;
 import com.micdm.transportlive.misc.RouteColors;
@@ -52,7 +54,6 @@ import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.ItemizedIconOverlay;
-import org.osmdroid.views.overlay.ItemizedOverlay;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
 
@@ -159,6 +160,7 @@ public class MapFragment extends Fragment {
     private boolean externalMapUsed;
     private MarkerBuilder builder;
     private ItemizedIconOverlay<OverlayItem> overlay;
+    private Map<MapVehicle, OverlayItem> items = new HashMap<MapVehicle, OverlayItem>();
 
     private Service service;
 
@@ -295,6 +297,23 @@ public class MapFragment extends Fragment {
                 }
             }
         });
+        manager.subscribe(this, EventType.UNSELECT_ROUTE, new EventManager.OnEventListener<UnselectRouteEvent>() {
+            @Override
+            public void onEvent(UnselectRouteEvent event) {
+                SelectedRoute route = event.getRoute();
+                int transportId = route.getTransportId();
+                int routeNumber = route.getRouteNumber();
+                List<String> numbers = new ArrayList<String>();
+                for (MapVehicle vehicle: items.keySet()) {
+                    if (vehicle.getTransportId() == transportId && vehicle.getRouteNumber() == routeNumber) {
+                        numbers.add(vehicle.getNumber());
+                    }
+                }
+                for (String number: numbers) {
+                    removeVehicle(number);
+                }
+            }
+        });
         manager.subscribe(this, EventType.UPDATE_VEHICLE, new EventManager.OnEventListener<UpdateVehicleEvent>() {
             @Override
             public void onEvent(UpdateVehicleEvent event) {
@@ -323,24 +342,27 @@ public class MapFragment extends Fragment {
             zoomOutView.setVisibility(View.VISIBLE);
         }
         ItemizedIconOverlay<OverlayItem> overlay = getOverlay();
-        String number = vehicle.getNumber();
-        OverlayItem item = getOverlayItem(overlay, number);
-        if (item != null) {
+        Map.Entry<MapVehicle, OverlayItem> pair = getMapVehicleAndOverlayItemPair(vehicle.getNumber());
+        if (pair != null) {
+            OverlayItem item = pair.getValue();
             builder.release(((BitmapDrawable) item.getDrawable()).getBitmap());
             overlay.removeItem(item);
+            items.remove(pair.getKey());
         }
-        item = new OverlayItem(number, null, null, getVehicleGeoPoint(vehicle));
+        OverlayItem item = new OverlayItem(null, null, null, getVehicleGeoPoint(vehicle));
         item.setMarker(new BitmapDrawable(getResources(), builder.build(vehicle)));
         item.setMarkerHotspot(OverlayItem.HotspotPlace.CENTER);
         overlay.addItem(item);
+        items.put(vehicle, item);
         mapView.invalidate();
     }
 
     private void removeVehicle(String number) {
         ItemizedIconOverlay<OverlayItem> overlay = getOverlay();
-        OverlayItem item = getOverlayItem(overlay, number);
-        if (item != null) {
-            overlay.removeItem(item);
+        Map.Entry<MapVehicle, OverlayItem> pair = getMapVehicleAndOverlayItemPair(number);
+        if (pair != null) {
+            overlay.removeItem(pair.getValue());
+            items.remove(pair.getKey());
             mapView.invalidate();
         }
     }
@@ -362,10 +384,10 @@ public class MapFragment extends Fragment {
         return overlay;
     }
 
-    private OverlayItem getOverlayItem(ItemizedOverlay<OverlayItem> overlay, String id) {
-        for (int i = 0; i < overlay.size(); i += 1) {
-            OverlayItem item = overlay.getItem(i);
-            if (item.getUid().equals(id)) {
+    private Map.Entry<MapVehicle, OverlayItem> getMapVehicleAndOverlayItemPair(String number) {
+        for (Map.Entry<MapVehicle, OverlayItem> item: items.entrySet()) {
+            MapVehicle vehicle = item.getKey();
+            if (vehicle.getNumber().equals(number)) {
                 return item;
             }
         }

@@ -34,6 +34,7 @@ import com.micdm.transportlive.events.events.RequestSelectRouteEvent;
 import com.micdm.transportlive.events.events.RequestSelectStationEvent;
 import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
 import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
+import com.micdm.transportlive.events.events.UnselectRouteEvent;
 import com.micdm.transportlive.events.events.UpdateForecastEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
 import com.micdm.transportlive.fragments.ForecastFragment;
@@ -207,6 +208,7 @@ public class MainActivity extends FragmentActivity {
                 removeSelectedRoute(transportId, routeNumber);
                 selectedRouteStore.put(selectedRoutes);
                 gate.unselectRoute(route);
+                manager.publish(new UnselectRouteEvent(route));
                 manager.publish(new LoadRoutesEvent(selectedRoutes));
             }
         });
@@ -255,7 +257,6 @@ public class MainActivity extends FragmentActivity {
                 iterator.remove();
             }
         }
-        // TODO: удалять транспорт
     }
 
     private void removeSelectedStation(int transportId, int stationId) {

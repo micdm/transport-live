@@ -29,6 +29,7 @@ import com.micdm.transportlive.events.events.RequestSelectRouteEvent;
 import com.micdm.transportlive.events.events.RequestSelectStationEvent;
 import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
 import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
+import com.micdm.transportlive.events.events.UnselectRouteEvent;
 import com.micdm.transportlive.events.events.UpdateForecastEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
 import com.micdm.transportlive.parcels.ForecastVehicleParcel;
@@ -58,6 +59,8 @@ public class IntentConverter {
                 return getRequestSelectRouteEvent(intent);
             case REQUEST_UNSELECT_ROUTE:
                 return getRequestUnselectRouteEvent(intent);
+            case UNSELECT_ROUTE:
+                return getUnselectRouteEvent(intent);
             case UPDATE_VEHICLE:
                 return getUpdateVehicleEvent(intent);
             case REMOVE_VEHICLE:
@@ -120,6 +123,11 @@ public class IntentConverter {
     private RequestUnselectRouteEvent getRequestUnselectRouteEvent(Intent intent) {
         SelectedRoute route = ((SelectedRouteParcel) intent.getParcelableExtra("route")).getRoute();
         return new RequestUnselectRouteEvent(route);
+    }
+
+    private UnselectRouteEvent getUnselectRouteEvent(Intent intent) {
+        SelectedRoute route = ((SelectedRouteParcel) intent.getParcelableExtra("route")).getRoute();
+        return new UnselectRouteEvent(route);
     }
 
     private UpdateVehicleEvent getUpdateVehicleEvent(Intent intent) {
