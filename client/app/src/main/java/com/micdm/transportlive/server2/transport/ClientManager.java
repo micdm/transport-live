@@ -50,7 +50,7 @@ public class ClientManager {
     }
 
     public void send(String message) {
-        if (client.getReadyState() == WebSocket.READYSTATE.OPEN) {
+        if (client != null && client.getReadyState() == WebSocket.READYSTATE.OPEN) {
             client.send(message);
         }
     }

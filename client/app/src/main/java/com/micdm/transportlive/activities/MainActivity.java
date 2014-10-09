@@ -3,6 +3,8 @@ package com.micdm.transportlive.activities;
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -278,16 +280,19 @@ public class MainActivity extends FragmentActivity {
 
     private void subscribeForData() {
         final ServerGate gate = App.get().getServerGate();
+        final Drawable connectingIcon = getConnectingIcon();
         gate.connect(new ServerGate.OnConnectListener() {
             @Override
             public void onStartConnect() {
                 ActionBar actionBar = getActionBar();
-                actionBar.setTitle(getString(R.string.__connecting));
+                actionBar.setIcon(connectingIcon);
                 actionBar.setDisplayShowTitleEnabled(true);
+                actionBar.setTitle(getString(R.string.__connecting));
             }
             @Override
             public void OnCompleteConnect() {
                 ActionBar actionBar = getActionBar();
+                actionBar.setIcon(R.drawable.ic_launcher);
                 actionBar.setDisplayShowTitleEnabled(false);
                 if (selectedRoutes != null) {
                     for (SelectedRoute route: selectedRoutes) {
@@ -306,6 +311,13 @@ public class MainActivity extends FragmentActivity {
                 }
             }
         });
+    }
+
+    private Drawable getConnectingIcon() {
+        Drawable original = getResources().getDrawable(R.drawable.ic_launcher);
+        Drawable icon = original.getConstantState().newDrawable().mutate();
+        icon.setColorFilter(getResources().getColor(R.color.connecting_icon), PorterDuff.Mode.SRC_ATOP);
+        return icon;
     }
 
     private void handleVehicleMessage(VehicleMessage message) {
