@@ -73,7 +73,7 @@ class StreamHandler(object):
 
     def _on_stream_data(self, data):
         logger.debug("New data on stream %s of length %s:\r\n%s", self._id, len(data), data)
-        self._buffer += data
+        self._buffer += data.decode("utf-8")
         self._parse_packets()
         if len(self._buffer) > self.MAX_BUFFER_SIZE:
             logger.warning("Buffer grows too much, closing stream...")
@@ -127,14 +127,14 @@ class StreamHandler(object):
             else:
                 logger.info("Starting new session...")
                 answer_packet = LoginAnswerPacket(LoginAnswerPacket.STATUS_OK)
-                self._stream.write(self._packet_serializer.serialize(answer_packet))
+                self._stream.write(self._packet_serializer.serialize(answer_packet).encode("utf-8"))
                 self._session = Session(packet.login)
                 IOLoop.instance().remove_timeout(self._close_timeout)
 
     def _handle_ping_packet(self, packet):
         logger.debug("Ping packet received")
         answer_packet = PingAnswerPacket()
-        self._stream.write(self._packet_serializer.serialize(answer_packet))
+        self._stream.write(self._packet_serializer.serialize(answer_packet).encode("utf-8"))
 
     def _handle_data_packet(self, packet):
         logger.debug("Data packet received")
@@ -143,7 +143,7 @@ class StreamHandler(object):
             self._stream.close()
         else:
             answer_packet = DataAnswerPacket(DataAnswerPacket.STATUS_OK)
-            self._stream.write(self._packet_serializer.serialize(answer_packet))
+            self._stream.write(self._packet_serializer.serialize(answer_packet).encode("utf-8"))
             self._on_data_packet(packet)
 
     def _on_close_stream(self):

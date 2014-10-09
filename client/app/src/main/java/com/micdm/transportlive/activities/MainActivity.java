@@ -178,6 +178,9 @@ public class MainActivity extends FragmentActivity {
             public void onEvent(RequestLoadRoutesEvent event) {
                 if (selectedRoutes == null) {
                     selectedRoutes = (new SelectedRouteStore(MainActivity.this)).load(service);
+                    for (SelectedRoute route: selectedRoutes) {
+                        gate.selectRoute(route);
+                    }
                 }
                 manager.publish(new LoadRoutesEvent(selectedRoutes));
             }
@@ -212,6 +215,9 @@ public class MainActivity extends FragmentActivity {
             public void onEvent(RequestLoadStationsEvent event) {
                 if (selectedStations == null) {
                     selectedStations = (new SelectedStationStore(MainActivity.this)).load(service);
+                    for (SelectedStation station: selectedStations) {
+                        gate.selectStation(station);
+                    }
                 }
                 manager.publish(new LoadStationsEvent(selectedStations));
             }
@@ -249,6 +255,7 @@ public class MainActivity extends FragmentActivity {
                 iterator.remove();
             }
         }
+        // TODO: удалять транспорт
     }
 
     private void removeSelectedStation(int transportId, int stationId) {
@@ -281,8 +288,10 @@ public class MainActivity extends FragmentActivity {
             public void OnCompleteConnect() {
                 ActionBar actionBar = getActionBar();
                 actionBar.setDisplayShowTitleEnabled(false);
-                for (SelectedRoute route: selectedRoutes) {
-                    gate.selectRoute(route);
+                if (selectedRoutes != null) {
+                    for (SelectedRoute route: selectedRoutes) {
+                        gate.selectRoute(route);
+                    }
                 }
             }
         }, new ServerGate.OnMessageListener() {

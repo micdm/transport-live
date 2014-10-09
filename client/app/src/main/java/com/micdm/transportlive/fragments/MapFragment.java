@@ -316,6 +316,12 @@ public class MapFragment extends Fragment {
     }
 
     private void updateVehicle(MapVehicle vehicle) {
+        if (mapView.getVisibility() != View.VISIBLE) {
+            hideAllViews();
+            mapView.setVisibility(View.VISIBLE);
+            zoomInView.setVisibility(View.VISIBLE);
+            zoomOutView.setVisibility(View.VISIBLE);
+        }
         ItemizedIconOverlay<OverlayItem> overlay = getOverlay();
         String number = vehicle.getNumber();
         OverlayItem item = getOverlayItem(overlay, number);
@@ -327,6 +333,7 @@ public class MapFragment extends Fragment {
         item.setMarker(new BitmapDrawable(getResources(), builder.build(vehicle)));
         item.setMarkerHotspot(OverlayItem.HotspotPlace.CENTER);
         overlay.addItem(item);
+        mapView.invalidate();
     }
 
     private void removeVehicle(String number) {
@@ -334,6 +341,7 @@ public class MapFragment extends Fragment {
         OverlayItem item = getOverlayItem(overlay, number);
         if (item != null) {
             overlay.removeItem(item);
+            mapView.invalidate();
         }
     }
 
