@@ -17,6 +17,7 @@ import com.micdm.transportlive.events.events.LoadDonateProductsEvent;
 import com.micdm.transportlive.events.events.LoadRoutesEvent;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
+import com.micdm.transportlive.events.events.RemoveAllVehiclesEvent;
 import com.micdm.transportlive.events.events.RemoveForecastEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestDonateEvent;
@@ -65,6 +66,8 @@ public class IntentConverter {
                 return getUpdateVehicleEvent(intent);
             case REMOVE_VEHICLE:
                 return getRemoveVehicleEvent(intent);
+            case REMOVE_ALL_VEHICLES:
+                return new RemoveAllVehiclesEvent();
             case REQUEST_LOAD_STATIONS:
                 return new RequestLoadStationsEvent();
             case LOAD_STATIONS:

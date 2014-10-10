@@ -30,6 +30,7 @@ import com.micdm.transportlive.events.EventManager;
 import com.micdm.transportlive.events.EventType;
 import com.micdm.transportlive.events.events.LoadRoutesEvent;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
+import com.micdm.transportlive.events.events.RemoveAllVehiclesEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
@@ -326,6 +327,12 @@ public class MapFragment extends Fragment {
                 removeVehicle(event.getNumber());
             }
         });
+        manager.subscribe(this, EventType.REMOVE_ALL_VEHICLES, new EventManager.OnEventListener<RemoveAllVehiclesEvent>() {
+            @Override
+            public void onEvent(RemoveAllVehiclesEvent event) {
+                removeAllVehicles();
+            }
+        });
     }
 
     private void requestForData() {
@@ -342,13 +349,7 @@ public class MapFragment extends Fragment {
             zoomOutView.setVisibility(View.VISIBLE);
         }
         ItemizedIconOverlay<OverlayItem> overlay = getOverlay();
-        Map.Entry<MapVehicle, OverlayItem> pair = getMapVehicleAndOverlayItemPair(vehicle.getNumber());
-        if (pair != null) {
-            OverlayItem item = pair.getValue();
-            builder.release(((BitmapDrawable) item.getDrawable()).getBitmap());
-            overlay.removeItem(item);
-            items.remove(pair.getKey());
-        }
+        removeVehicle(vehicle.getNumber());
         OverlayItem item = new OverlayItem(null, null, null, getVehicleGeoPoint(vehicle));
         item.setMarker(new BitmapDrawable(getResources(), builder.build(vehicle)));
         item.setMarkerHotspot(OverlayItem.HotspotPlace.CENTER);
@@ -358,13 +359,26 @@ public class MapFragment extends Fragment {
     }
 
     private void removeVehicle(String number) {
-        ItemizedIconOverlay<OverlayItem> overlay = getOverlay();
         Map.Entry<MapVehicle, OverlayItem> pair = getMapVehicleAndOverlayItemPair(number);
         if (pair != null) {
+            OverlayItem item = pair.getValue();
+            builder.release(((BitmapDrawable) item.getDrawable()).getBitmap());
+            ItemizedIconOverlay<OverlayItem> overlay = getOverlay();
             overlay.removeItem(pair.getValue());
             items.remove(pair.getKey());
             mapView.invalidate();
         }
+    }
+
+    private void removeAllVehicles() {
+        ItemizedIconOverlay<OverlayItem> overlay = getOverlay();
+        for (int i = 0; i < overlay.size(); i += 1) {
+            OverlayItem item = overlay.getItem(i);
+            builder.release(((BitmapDrawable) item.getDrawable()).getBitmap());
+        }
+        overlay.removeAllItems();
+        items.clear();
+        mapView.invalidate();
     }
 
     private ItemizedIconOverlay<OverlayItem> getOverlay() {

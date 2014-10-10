@@ -26,6 +26,7 @@ import com.micdm.transportlive.events.EventType;
 import com.micdm.transportlive.events.events.LoadRoutesEvent;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
+import com.micdm.transportlive.events.events.RemoveAllVehiclesEvent;
 import com.micdm.transportlive.events.events.RemoveForecastEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
@@ -294,6 +295,7 @@ public class MainActivity extends FragmentActivity {
                 ActionBar actionBar = getActionBar();
                 actionBar.setIcon(R.drawable.ic_launcher);
                 actionBar.setDisplayShowTitleEnabled(false);
+                App.get().getEventManager().publish(new RemoveAllVehiclesEvent());
                 if (selectedRoutes != null) {
                     for (SelectedRoute route: selectedRoutes) {
                         gate.selectRoute(route);
