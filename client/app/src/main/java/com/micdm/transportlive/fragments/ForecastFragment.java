@@ -162,9 +162,7 @@ public class ForecastFragment extends Fragment {
 
         @Override
         public long getChildId(int groupPosition, int childPodition) {
-            ForecastVehicle vehicle = getChild(groupPosition, childPodition);
-            // TODO: завести для каждой машины свой идентификатор
-            return (vehicle == null) ? 0 : vehicle.hashCode();
+            return 0;
         }
 
         @Override
@@ -223,7 +221,7 @@ public class ForecastFragment extends Fragment {
                 holder.vehicleInfoView.setVisibility(View.GONE);
             } else {
                 Transport transport = service.getTransportById(selectedStation.getTransportId());
-                Route route = transport.getRouteByNumber(selectedStation.getRouteNumber());
+                Route route = transport.getRouteByNumber(vehicle.getRouteNumber());
                 holder.noVehiclesView.setVisibility(View.GONE);
                 holder.vehicleInfoView.setVisibility(View.VISIBLE);
                 holder.colorView.setBackgroundColor(colors.get(route));
