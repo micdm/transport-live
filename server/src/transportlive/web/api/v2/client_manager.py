@@ -65,9 +65,9 @@ class ClientManager:
         self._remove_request_handler_from_station_subscription(request_handler, station)
 
     def on_close(self, request_handler):
-        for route in self._selected_routes.keys():
+        for route in list(self._selected_routes.keys()):
             self._remove_request_handler_from_route_subscription(request_handler, route)
-        for station in self._selected_stations.keys():
+        for station in list(self._selected_stations.keys()):
             self._remove_request_handler_from_station_subscription(request_handler, station)
 
     def _remove_request_handler_from_route_subscription(self, request_handler, route):
