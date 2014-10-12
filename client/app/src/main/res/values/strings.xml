@@ -5,6 +5,7 @@
     <string name="__contact_email">demerzov@gmail.com</string>
     <string name="__user_agent">transport-live %1$s @ Android %2$s</string>
     <string name="__connecting">подключение…</string>
+    <string name="__no_connection_after_several_tries">Нет подключения. Соединение с Интернетом активно?</string>
     <string name="__share">Троллейбусы и трамваи Томска на карте онлайн. https://play.google.com/store/apps/details?id=%s</string>
     <!-- Названия транспорта -->
     <string name="__transport_type_trolleybus">Троллейбус</string>

@@ -20,7 +20,7 @@ import com.micdm.transportlive.server.transport.ClientManager;
 public class ServerGate {
 
     public static interface OnConnectListener {
-        public void onStartConnect();
+        public void onStartConnect(int tryNumber);
         public void OnCompleteConnect();
     }
 
@@ -38,8 +38,8 @@ public class ServerGate {
 
     private final ClientManager clientManager = new ClientManager(new ClientManager.OnConnectListener() {
         @Override
-        public void onStartConnect() {
-            onConnectListener.onStartConnect();
+        public void onStartConnect(int tryNumber) {
+            onConnectListener.onStartConnect(tryNumber);
         }
         @Override
         public void onCompleteConnect() {

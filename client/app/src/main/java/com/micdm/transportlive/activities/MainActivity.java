@@ -13,6 +13,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.micdm.transportlive.App;
 import com.micdm.transportlive.R;
@@ -277,11 +278,14 @@ public class MainActivity extends FragmentActivity {
         final Drawable connectingIcon = getConnectingIcon();
         gate.connect(new ServerGate.OnConnectListener() {
             @Override
-            public void onStartConnect() {
+            public void onStartConnect(int tryNumber) {
                 ActionBar actionBar = getActionBar();
                 actionBar.setIcon(connectingIcon);
                 actionBar.setDisplayShowTitleEnabled(true);
                 actionBar.setTitle(getString(R.string.__connecting));
+                if (tryNumber > 1) {
+                    showNoConnectionNotice();
+                }
             }
             @Override
             public void OnCompleteConnect() {
@@ -318,6 +322,10 @@ public class MainActivity extends FragmentActivity {
         Drawable icon = original.getConstantState().newDrawable().mutate();
         icon.setColorFilter(getResources().getColor(R.color.connecting_icon), PorterDuff.Mode.SRC_ATOP);
         return icon;
+    }
+
+    private void showNoConnectionNotice() {
+        Toast.makeText(this, getString(R.string.__no_connection_after_several_tries), Toast.LENGTH_LONG).show();
     }
 
     private void handleVehicleMessage(VehicleMessage message) {

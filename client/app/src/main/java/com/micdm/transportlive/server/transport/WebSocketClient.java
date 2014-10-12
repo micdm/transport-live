@@ -22,6 +22,7 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
     }
 
     private static final URI SERVER_URI = URI.create("ws://192.168.1.5:8001/api/v2");
+    private static final int TIMEOUT = 10;
 
     private static final Handler handler = new Handler();
 
@@ -30,7 +31,7 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
     private final OnCloseListener onCloseListener;
 
     public WebSocketClient(OnOpenListener onOpenListener, OnMessageListener onMessageListener, OnCloseListener onCloseListener) {
-        super(SERVER_URI, new Draft_17());
+        super(SERVER_URI, new Draft_17(), null, TIMEOUT);
         this.onOpenListener = onOpenListener;
         this.onMessageListener = onMessageListener;
         this.onCloseListener = onCloseListener;
