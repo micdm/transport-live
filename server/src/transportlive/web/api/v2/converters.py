@@ -33,6 +33,7 @@ class IncomingMessageConverter(object):
 class OutcomingMessageConverter(object):
 
     MESSAGE_TYPE_VEHICLE = 0
+    MESSAGE_TYPE_FORECAST = 1
 
     def convert(self, message):
         params = {"type": self._get_message_type(message)}
@@ -45,11 +46,24 @@ class OutcomingMessageConverter(object):
                 "longitude": str(message.longitude),
                 "course": message.course
             })
+        if isinstance(message, messages.ForecastMessage):
+            params.update({
+                "transport_id": message.transport_id,
+                "station_id": message.station_id,
+                "vehicles": [{
+                    "number": vehicle.number,
+                    "route_number": vehicle.route_number,
+                    "arrival_time": vehicle.arrival_time,
+                    "is_low_floor": vehicle.is_low_floor
+                } for vehicle in message.vehicles]
+            })
         return self._serialize(params)
 
     def _get_message_type(self, message):
         if isinstance(message, messages.VehicleMessage):
             return self.MESSAGE_TYPE_VEHICLE
+        if isinstance(message, messages.ForecastMessage):
+            return self.MESSAGE_TYPE_FORECAST
         raise Exception("unknown message type %s", message)
 
     def _serialize(self, params):

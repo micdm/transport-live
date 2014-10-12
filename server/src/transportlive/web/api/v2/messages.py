@@ -41,3 +41,10 @@ class VehicleMessage(Message):
         self.latitude = latitude
         self.longitude = longitude
         self.course = course
+
+class ForecastMessage(Message):
+
+    def __init__(self, transport_id, station_id, vehicles):
+        self.transport_id = transport_id
+        self.station_id = station_id
+        self.vehicles = vehicles

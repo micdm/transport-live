@@ -45,7 +45,7 @@ class DataServer(TCPServer):
         elif not vehicle_info.is_on_line:
             logger.debug("Vehicle is off line, skipping...")
         else:
-            self._datastore.add_vehicle(vehicle_info)
+            self._datastore.update_vehicle(vehicle_info)
 
 class StreamHandler(object):
 

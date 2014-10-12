@@ -21,14 +21,14 @@ class DataStore(object):
         self._low_floor_vehicles = LowFloorVehiclesBuilder().build()
         self._vehicles = {}
         self._forecast_calculator = ForecastCalculator(self._service)
-        self._on_add_vehicle = None
+        self._on_update_vehicle = None
         self._on_remove_vehicle = None
 
-    def set_callbacks(self, on_add_vehicle, on_remove_vehicle):
-        self._on_add_vehicle = on_add_vehicle
+    def set_callbacks(self, on_update_vehicle, on_remove_vehicle):
+        self._on_update_vehicle = on_update_vehicle
         self._on_remove_vehicle = on_remove_vehicle
 
-    def add_vehicle(self, info):
+    def update_vehicle(self, info):
         vehicle = self._vehicles.get(info.vehicle_id)
         if not vehicle:
             vehicle = Vehicle(info.vehicle_id, info.number, self._is_low_floor(info.transport_type, info.number))
@@ -36,8 +36,8 @@ class DataStore(object):
         vehicle.transport = self._service.get_transport_by_type(info.transport_type)
         vehicle.route = vehicle.transport.get_route_by_number(info.route_number)
         vehicle.marks.append(info.mark)
-        if self._on_add_vehicle:
-            self._on_add_vehicle(vehicle)
+        if self._on_update_vehicle:
+            self._on_update_vehicle(vehicle)
         self._forecast_calculator.update_vehicle(vehicle)
 
     def _is_low_floor(self, transport_type, number):

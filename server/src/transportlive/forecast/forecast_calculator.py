@@ -99,7 +99,7 @@ class ForecastCalculator(object):
         return sum(mark.speed for mark in marks) / len(marks)
 
     def _get_non_zero_speed_vehicle_marks(self, vehicle):
-        return filter(lambda mark: mark.speed != 0, vehicle.marks)
+        return list(filter(lambda mark: mark.speed != 0, vehicle.marks))
 
     def update_vehicle(self, vehicle):
         self._direction_calculator.update_vehicle(vehicle)
