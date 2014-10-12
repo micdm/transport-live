@@ -32,7 +32,6 @@ import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestLoadStationsEvent;
-import com.micdm.transportlive.events.events.RequestReconnectEvent;
 import com.micdm.transportlive.events.events.RequestSelectRouteEvent;
 import com.micdm.transportlive.events.events.RequestSelectStationEvent;
 import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
@@ -143,13 +142,13 @@ public class MainActivity extends FragmentActivity {
             public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
                 pager.setCurrentItem(tab.getPosition());
             }
-
             @Override
             public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-            }
 
+            }
             @Override
             public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+
             }
         });
         actionBar.addTab(tab);
@@ -162,12 +161,6 @@ public class MainActivity extends FragmentActivity {
         final ServiceLoader serviceLoader = app.getServiceLoader();
         final SelectedRouteStore selectedRouteStore = app.getSelectedRouteStore();
         final SelectedStationStore selectedStationStore = app.getSelectedStationStore();
-        manager.subscribe(this, EventType.REQUEST_RECONNECT, new EventManager.OnEventListener<RequestReconnectEvent>() {
-            @Override
-            public void onEvent(RequestReconnectEvent event) {
-
-            }
-        });
         manager.subscribe(this, EventType.REQUEST_LOAD_SERVICE, new EventManager.OnEventListener<RequestLoadServiceEvent>() {
             @Override
             public void onEvent(RequestLoadServiceEvent event) {

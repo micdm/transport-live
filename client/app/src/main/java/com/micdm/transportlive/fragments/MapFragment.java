@@ -161,7 +161,7 @@ public class MapFragment extends Fragment {
     private boolean externalMapUsed;
     private MarkerBuilder builder;
     private ItemizedIconOverlay<OverlayItem> overlay;
-    private Map<MapVehicle, OverlayItem> items = new HashMap<MapVehicle, OverlayItem>();
+    private final Map<MapVehicle, OverlayItem> items = new HashMap<MapVehicle, OverlayItem>();
 
     private Service service;
 
@@ -171,7 +171,6 @@ public class MapFragment extends Fragment {
     private MapView mapView;
     private View zoomInView;
     private View zoomOutView;
-    private View loadingView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -198,7 +197,6 @@ public class MapFragment extends Fragment {
                 mapView.getController().zoomOut();
             }
         });
-        loadingView = view.findViewById(R.id.f__map__loading);
         View selectRoutesView = view.findViewById(R.id.f__map__select_route);
         selectRoutesView.setOnClickListener(new View.OnClickListener() {
             @Override

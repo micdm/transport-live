@@ -13,7 +13,6 @@ import com.micdm.transportlive.events.events.LoadDonateProductsEvent;
 import com.micdm.transportlive.events.events.LoadRoutesEvent;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
-import com.micdm.transportlive.events.events.RemoveForecastEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestDonateEvent;
 import com.micdm.transportlive.events.events.RequestSelectRouteEvent;
@@ -74,9 +73,6 @@ public class EventConverter {
                 break;
             case UPDATE_FORECAST:
                 buildIntentForUpdateForecastEvent((UpdateForecastEvent) event, intent);
-                break;
-            case REMOVE_FORECAST:
-                buildIntentForRemoveForecastEvent((RemoveForecastEvent) event, intent);
                 break;
             case LOAD_DONATE_PRODUCTS:
                 buildIntentForLoadDonateProductsEvent((LoadDonateProductsEvent) event, intent);
@@ -142,12 +138,6 @@ public class EventConverter {
 
     private void buildIntentForUpdateForecastEvent(UpdateForecastEvent event, Intent intent) {
         intent.putExtra("forecast", new ForecastParcel(event.getForecast()));
-    }
-
-    private void buildIntentForRemoveForecastEvent(RemoveForecastEvent event, Intent intent) {
-        intent.putExtra("transport_id", event.getTransportId());
-        intent.putExtra("station_id", event.getStationId());
-        intent.putExtra("number", event.getNumber());
     }
 
     private void buildIntentForLoadDonateProductsEvent(LoadDonateProductsEvent event, Intent intent) {

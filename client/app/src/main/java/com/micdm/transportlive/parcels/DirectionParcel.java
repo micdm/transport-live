@@ -49,8 +49,4 @@ public class DirectionParcel implements Parcelable {
         }
         return parcels;
     }
-
-    public Direction getDirection() {
-        return direction;
-    }
 }

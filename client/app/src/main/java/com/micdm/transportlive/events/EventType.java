@@ -1,7 +1,6 @@
 package com.micdm.transportlive.events;
 
 public enum EventType {
-    REQUEST_RECONNECT,
     REQUEST_LOAD_SERVICE,
     LOAD_SERVICE,
     REQUEST_LOAD_ROUTES,
@@ -16,7 +15,6 @@ public enum EventType {
     REQUEST_SELECT_STATION,
     REQUEST_UNSELECT_STATION,
     UPDATE_FORECAST,
-    REMOVE_FORECAST,
     REMOVE_ALL_DATA,
     REQUEST_LOAD_DONATE_PRODUCTS,
     LOAD_DONATE_PRODUCTS,

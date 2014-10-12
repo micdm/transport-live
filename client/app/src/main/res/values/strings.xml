@@ -4,7 +4,6 @@
     <string name="__app_name">Транспорт Томска</string>
     <string name="__contact_email">demerzov@gmail.com</string>
     <string name="__user_agent">transport-live %1$s @ Android %2$s</string>
-    <string name="__loading">Обновление…</string>
     <string name="__connecting">подключение…</string>
     <string name="__share">Троллейбусы и трамваи Томска на карте онлайн. https://play.google.com/store/apps/details?id=%s</string>
     <!-- Названия транспорта -->

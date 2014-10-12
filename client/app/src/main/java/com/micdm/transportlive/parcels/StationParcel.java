@@ -36,8 +36,4 @@ public class StationParcel implements Parcelable {
         dest.writeInt(station.getId());
         dest.writeString(station.getName());
     }
-
-    public Station getStation() {
-        return station;
-    }
 }

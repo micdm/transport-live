@@ -51,10 +51,6 @@ public class DonateManager {
         context.unbindService(connection);
     }
 
-    public List<DonateProduct> getProducts() {
-        return products;
-    }
-
     private void consumeStalePurchases() {
         List<String> tokens = getStalePurchaseTokens();
         if (tokens != null) {
@@ -159,7 +155,9 @@ public class DonateManager {
             protected Void doInBackground(String... tokens) {
                 try {
                     connection.getService().consumePurchase(BILLING_API_VERSION, context.getPackageName(), tokens[0]);
-                } catch (RemoteException e) {}
+                } catch (RemoteException e) {
+
+                }
                 return null;
             }
         };

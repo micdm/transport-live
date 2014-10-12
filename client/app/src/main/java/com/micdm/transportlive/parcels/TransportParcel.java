@@ -61,8 +61,4 @@ public class TransportParcel implements Parcelable {
         }
         return parcels;
     }
-
-    public Transport getTransport() {
-        return transport;
-    }
 }

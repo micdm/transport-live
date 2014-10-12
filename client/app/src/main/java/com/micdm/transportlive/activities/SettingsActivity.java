@@ -64,7 +64,9 @@ public class SettingsActivity extends FragmentActivity implements PreferenceFrag
                 try {
                     startIntentSenderForResult(intent.getIntentSender(), BUY_REQUEST_CODE, new Intent(), 0, 0, 0);
                     App.get().getAnalytics().reportEvent(Analytics.Category.DONATE, Analytics.Action.CLICK, product.getId());
-                } catch (IntentSender.SendIntentException e) {}
+                } catch (IntentSender.SendIntentException e) {
+
+                }
             }
         });
     }
@@ -104,7 +106,9 @@ public class SettingsActivity extends FragmentActivity implements PreferenceFrag
         intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.__share, getPackageName()));
         try {
             startActivity(intent);
-        } catch (ActivityNotFoundException e) {}
+        } catch (ActivityNotFoundException e) {
+
+        }
         App.get().getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "share");
     }
 

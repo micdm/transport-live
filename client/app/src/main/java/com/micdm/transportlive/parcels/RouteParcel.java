@@ -49,8 +49,4 @@ public class RouteParcel implements Parcelable {
         }
         return parcels;
     }
-
-    public Route getRoute() {
-        return route;
-    }
 }

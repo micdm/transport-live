@@ -18,14 +18,12 @@ import com.micdm.transportlive.events.events.LoadRoutesEvent;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
 import com.micdm.transportlive.events.events.RemoveAllDataEvent;
-import com.micdm.transportlive.events.events.RemoveForecastEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestDonateEvent;
 import com.micdm.transportlive.events.events.RequestLoadDonateProductsEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestLoadStationsEvent;
-import com.micdm.transportlive.events.events.RequestReconnectEvent;
 import com.micdm.transportlive.events.events.RequestSelectRouteEvent;
 import com.micdm.transportlive.events.events.RequestSelectStationEvent;
 import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
@@ -46,8 +44,6 @@ public class IntentConverter {
 
     public Event convert(Intent intent) {
         switch (getEventTypeFromIntent(intent)) {
-            case REQUEST_RECONNECT:
-                return new RequestReconnectEvent();
             case REQUEST_LOAD_SERVICE:
                 return new RequestLoadServiceEvent();
             case LOAD_SERVICE:
@@ -76,8 +72,6 @@ public class IntentConverter {
                 return getRequestUnselectStationEvent(intent);
             case UPDATE_FORECAST:
                 return getUpdateForecastEvent(intent);
-            case REMOVE_FORECAST:
-                return getRemoveForecastEvent(intent);
             case REMOVE_ALL_DATA:
                 return new RemoveAllDataEvent();
             case REQUEST_LOAD_DONATE_PRODUCTS:
@@ -164,13 +158,6 @@ public class IntentConverter {
     private UpdateForecastEvent getUpdateForecastEvent(Intent intent) {
         Forecast forecast = ((ForecastParcel) intent.getParcelableExtra("forecast")).getForecast();
         return new UpdateForecastEvent(forecast);
-    }
-
-    private RemoveForecastEvent getRemoveForecastEvent(Intent intent) {
-        int transportId = intent.getIntExtra("transport_id", 0);
-        int stationId = intent.getIntExtra("station_id", 0);
-        String number = intent.getStringExtra("number");
-        return new RemoveForecastEvent(transportId, stationId, number);
     }
 
     private LoadDonateProductsEvent getLoadDonateProductsEvent(Intent intent) {

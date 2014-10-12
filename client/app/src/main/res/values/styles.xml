@@ -9,13 +9,4 @@
     <style name="ActionBarTitle" parent="android:style/TextAppearance.Holo.Widget.ActionBar.Title">
         <item name="android:textColor">@color/connecting_text</item>
     </style>
-    <style name="AppTheme.LoadingMessage">
-        <item name="android:layout_gravity">bottom|center</item>
-        <item name="android:padding">5dp</item>
-        <item name="android:layout_margin">3dp</item>
-        <item name="android:background">#99000000</item>
-        <item name="android:textColor">#FFFFFFFF</item>
-        <item name="android:text">@string/__loading</item>
-        <item name="android:visibility">gone</item>
-    </style>
 </resources>

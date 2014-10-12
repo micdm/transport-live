@@ -2,13 +2,13 @@ package com.micdm.transportlive.events;
 
 public abstract class Event {
 
-    private final EventType _type;
+    private final EventType type;
 
-    public Event(EventType type) {
-        _type = type;
+    protected Event(EventType type) {
+        this.type = type;
     }
 
     public EventType getType() {
-        return _type;
+        return type;
     }
 }

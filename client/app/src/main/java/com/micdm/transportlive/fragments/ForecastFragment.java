@@ -85,7 +85,7 @@ public class ForecastFragment extends Fragment {
         private RouteColors colors;
 
         private List<SelectedStation> selectedStations;
-        private List<Forecast> forecasts = new ArrayList<Forecast>();
+        private final List<Forecast> forecasts = new ArrayList<Forecast>();
 
         public void setService(Service service) {
             this.service = service;
@@ -262,7 +262,6 @@ public class ForecastFragment extends Fragment {
 
     private View noStationSelectedView;
     private ExpandableListView forecastsView;
-    private View loadingView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -275,7 +274,6 @@ public class ForecastFragment extends Fragment {
                 return true;
             }
         });
-        loadingView = view.findViewById(R.id.f__forecasts__loading);
         View selectStationView = view.findViewById(R.id.f__forecasts__select_station);
         selectStationView.setOnClickListener(new View.OnClickListener() {
             @Override

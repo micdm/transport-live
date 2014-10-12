@@ -8,6 +8,8 @@
         android:id="@+id/v__forecasts_list_item_title__station"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@+id/v__forecasts_list_item_title__remove_station"
         android:textSize="20sp"
         android:textStyle="bold"/>
     <TextView

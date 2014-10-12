@@ -40,8 +40,4 @@ public class ForecastVehicleParcel implements Parcelable {
         dest.writeInt(vehicle.getArrivalTime());
         dest.writeInt(vehicle.isLowFloor() ? 1 : 0);
     }
-
-    public ForecastVehicle getVehicle() {
-        return vehicle;
-    }
 }
