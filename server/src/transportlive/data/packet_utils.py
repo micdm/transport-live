@@ -1,5 +1,3 @@
-# coding=utf-8
-
 from decimal import Decimal, ROUND_FLOOR
 from datetime import datetime
 import re
@@ -7,7 +5,7 @@ import re
 from transportlive.data.packets import LoginPacket, LoginAnswerPacket, PingPacket, PingAnswerPacket, DataPacket, DataAnswerPacket
 from transportlive.misc.utils import normalize_coordinate
 
-class PacketSerializer(object):
+class PacketSerializer:
 
     def serialize(self, packet):
         return "#%s#%s\r\n"%(self._get_type(packet), self._get_status(packet))
@@ -30,7 +28,7 @@ class PacketSerializer(object):
             if packet.status == DataAnswerPacket.STATUS_OK:
                 return "1"
 
-class PacketUnserializer(object):
+class PacketUnserializer:
 
     def unserialize(self, string):
         matched = re.match("#([A-Z]+)#([^\r]*?)\r\n", string)
@@ -38,7 +36,7 @@ class PacketUnserializer(object):
             return None
         return len(matched.group(0)), matched.group(1), matched.group(2).split(";")
 
-class PacketBuilder(object):
+class PacketBuilder:
 
     VALUE_NOT_AVAILABLE = "NA"
 

@@ -1,11 +1,9 @@
-# coding=utf-8
-
 import os.path
 import xml.etree.ElementTree as etree
 
 from tornado.options import options
 
-class LowFloorVehiclesBuilder(object):
+class LowFloorVehiclesBuilder:
 
     DATA_FILE = os.path.join(options.DATA_ROOT, "low_floor_vehicles.xml")
 

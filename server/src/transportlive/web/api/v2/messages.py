@@ -1,6 +1,4 @@
-# coding=utf-8
-
-class Message(object):
+class Message:
     pass
 
 class GreetingMessage(Message):

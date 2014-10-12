@@ -1,5 +1,3 @@
-# coding=utf-8
-
 from tornado.options import options
 from tornado.template import Loader
 from tornado.web import RequestHandler

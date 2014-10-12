@@ -1,5 +1,3 @@
-# coding=utf-8
-
 from logging import getLogger
 import math
 
@@ -54,7 +52,7 @@ def _get_distance_in_meters(point1, point2):
     radians = math.acos(math.sin(lat1) * math.sin(lat2) + math.cos(lat1) * math.cos(lat2) * math.cos(lon1 - lon2))
     return round(radians * _EARTH_RADIUS, 2)
 
-class ForecastCalculator(object):
+class ForecastCalculator:
 
     MAX_ARRIVAL_TIME = 1800
 
@@ -111,7 +109,7 @@ class ForecastCalculator(object):
         self._direction_calculator.cleanup()
         self._distance_calculator.cleanup()
 
-class _DirectionCalculator(object):
+class _DirectionCalculator:
 
     def __init__(self):
         self._nearest_point_index_cache = {}
@@ -156,7 +154,7 @@ class _DirectionCalculator(object):
     def cleanup(self):
         self._nearest_point_index_cache.clear()
 
-class _DistanceCalculator(object):
+class _DistanceCalculator:
 
     def __init__(self, service):
         self._distance_index = _DistanceIndex.create(service)
@@ -178,7 +176,7 @@ class _DistanceCalculator(object):
     def cleanup(self):
         self._distance_cache.clear()
 
-class _DistanceIndex(object):
+class _DistanceIndex:
 
     @classmethod
     def create(cls, service):
@@ -205,7 +203,7 @@ class _DistanceIndex(object):
     def get(self, point):
         return self._index[point]
 
-class _StationIndex(object):
+class _StationIndex:
 
     @classmethod
     def create(cls, service):

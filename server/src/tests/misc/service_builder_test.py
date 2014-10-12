@@ -1,5 +1,3 @@
-# coding=utf-8
-
 import unittest
 
 from transportlive.misc.service_builder import ServiceBuilder

@@ -1,6 +1,4 @@
-# coding=utf-8
-
-class Service(object):
+class Service:
 
     def __init__(self):
         self.transports = []
@@ -11,7 +9,7 @@ class Service(object):
                 return transport
         raise Exception('unknown transport "%s"'%transport_type)
 
-class Transport(object):
+class Transport:
 
     TYPE_TROLLEYBUS = 0
     TYPE_TRAM = 1
@@ -33,27 +31,27 @@ class Transport(object):
                 return route
         raise Exception('unknown route "%s"'%number)
 
-class Station(object):
+class Station:
 
     def __init__(self, station_id, coords, name):
         self.id = station_id
         self.coords = coords
         self.name = name
 
-class Route(object):
+class Route:
 
     def __init__(self, number):
         self.number = number
         self.directions = []
 
-class Direction(object):
+class Direction:
 
     def __init__(self, direction_id):
         self.id = direction_id
         self.stations = []
         self.points = []
 
-class Vehicle(object):
+class Vehicle:
 
     def __init__(self, vehicle_id, number, is_low_floor):
         self.id = vehicle_id
@@ -67,7 +65,7 @@ class Vehicle(object):
     def last_mark(self):
         return self.marks[-1] if len(self.marks) else None
 
-class Mark(object):
+class Mark:
 
     def __init__(self, datetime, coords, speed, course):
         self.datetime = datetime
@@ -75,13 +73,13 @@ class Mark(object):
         self.speed = speed
         self.course = course
 
-class Coords(object):
+class Coords:
 
     def __init__(self, latitude, longitude):
         self.latitude = latitude
         self.longitude = longitude
 
-class Forecast(object):
+class Forecast:
 
     def __init__(self, transport, station):
         self.transport = transport

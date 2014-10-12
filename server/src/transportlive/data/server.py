@@ -1,5 +1,3 @@
-# coding=utf-8
-
 from datetime import timedelta
 from logging import getLogger
 
@@ -47,7 +45,7 @@ class DataServer(TCPServer):
         else:
             self._datastore.update_vehicle(vehicle_info)
 
-class StreamHandler(object):
+class StreamHandler:
 
     MAX_BUFFER_SIZE = 1024
     CLOSE_STREAM_INTERVAL = timedelta(seconds=30)
@@ -149,7 +147,7 @@ class StreamHandler(object):
     def _on_close_stream(self):
         logger.debug("Stream %s closed", self._id)
 
-class Session(object):
+class Session:
 
     def __init__(self, login):
         self.login = login

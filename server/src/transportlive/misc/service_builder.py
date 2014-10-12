@@ -1,5 +1,3 @@
-# coding=utf-8
-
 from decimal import Decimal
 import os.path
 import xml.etree.ElementTree as etree
@@ -8,7 +6,7 @@ from tornado.options import options
 
 from transportlive.models import Service, Station, Transport, Route, Direction, Coords
 
-class ServiceBuilder(object):
+class ServiceBuilder:
 
     DATA_FILE = os.path.join(options.DATA_ROOT, "service.xml")
 

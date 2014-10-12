@@ -1,5 +1,3 @@
-# coding=utf-8
-
 from tornado.websocket import WebSocketHandler
 
 class ApiHandler(WebSocketHandler):

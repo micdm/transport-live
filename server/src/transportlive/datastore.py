@@ -1,5 +1,3 @@
-# coding=utf-8
-
 from datetime import datetime
 from logging import getLogger
 
@@ -12,7 +10,7 @@ from transportlive.models import Vehicle
 
 logger = getLogger(__name__)
 
-class DataStore(object):
+class DataStore:
 
     MAX_MARK_COUNT = 30
 

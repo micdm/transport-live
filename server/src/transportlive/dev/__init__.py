@@ -1,12 +1,10 @@
-# coding=utf-8
-
 import os.path
 
 from tornado.options import options
 
 from transportlive.data.packet_utils import PacketUnserializer, PacketBuilder
 
-class TestDataHandler(object):
+class TestDataHandler:
 
     DATA_FILE = os.path.join(options.DATA_ROOT, "test.txt")
 

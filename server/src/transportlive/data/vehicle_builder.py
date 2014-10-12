@@ -1,8 +1,6 @@
-# coding=utf-8
-
 from transportlive.models import Transport, Mark, Coords
 
-class VehicleBuilder(object):
+class VehicleBuilder:
 
     def build(self, packet):
         transport, route = self._get_transport_and_route(packet)
@@ -38,7 +36,7 @@ class VehicleBuilder(object):
         params = packet.params
         return params.get("break") is None and params.get("dinner") is None and params.get("nonprocessrun") is None
 
-class VehicleInfo(object):
+class VehicleInfo:
 
     def __init__(self, vehicle_id, number, transport_type, route_number, mark, is_on_line):
         self.vehicle_id = vehicle_id

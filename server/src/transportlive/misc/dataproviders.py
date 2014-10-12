@@ -1,5 +1,3 @@
-# coding=utf-8
-
 def use_dataproviders(cls):
     methods = _get_test_methods(cls)
     for name, method in methods:

@@ -1,25 +1,23 @@
-# coding=utf-8
-
-class LoginPacket(object):
+class LoginPacket:
 
     def __init__(self, login, password):
         self.login = login
         self.password = password
 
-class LoginAnswerPacket(object):
+class LoginAnswerPacket:
 
     STATUS_OK = 0
 
     def __init__(self, status):
         self.status = status
 
-class PingPacket(object):
+class PingPacket:
     pass
 
-class PingAnswerPacket(object):
+class PingAnswerPacket:
     pass
 
-class DataPacket(object):
+class DataPacket:
 
     def __init__(self, imei, datetime, latitude, longitude, speed, course, params):
         self.imei = imei
@@ -30,7 +28,7 @@ class DataPacket(object):
         self.course = course
         self.params = params
 
-class DataAnswerPacket(object):
+class DataAnswerPacket:
 
     STATUS_OK = 0
 

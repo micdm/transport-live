@@ -1,10 +1,8 @@
-# coding=utf-8
-
 from tornado.escape import json_decode, json_encode
 
 import transportlive.web.api.v2.messages as messages
 
-class IncomingMessageConverter(object):
+class IncomingMessageConverter:
 
     MESSAGE_TYPE_GREETING = 0
     MESSAGE_TYPE_SELECT_ROUTE = 1
@@ -30,7 +28,7 @@ class IncomingMessageConverter(object):
     def _unserialize(self, text):
         return json_decode(text)
 
-class OutcomingMessageConverter(object):
+class OutcomingMessageConverter:
 
     MESSAGE_TYPE_VEHICLE = 0
     MESSAGE_TYPE_FORECAST = 1

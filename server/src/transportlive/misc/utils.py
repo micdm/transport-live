@@ -1,5 +1,3 @@
-# coding=utf-8
-
 from decimal import Decimal
 
 def normalize_coordinate(coordinate):
