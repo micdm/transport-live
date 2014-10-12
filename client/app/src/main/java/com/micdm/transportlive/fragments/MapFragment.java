@@ -167,7 +167,6 @@ public class MapFragment extends Fragment {
 
     private ViewGroup mapContainerView;
     private View noRouteSelectedView;
-    private View noVehiclesView;
     private MapView mapView;
     private View zoomInView;
     private View zoomOutView;
@@ -177,7 +176,6 @@ public class MapFragment extends Fragment {
         View view = inflater.inflate(R.layout.f__map, container, false);
         mapContainerView = (ViewGroup) view.findViewById(R.id.f__map__map_container);
         noRouteSelectedView = view.findViewById(R.id.f__map__no_route_selected);
-        noVehiclesView = view.findViewById(R.id.f__map__no_vehicles);
         externalMapUsed = needUseExternalMap();
         mapView = getMapView(externalMapUsed);
         mapView.setVisibility(View.GONE);
@@ -255,7 +253,6 @@ public class MapFragment extends Fragment {
 
     private void hideAllViews() {
         noRouteSelectedView.setVisibility(View.GONE);
-        noVehiclesView.setVisibility(View.GONE);
         mapView.setVisibility(View.GONE);
         zoomInView.setVisibility(View.GONE);
         zoomOutView.setVisibility(View.GONE);
@@ -290,9 +287,13 @@ public class MapFragment extends Fragment {
         manager.subscribe(this, EventType.LOAD_ROUTES, new EventManager.OnEventListener<LoadRoutesEvent>() {
             @Override
             public void onEvent(LoadRoutesEvent event) {
+                hideAllViews();
                 if (event.getRoutes().size() == 0) {
-                    hideAllViews();
                     noRouteSelectedView.setVisibility(View.VISIBLE);
+                } else {
+                    mapView.setVisibility(View.VISIBLE);
+                    zoomInView.setVisibility(View.VISIBLE);
+                    zoomOutView.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -340,12 +341,6 @@ public class MapFragment extends Fragment {
     }
 
     private void updateVehicle(MapVehicle vehicle) {
-        if (mapView.getVisibility() != View.VISIBLE) {
-            hideAllViews();
-            mapView.setVisibility(View.VISIBLE);
-            zoomInView.setVisibility(View.VISIBLE);
-            zoomOutView.setVisibility(View.VISIBLE);
-        }
         ItemizedIconOverlay<OverlayItem> overlay = getOverlay();
         removeVehicle(vehicle.getNumber());
         OverlayItem item = new OverlayItem(null, null, null, getVehicleGeoPoint(vehicle));
