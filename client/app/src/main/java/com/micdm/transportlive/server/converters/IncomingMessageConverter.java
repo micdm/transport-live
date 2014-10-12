@@ -1,8 +1,8 @@
-package com.micdm.transportlive.server2.converters;
+package com.micdm.transportlive.server.converters;
 
-import com.micdm.transportlive.server2.messages.Message;
-import com.micdm.transportlive.server2.messages.incoming.ForecastMessage;
-import com.micdm.transportlive.server2.messages.incoming.VehicleMessage;
+import com.micdm.transportlive.server.messages.Message;
+import com.micdm.transportlive.server.messages.incoming.ForecastMessage;
+import com.micdm.transportlive.server.messages.incoming.VehicleMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;

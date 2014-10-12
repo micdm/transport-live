@@ -46,10 +46,10 @@ import com.micdm.transportlive.misc.ServiceLoader;
 import com.micdm.transportlive.misc.Utils;
 import com.micdm.transportlive.misc.ViewPager;
 import com.micdm.transportlive.misc.analytics.Analytics;
-import com.micdm.transportlive.server2.ServerGate;
-import com.micdm.transportlive.server2.messages.Message;
-import com.micdm.transportlive.server2.messages.incoming.ForecastMessage;
-import com.micdm.transportlive.server2.messages.incoming.VehicleMessage;
+import com.micdm.transportlive.server.ServerGate;
+import com.micdm.transportlive.server.messages.Message;
+import com.micdm.transportlive.server.messages.incoming.ForecastMessage;
+import com.micdm.transportlive.server.messages.incoming.VehicleMessage;
 import com.micdm.transportlive.stores.SelectedRouteStore;
 import com.micdm.transportlive.stores.SelectedStationStore;
 

@@ -1,13 +1,13 @@
-package com.micdm.transportlive.server2.messages.outcoming;
+package com.micdm.transportlive.server.messages.outcoming;
 
-import com.micdm.transportlive.server2.messages.Message;
+import com.micdm.transportlive.server.messages.Message;
 
-public class UnselectRouteMessage implements Message {
+public class SelectRouteMessage implements Message {
 
     private final int transportId;
     private final int routeNumber;
 
-    public UnselectRouteMessage(int transportId, int routeNumber) {
+    public SelectRouteMessage(int transportId, int routeNumber) {
         this.transportId = transportId;
         this.routeNumber = routeNumber;
     }

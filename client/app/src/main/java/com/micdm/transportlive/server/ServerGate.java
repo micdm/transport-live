@@ -1,4 +1,4 @@
-package com.micdm.transportlive.server2;
+package com.micdm.transportlive.server;
 
 import android.content.Context;
 import android.os.Build;
@@ -7,15 +7,15 @@ import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.SelectedRoute;
 import com.micdm.transportlive.data.SelectedStation;
 import com.micdm.transportlive.misc.Utils;
-import com.micdm.transportlive.server2.converters.IncomingMessageConverter;
-import com.micdm.transportlive.server2.converters.OutcomingMessageConverter;
-import com.micdm.transportlive.server2.messages.Message;
-import com.micdm.transportlive.server2.messages.outcoming.GreetingMessage;
-import com.micdm.transportlive.server2.messages.outcoming.SelectRouteMessage;
-import com.micdm.transportlive.server2.messages.outcoming.SelectStationMessage;
-import com.micdm.transportlive.server2.messages.outcoming.UnselectRouteMessage;
-import com.micdm.transportlive.server2.messages.outcoming.UnselectStationMessage;
-import com.micdm.transportlive.server2.transport.ClientManager;
+import com.micdm.transportlive.server.converters.IncomingMessageConverter;
+import com.micdm.transportlive.server.converters.OutcomingMessageConverter;
+import com.micdm.transportlive.server.messages.Message;
+import com.micdm.transportlive.server.messages.outcoming.GreetingMessage;
+import com.micdm.transportlive.server.messages.outcoming.SelectRouteMessage;
+import com.micdm.transportlive.server.messages.outcoming.SelectStationMessage;
+import com.micdm.transportlive.server.messages.outcoming.UnselectRouteMessage;
+import com.micdm.transportlive.server.messages.outcoming.UnselectStationMessage;
+import com.micdm.transportlive.server.transport.ClientManager;
 
 public class ServerGate {
 

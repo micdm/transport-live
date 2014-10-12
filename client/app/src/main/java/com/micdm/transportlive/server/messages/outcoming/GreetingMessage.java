@@ -1,6 +1,6 @@
-package com.micdm.transportlive.server2.messages.outcoming;
+package com.micdm.transportlive.server.messages.outcoming;
 
-import com.micdm.transportlive.server2.messages.Message;
+import com.micdm.transportlive.server.messages.Message;
 
 public class GreetingMessage implements Message {
 

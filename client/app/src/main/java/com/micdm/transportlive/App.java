@@ -8,7 +8,7 @@ import com.micdm.transportlive.misc.ServiceLoader;
 import com.micdm.transportlive.misc.analytics.Analytics;
 import com.micdm.transportlive.misc.analytics.DevModeAnalytics;
 import com.micdm.transportlive.misc.analytics.ProdModeAnalytics;
-import com.micdm.transportlive.server2.ServerGate;
+import com.micdm.transportlive.server.ServerGate;
 import com.micdm.transportlive.stores.SelectedRouteStore;
 import com.micdm.transportlive.stores.SelectedStationStore;
 

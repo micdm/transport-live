@@ -1,6 +1,6 @@
-package com.micdm.transportlive.server2.messages.incoming;
+package com.micdm.transportlive.server.messages.incoming;
 
-import com.micdm.transportlive.server2.messages.Message;
+import com.micdm.transportlive.server.messages.Message;
 
 import java.util.List;
 

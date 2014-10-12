@@ -1,11 +1,11 @@
-package com.micdm.transportlive.server2.converters;
+package com.micdm.transportlive.server.converters;
 
-import com.micdm.transportlive.server2.messages.Message;
-import com.micdm.transportlive.server2.messages.outcoming.GreetingMessage;
-import com.micdm.transportlive.server2.messages.outcoming.SelectRouteMessage;
-import com.micdm.transportlive.server2.messages.outcoming.SelectStationMessage;
-import com.micdm.transportlive.server2.messages.outcoming.UnselectRouteMessage;
-import com.micdm.transportlive.server2.messages.outcoming.UnselectStationMessage;
+import com.micdm.transportlive.server.messages.Message;
+import com.micdm.transportlive.server.messages.outcoming.GreetingMessage;
+import com.micdm.transportlive.server.messages.outcoming.SelectRouteMessage;
+import com.micdm.transportlive.server.messages.outcoming.SelectStationMessage;
+import com.micdm.transportlive.server.messages.outcoming.UnselectRouteMessage;
+import com.micdm.transportlive.server.messages.outcoming.UnselectStationMessage;
 
 import org.json.JSONException;
 import org.json.JSONObject;
