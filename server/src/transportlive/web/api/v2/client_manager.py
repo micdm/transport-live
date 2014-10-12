@@ -65,9 +65,9 @@ class ClientManager:
         self._remove_request_handler_from_station_subscription(request_handler, station)
 
     def on_close(self, request_handler):
-        for route in self._selected_routes:
+        for route in self._selected_routes.keys():
             self._remove_request_handler_from_route_subscription(request_handler, route)
-        for station in self._selected_stations:
+        for station in self._selected_stations.keys():
             self._remove_request_handler_from_station_subscription(request_handler, station)
 
     def _remove_request_handler_from_route_subscription(self, request_handler, route):
@@ -92,7 +92,8 @@ class ClientManager:
         message = self._build_vehicle_message(vehicle)
         message_text = self._outcoming_message_converter.convert(message)
         route = (vehicle.transport.type, vehicle.route.number)
-        for request_handler in self._selected_routes[route]:
+        request_handlers = self._selected_routes.get(route, [])
+        for request_handler in request_handlers:
             request_handler.write_message(message_text)
 
     def _send_update_forecast_messages(self, vehicle):
@@ -123,7 +124,8 @@ class ClientManager:
         message = messages.VehicleMessage(vehicle.number, 0, 0, 0, 0, 0)
         message_text = self._outcoming_message_converter.convert(message)
         route = (vehicle.transport.type, vehicle.route.number)
-        for request_handler in self._selected_routes[route]:
+        request_handlers = self._selected_routes.get(route, [])
+        for request_handler in request_handlers:
             request_handler.write_message(message_text)
 
     def _build_vehicle_message(self, vehicle):

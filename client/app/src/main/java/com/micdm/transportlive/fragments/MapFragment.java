@@ -30,7 +30,7 @@ import com.micdm.transportlive.events.EventManager;
 import com.micdm.transportlive.events.EventType;
 import com.micdm.transportlive.events.events.LoadRoutesEvent;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
-import com.micdm.transportlive.events.events.RemoveAllVehiclesEvent;
+import com.micdm.transportlive.events.events.RemoveAllDataEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
@@ -327,9 +327,9 @@ public class MapFragment extends Fragment {
                 removeVehicle(event.getNumber());
             }
         });
-        manager.subscribe(this, EventType.REMOVE_ALL_VEHICLES, new EventManager.OnEventListener<RemoveAllVehiclesEvent>() {
+        manager.subscribe(this, EventType.REMOVE_ALL_DATA, new EventManager.OnEventListener<RemoveAllDataEvent>() {
             @Override
-            public void onEvent(RemoveAllVehiclesEvent event) {
+            public void onEvent(RemoveAllDataEvent event) {
                 removeAllVehicles();
             }
         });

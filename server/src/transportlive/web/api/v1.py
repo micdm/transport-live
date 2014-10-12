@@ -69,10 +69,10 @@ class ForecastHandler(RequestHandler):
         return {
             "transport": forecast.transport.type,
             "station": forecast.station.id,
-            "vehicles": map(lambda item: self._arrival_to_dict(*item), forecast.arrival)
+            "vehicles": map(lambda item: self._vehicles_to_dict(*item), forecast.vehicles)
         }
 
-    def _arrival_to_dict(self, vehicle, time):
+    def _vehicles_to_dict(self, vehicle, time):
         result = {
             "route": vehicle.route.number,
             "time": time

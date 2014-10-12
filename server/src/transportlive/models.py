@@ -84,4 +84,4 @@ class Forecast:
     def __init__(self, transport, station):
         self.transport = transport
         self.station = station
-        self.arrival = []
+        self.vehicles = []

@@ -1,19 +1,19 @@
 package com.micdm.transportlive.events.events;
 
-import com.micdm.transportlive.data.ForecastVehicle;
+import com.micdm.transportlive.data.Forecast;
 import com.micdm.transportlive.events.Event;
 import com.micdm.transportlive.events.EventType;
 
 public class UpdateForecastEvent extends Event {
 
-    private final ForecastVehicle vehicle;
+    private final Forecast forecast;
 
-    public UpdateForecastEvent(ForecastVehicle vehicle) {
+    public UpdateForecastEvent(Forecast forecast) {
         super(EventType.UPDATE_FORECAST);
-        this.vehicle = vehicle;
+        this.forecast = forecast;
     }
 
-    public ForecastVehicle getVehicle() {
-        return vehicle;
+    public Forecast getForecast() {
+        return forecast;
     }
 }

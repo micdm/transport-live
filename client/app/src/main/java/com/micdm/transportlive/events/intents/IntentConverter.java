@@ -3,7 +3,7 @@ package com.micdm.transportlive.events.intents;
 import android.content.Intent;
 import android.os.Parcelable;
 
-import com.micdm.transportlive.data.ForecastVehicle;
+import com.micdm.transportlive.data.Forecast;
 import com.micdm.transportlive.data.MapVehicle;
 import com.micdm.transportlive.data.SelectedRoute;
 import com.micdm.transportlive.data.SelectedStation;
@@ -17,7 +17,7 @@ import com.micdm.transportlive.events.events.LoadDonateProductsEvent;
 import com.micdm.transportlive.events.events.LoadRoutesEvent;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
-import com.micdm.transportlive.events.events.RemoveAllVehiclesEvent;
+import com.micdm.transportlive.events.events.RemoveAllDataEvent;
 import com.micdm.transportlive.events.events.RemoveForecastEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestDonateEvent;
@@ -33,7 +33,7 @@ import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
 import com.micdm.transportlive.events.events.UnselectRouteEvent;
 import com.micdm.transportlive.events.events.UpdateForecastEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
-import com.micdm.transportlive.parcels.ForecastVehicleParcel;
+import com.micdm.transportlive.parcels.ForecastParcel;
 import com.micdm.transportlive.parcels.SelectedRouteParcel;
 import com.micdm.transportlive.parcels.SelectedStationParcel;
 import com.micdm.transportlive.parcels.ServiceParcel;
@@ -66,8 +66,6 @@ public class IntentConverter {
                 return getUpdateVehicleEvent(intent);
             case REMOVE_VEHICLE:
                 return getRemoveVehicleEvent(intent);
-            case REMOVE_ALL_VEHICLES:
-                return new RemoveAllVehiclesEvent();
             case REQUEST_LOAD_STATIONS:
                 return new RequestLoadStationsEvent();
             case LOAD_STATIONS:
@@ -80,6 +78,8 @@ public class IntentConverter {
                 return getUpdateForecastEvent(intent);
             case REMOVE_FORECAST:
                 return getRemoveForecastEvent(intent);
+            case REMOVE_ALL_DATA:
+                return new RemoveAllDataEvent();
             case REQUEST_LOAD_DONATE_PRODUCTS:
                 return new RequestLoadDonateProductsEvent();
             case LOAD_DONATE_PRODUCTS:
@@ -162,8 +162,8 @@ public class IntentConverter {
     }
 
     private UpdateForecastEvent getUpdateForecastEvent(Intent intent) {
-        ForecastVehicle vehicle = ((ForecastVehicleParcel) intent.getParcelableExtra("vehicle")).getVehicle();
-        return new UpdateForecastEvent(vehicle);
+        Forecast forecast = ((ForecastParcel) intent.getParcelableExtra("forecast")).getForecast();
+        return new UpdateForecastEvent(forecast);
     }
 
     private RemoveForecastEvent getRemoveForecastEvent(Intent intent) {

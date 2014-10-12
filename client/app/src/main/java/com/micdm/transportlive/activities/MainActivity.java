@@ -16,6 +16,7 @@ import android.view.MenuItem;
 
 import com.micdm.transportlive.App;
 import com.micdm.transportlive.R;
+import com.micdm.transportlive.data.Forecast;
 import com.micdm.transportlive.data.ForecastVehicle;
 import com.micdm.transportlive.data.MapVehicle;
 import com.micdm.transportlive.data.SelectedRoute;
@@ -26,8 +27,7 @@ import com.micdm.transportlive.events.EventType;
 import com.micdm.transportlive.events.events.LoadRoutesEvent;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
-import com.micdm.transportlive.events.events.RemoveAllVehiclesEvent;
-import com.micdm.transportlive.events.events.RemoveForecastEvent;
+import com.micdm.transportlive.events.events.RemoveAllDataEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
@@ -295,10 +295,15 @@ public class MainActivity extends FragmentActivity {
                 ActionBar actionBar = getActionBar();
                 actionBar.setIcon(R.drawable.ic_launcher);
                 actionBar.setDisplayShowTitleEnabled(false);
-                App.get().getEventManager().publish(new RemoveAllVehiclesEvent());
+                App.get().getEventManager().publish(new RemoveAllDataEvent());
                 if (selectedRoutes != null) {
                     for (SelectedRoute route: selectedRoutes) {
                         gate.selectRoute(route);
+                    }
+                }
+                if (selectedStations != null) {
+                    for (SelectedStation station: selectedStations) {
+                        gate.selectStation(station);
                     }
                 }
             }
@@ -338,15 +343,16 @@ public class MainActivity extends FragmentActivity {
     private void handleForecastMessage(ForecastMessage message) {
         int transportId = message.getTransportId();
         int stationId = message.getStationId();
-        String number = message.getNumber();
-        int arrivalTime = message.getArrivalTime();
-        EventManager manager = App.get().getEventManager();
-        if (arrivalTime == 0) {
-            manager.publish(new RemoveForecastEvent(transportId, stationId, number));
-        } else {
-            ForecastVehicle vehicle = new ForecastVehicle(number, transportId, message.getRouteNumber(), stationId, arrivalTime, message.isLowFloor());
-            manager.publish(new UpdateForecastEvent(vehicle));
+        List<ForecastVehicle> vehicles = new ArrayList<ForecastVehicle>();
+        for (ForecastMessage.Vehicle vehicle: message.getVehicles()) {
+            String number = vehicle.getNumber();
+            int routeNumber = vehicle.getRouteNumber();
+            int arrivalTime = vehicle.getArrivalTime();
+            boolean isLowFloor = vehicle.isLowFloor();
+            vehicles.add(new ForecastVehicle(number, routeNumber, arrivalTime, isLowFloor));
         }
+        Forecast forecast = new Forecast(transportId, stationId, vehicles);
+        App.get().getEventManager().publish(new UpdateForecastEvent(forecast));
     }
 
     @Override

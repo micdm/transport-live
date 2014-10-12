@@ -11,8 +11,8 @@
     <string name="__transport_type_trolleybus">Троллейбус</string>
     <string name="__transport_type_tram">Трамвай</string>
     <!-- Вкладки -->
-    <string name="__tab_title_forecast">Расписание</string>
     <string name="__tab_title_map">Карта</string>
+    <string name="__tab_title_forecast">Прогноз</string>
     <!-- Меню -->
     <string name="m__settings">Настройки</string>
     <!-- Фрагмент о приложении -->

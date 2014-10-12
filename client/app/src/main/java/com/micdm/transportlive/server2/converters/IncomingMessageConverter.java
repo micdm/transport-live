@@ -4,10 +4,13 @@ import com.micdm.transportlive.server2.messages.Message;
 import com.micdm.transportlive.server2.messages.incoming.ForecastMessage;
 import com.micdm.transportlive.server2.messages.incoming.VehicleMessage;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class IncomingMessageConverter {
 
@@ -49,12 +52,22 @@ public class IncomingMessageConverter {
     }
 
     private ForecastMessage getForecastMessage(JSONObject json) throws JSONException {
-        String number = json.getString("number");
         int transportId = json.getInt("transport_id");
-        int routeNumber = json.getInt("route_number");
         int stationId = json.getInt("station_id");
-        int arrivalTime = json.getInt("arrival_time");
-        boolean isLowFloor = json.getBoolean("is_low_floor");
-        return new ForecastMessage(number, transportId, routeNumber, stationId, arrivalTime, isLowFloor);
+        List<ForecastMessage.Vehicle> vehicles = getForecastMessageVehicles(json.getJSONArray("vehicles"));
+        return new ForecastMessage(transportId, stationId, vehicles);
+    }
+
+    private List<ForecastMessage.Vehicle> getForecastMessageVehicles(JSONArray vehiclesJson) throws JSONException {
+        List<ForecastMessage.Vehicle> vehicles = new ArrayList<ForecastMessage.Vehicle>();
+        for (int i = 0; i < vehiclesJson.length(); i += 1) {
+            JSONObject vehicleJson = vehiclesJson.getJSONObject(i);
+            String number = vehicleJson.getString("number");
+            int routeNumber = vehicleJson.getInt("route_number");
+            int arrivalTime = vehicleJson.getInt("arrival_time");
+            boolean isLowFloor = vehicleJson.getBoolean("is_low_floor");
+            vehicles.add(new ForecastMessage.Vehicle(number, routeNumber, arrivalTime, isLowFloor));
+        }
+        return vehicles;
     }
 }

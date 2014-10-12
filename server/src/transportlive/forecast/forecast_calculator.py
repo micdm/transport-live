@@ -74,7 +74,7 @@ class ForecastCalculator:
             time = int(distance / speed)
             if time > self.MAX_ARRIVAL_TIME:
                 continue
-            forecast.arrival.append((vehicle, time))
+            forecast.vehicles.append((vehicle, time))
         return forecast
 
     def _get_vehicles(self, station):

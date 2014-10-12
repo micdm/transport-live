@@ -49,11 +49,11 @@ class OutcomingMessageConverter:
                 "transport_id": message.transport_id,
                 "station_id": message.station_id,
                 "vehicles": [{
-                    "number": vehicle.number,
-                    "route_number": vehicle.route_number,
-                    "arrival_time": vehicle.arrival_time,
-                    "is_low_floor": vehicle.is_low_floor
-                } for vehicle in message.vehicles]
+                    "number": number,
+                    "route_number": route_number,
+                    "arrival_time": arrival_time,
+                    "is_low_floor": is_low_floor
+                } for number, route_number, arrival_time, is_low_floor in message.vehicles]
             })
         return self._serialize(params)
 

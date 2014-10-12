@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.micdm.transportlive.App;
 import com.micdm.transportlive.R;
+import com.micdm.transportlive.data.Forecast;
 import com.micdm.transportlive.data.ForecastVehicle;
 import com.micdm.transportlive.data.SelectedStation;
 import com.micdm.transportlive.data.service.Direction;
@@ -23,7 +24,7 @@ import com.micdm.transportlive.events.EventManager;
 import com.micdm.transportlive.events.EventType;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
-import com.micdm.transportlive.events.events.RemoveForecastEvent;
+import com.micdm.transportlive.events.events.RemoveAllDataEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestLoadStationsEvent;
 import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
@@ -35,7 +36,6 @@ import com.micdm.transportlive.misc.analytics.Analytics;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 public class ForecastFragment extends Fragment {
@@ -85,7 +85,7 @@ public class ForecastFragment extends Fragment {
         private RouteColors colors;
 
         private List<SelectedStation> selectedStations;
-        private List<ForecastVehicle> vehicles = new ArrayList<ForecastVehicle>();
+        private List<Forecast> forecasts = new ArrayList<Forecast>();
 
         public void setService(Service service) {
             this.service = service;
@@ -96,30 +96,30 @@ public class ForecastFragment extends Fragment {
             this.selectedStations = selectedStations;
         }
 
-        public void updateVehicle(ForecastVehicle vehicle) {
-            removeVehicle(vehicle.getTransportId(), vehicle.getStationId(), vehicle.getNumber());
-            vehicles.add(vehicle);
-            Collections.sort(vehicles, VEHICLE_COMPARATOR);
+        public void updateForecast(Forecast forecast) {
+            removeForecast(forecast.getTransportId(), forecast.getStationId());
+            Collections.sort(forecast.getVehicles(), VEHICLE_COMPARATOR);
+            forecasts.add(forecast);
         }
 
-        public void removeVehicle(int transportId, int stationId, String number) {
-            Iterator<ForecastVehicle> iterator = vehicles.iterator();
-            while (iterator.hasNext()) {
-                ForecastVehicle vehicle = iterator.next();
-                if (vehicle.getTransportId() == transportId && vehicle.getStationId() == stationId && vehicle.getNumber().equals(number)) {
-                    iterator.remove();
-                }
+        private void removeForecast(int transportId, int stationId) {
+            Forecast forecast = getForecast(transportId, stationId);
+            if (forecast != null) {
+                forecasts.remove(forecast);
             }
         }
 
-        private List<ForecastVehicle> getVehicles(SelectedStation selectedStation) {
-            List<ForecastVehicle> vehicles = new ArrayList<ForecastVehicle>();
-            for (ForecastVehicle vehicle: vehicles) {
-                if (vehicle.getTransportId() == selectedStation.getTransportId() && vehicle.getStationId() == selectedStation.getStationId()) {
-                    vehicles.add(vehicle);
+        public void removeAllForecasts() {
+            forecasts.clear();
+        }
+
+        private Forecast getForecast(int transportId, int stationId) {
+            for (Forecast forecast: forecasts) {
+                if (forecast.getTransportId() == transportId && forecast.getStationId() == stationId) {
+                    return forecast;
                 }
             }
-            return vehicles;
+            return null;
         }
 
         @Override
@@ -130,8 +130,11 @@ public class ForecastFragment extends Fragment {
         @Override
         public int getChildrenCount(int position) {
             SelectedStation selectedStation = getGroup(position);
-            List<ForecastVehicle> vehicles = getVehicles(selectedStation);
-            int count = vehicles.size();
+            Forecast forecast = getForecast(selectedStation.getTransportId(), selectedStation.getStationId());
+            if (forecast == null) {
+                return 1;
+            }
+            int count = forecast.getVehicles().size();
             return (count == 0) ? 1 : count;
         }
 
@@ -143,7 +146,11 @@ public class ForecastFragment extends Fragment {
         @Override
         public ForecastVehicle getChild(int groupPosition, int childPosition) {
             SelectedStation selectedStation = getGroup(groupPosition);
-            List<ForecastVehicle> vehicles = getVehicles(selectedStation);
+            Forecast forecast = getForecast(selectedStation.getTransportId(), selectedStation.getStationId());
+            if (forecast == null) {
+                return null;
+            }
+            List<ForecastVehicle> vehicles = forecast.getVehicles();
             return (vehicles.size() == 0) ? null : vehicles.get(childPosition);
         }
 
@@ -323,47 +330,19 @@ public class ForecastFragment extends Fragment {
                 }
             }
         });
-//        manager.subscribe(this, EventType.LOAD_FORECASTS, new EventManager.OnEventListener<LoadForecastsEvent>() {
-//            @Override
-//            public void onEvent(LoadForecastsEvent event) {
-//                switch (event.getState()) {
-//                    case LoadForecastsEvent.STATE_START:
-//                        loadingView.setVisibility(View.VISIBLE);
-//                        break;
-//                    case LoadForecastsEvent.STATE_FINISH:
-//                        loadingView.setVisibility(View.GONE);
-//                        break;
-//                    case LoadForecastsEvent.STATE_COMPLETE:
-//                        List<Forecast> forecasts = event.getForecasts();
-//                        for (Forecast forecast: forecasts) {
-//                            Collections.sort(forecast.getVehicles(), new Comparator<ForecastVehicle>() {
-//                                @Override
-//                                public int compare(ForecastVehicle a, ForecastVehicle b) {
-//                                    return (a.getArrivalTime() > b.getArrivalTime()) ? 1 : -1;
-//                                }
-//                            });
-//                        }
-//                        ForecastListAdapter adapter = getAdapter();
-//                        adapter.setForecasts(forecasts);
-//                        adapter.notifyDataSetChanged();
-//                        expandAllGroups();
-//                        break;
-//                }
-//            }
-//        });
         manager.subscribe(this, EventType.UPDATE_FORECAST, new EventManager.OnEventListener<UpdateForecastEvent>() {
             @Override
             public void onEvent(UpdateForecastEvent event) {
                 ForecastListAdapter adapter = getAdapter();
-                adapter.updateVehicle(event.getVehicle());
+                adapter.updateForecast(event.getForecast());
                 adapter.notifyDataSetChanged();
             }
         });
-        manager.subscribe(this, EventType.REMOVE_FORECAST, new EventManager.OnEventListener<RemoveForecastEvent>() {
+        manager.subscribe(this, EventType.REMOVE_ALL_DATA, new EventManager.OnEventListener<RemoveAllDataEvent>() {
             @Override
-            public void onEvent(RemoveForecastEvent event) {
+            public void onEvent(RemoveAllDataEvent event) {
                 ForecastListAdapter adapter = getAdapter();
-                adapter.removeVehicle(event.getTransportId(), event.getStationId(), event.getNumber());
+                adapter.removeAllForecasts();
                 adapter.notifyDataSetChanged();
             }
         });

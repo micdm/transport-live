@@ -23,7 +23,7 @@ import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
 import com.micdm.transportlive.events.events.UnselectRouteEvent;
 import com.micdm.transportlive.events.events.UpdateForecastEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
-import com.micdm.transportlive.parcels.ForecastVehicleParcel;
+import com.micdm.transportlive.parcels.ForecastParcel;
 import com.micdm.transportlive.parcels.SelectedRouteParcel;
 import com.micdm.transportlive.parcels.SelectedStationParcel;
 import com.micdm.transportlive.parcels.ServiceParcel;
@@ -141,7 +141,7 @@ public class EventConverter {
     }
 
     private void buildIntentForUpdateForecastEvent(UpdateForecastEvent event, Intent intent) {
-        intent.putExtra("vehicle", new ForecastVehicleParcel(event.getVehicle()));
+        intent.putExtra("forecast", new ForecastParcel(event.getForecast()));
     }
 
     private void buildIntentForRemoveForecastEvent(RemoveForecastEvent event, Intent intent) {
