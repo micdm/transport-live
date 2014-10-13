@@ -13,7 +13,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.util.Pools;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -197,17 +196,6 @@ public class MapFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 mapView.getController().zoomOut();
-            }
-        });
-        View selectRoutesView = view.findViewById(R.id.f__map__select_route);
-        selectRoutesView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FragmentManager manager = getChildFragmentManager();
-                if (manager.findFragmentByTag(FragmentTag.SELECT_ROUTE) == null) {
-                    (new SelectRouteFragment()).show(manager, FragmentTag.SELECT_ROUTE);
-                    App.get().getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "select_route");
-                }
             }
         });
         return view;

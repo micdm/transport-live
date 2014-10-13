@@ -14,6 +14,7 @@
     <string name="__tab_title_map">Карта</string>
     <string name="__tab_title_forecast">Прогноз</string>
     <!-- Меню -->
+    <string name="m__add">Добавить…</string>
     <string name="m__settings">Настройки</string>
     <!-- Фрагмент о приложении -->
     <string name="f__about__title">О приложении</string>
@@ -24,7 +25,6 @@
         Работает на основе openstreetmap.org.
     </string>
     <!-- Фрагмент с прогнозами -->
-    <string name="f__forecast__select_station">Добавить остановку…</string>
     <string name="f__forecast__no_station_selected">Здесь будет показано ориентировочное время прибытия транспорта на остановки, которые вы выберете.</string>
     <string name="f__forecast__direction">→ %s</string>
     <string name="f__forecast__route">%1$s №%2$s</string>
@@ -36,7 +36,6 @@
     <string name="f__select_station__route_list_item">№%s</string>
     <string name="f__select_station__direction_list_item">%1$s → %2$s</string>
     <!-- Фрагмент с картой -->
-    <string name="f__map__select_route">Выбрать маршруты…</string>
     <string name="f__map__no_route_selected">Здесь на карте в реальном времени будет показан транспорт, маршрут которого вы выберете.</string>
     <string name="f__map__route_not_selected">Сперва выберите маршрут №%s.</string>
     <!-- Фрагмент выбора маршрутов -->

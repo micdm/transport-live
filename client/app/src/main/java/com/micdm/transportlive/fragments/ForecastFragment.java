@@ -2,7 +2,6 @@ package com.micdm.transportlive.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +31,6 @@ import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
 import com.micdm.transportlive.events.events.UpdateForecastEvent;
 import com.micdm.transportlive.misc.RouteColors;
 import com.micdm.transportlive.misc.Utils;
-import com.micdm.transportlive.misc.analytics.Analytics;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -284,17 +282,6 @@ public class ForecastFragment extends Fragment {
                     return true;
                 }
                 return false;
-            }
-        });
-        View selectStationView = view.findViewById(R.id.f__forecasts__select_station);
-        selectStationView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FragmentManager manager = getChildFragmentManager();
-                if (manager.findFragmentByTag(FragmentTag.SELECT_STATION) == null) {
-                    (new SelectStationFragment()).show(manager, FragmentTag.SELECT_STATION);
-                    App.get().getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "select_station");
-                }
             }
         });
         return view;

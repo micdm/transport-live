@@ -1,30 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-    <FrameLayout
+    android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/f__forecasts__no_station_selected"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/f__forecasts__no_station_selected"
-            android:gravity="center"
-            android:padding="5dp"
-            android:text="@string/f__forecast__no_station_selected"/>
-        <ExpandableListView
-            android:id="@+id/f__forecasts__forecast_list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:listSelector="@android:color/transparent"
-            android:groupIndicator="@null"
-            android:childDivider="@android:color/transparent"/>
-    </FrameLayout>
-    <Button
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="@string/f__forecast__no_station_selected"/>
+    <ExpandableListView
+        android:id="@+id/f__forecasts__forecast_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/f__forecasts__select_station"
-        android:text="@string/f__forecast__select_station"/>
-</LinearLayout>
+        android:layout_height="match_parent"
+        android:listSelector="@android:color/transparent"
+        android:groupIndicator="@null"
+        android:childDivider="@android:color/transparent"/>
+</FrameLayout>

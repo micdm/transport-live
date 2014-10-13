@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/m__main__add"
+        android:icon="@drawable/ic_action_new"
+        android:title="@string/m__add"
+        android:showAsAction="always"/>
+    <item
         android:id="@+id/m__main__settings"
         android:icon="@drawable/ic_action_settings"
         android:title="@string/m__settings"

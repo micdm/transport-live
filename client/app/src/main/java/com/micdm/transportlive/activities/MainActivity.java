@@ -42,7 +42,10 @@ import com.micdm.transportlive.events.events.UnselectRouteEvent;
 import com.micdm.transportlive.events.events.UpdateForecastEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
 import com.micdm.transportlive.fragments.ForecastFragment;
+import com.micdm.transportlive.fragments.FragmentTag;
 import com.micdm.transportlive.fragments.MapFragment;
+import com.micdm.transportlive.fragments.SelectRouteFragment;
+import com.micdm.transportlive.fragments.SelectStationFragment;
 import com.micdm.transportlive.misc.ServiceLoader;
 import com.micdm.transportlive.misc.Utils;
 import com.micdm.transportlive.misc.ViewPager;
@@ -102,6 +105,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     private static final int MAP_TAB_INDEX = 0;
+    private static final int FORECAST_TAB_INDEX = 1;
 
     private Service service;
 
@@ -383,12 +387,38 @@ public class MainActivity extends FragmentActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.m__main__add:
+                switch (getActionBar().getSelectedNavigationIndex()) {
+                    case MAP_TAB_INDEX:
+                        showSelectRouteFragment();
+                        break;
+                    case FORECAST_TAB_INDEX:
+                        showSelectStationFragment();
+                        break;
+                }
+                return true;
             case R.id.m__main__settings:
                 Intent intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showSelectRouteFragment() {
+        FragmentManager manager = getSupportFragmentManager();
+        if (manager.findFragmentByTag(FragmentTag.SELECT_ROUTE) == null) {
+            (new SelectRouteFragment()).show(manager, FragmentTag.SELECT_ROUTE);
+            App.get().getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "select_route");
+        }
+    }
+
+    private void showSelectStationFragment() {
+        FragmentManager manager = getSupportFragmentManager();
+        if (manager.findFragmentByTag(FragmentTag.SELECT_STATION) == null) {
+            (new SelectStationFragment()).show(manager, FragmentTag.SELECT_STATION);
+            App.get().getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "select_station");
+        }
     }
 
     @Override
