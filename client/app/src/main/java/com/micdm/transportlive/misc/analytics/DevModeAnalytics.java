@@ -10,11 +10,22 @@ public class DevModeAnalytics extends Analytics {
     }
 
     @Override
-    public void reportActivityStart(Activity activity) {}
+    public void reportActivityStart(Activity activity) {
+
+    }
 
     @Override
-    public void reportActivityStop(Activity activity) {}
+    public void reportActivityStop(Activity activity) {
+
+    }
 
     @Override
-    public void reportEvent(Category category, Action action, String label) {}
+    public void reportEvent(Category category, Action action, String label) {
+
+    }
+
+    @Override
+    public void reportEvent(Category category, Action action, String label, Integer value) {
+
+    }
 }

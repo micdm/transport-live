@@ -14,7 +14,8 @@ public abstract class Analytics {
 
     public static enum Action {
         SHOW,
-        CLICK
+        CLICK,
+        MISC
     }
 
     protected final Context context;
@@ -26,4 +27,5 @@ public abstract class Analytics {
     public abstract void reportActivityStart(Activity activity);
     public abstract void reportActivityStop(Activity activity);
     public abstract void reportEvent(Category category, Action action, String label);
+    public abstract void reportEvent(Category category, Action action, String label, Integer value);
 }

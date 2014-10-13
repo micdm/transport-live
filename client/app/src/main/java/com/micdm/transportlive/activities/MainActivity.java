@@ -285,6 +285,7 @@ public class MainActivity extends FragmentActivity {
                 actionBar.setTitle(getString(R.string.__connecting));
                 if (tryNumber > 1) {
                     showNoConnectionNotice();
+                    App.get().getAnalytics().reportEvent(Analytics.Category.MISC, Analytics.Action.MISC, "no_connection", tryNumber);
                 }
             }
             @Override

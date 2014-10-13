@@ -29,10 +29,18 @@ public class ProdModeAnalytics extends Analytics {
 
     @Override
     public void reportEvent(Category category, Action action, String label) {
+        reportEvent(category, action, label, null);
+    }
+
+    @Override
+    public void reportEvent(Category category, Action action, String label, Integer value) {
         HitBuilders.EventBuilder builder = new HitBuilders.EventBuilder();
         builder.setCategory(category.toString().toLowerCase());
         builder.setAction(action.toString().toLowerCase());
         builder.setLabel(label);
+        if (value != null) {
+            builder.setValue(value);
+        }
         tracker.send(builder.build());
     }
 }
