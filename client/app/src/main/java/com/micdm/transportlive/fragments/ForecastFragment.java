@@ -300,6 +300,16 @@ public class ForecastFragment extends Fragment {
         forecastsView.setVisibility(View.GONE);
     }
 
+    private void showNoStationSelectedView() {
+        hideAllViews();
+        noStationSelectedView.setVisibility(View.VISIBLE);
+    }
+
+    private void showForecastsView() {
+        hideAllViews();
+        forecastsView.setVisibility(View.VISIBLE);
+    }
+
     private void subscribeForEvents() {
         EventManager manager = App.get().getEventManager();
         manager.subscribe(this, EventType.LOAD_SERVICE, new EventManager.OnEventListener<LoadServiceEvent>() {
@@ -311,19 +321,26 @@ public class ForecastFragment extends Fragment {
                 expandAllGroups();
             }
         });
+        manager.subscribe(this, EventType.REMOVE_ALL_DATA, new EventManager.OnEventListener<RemoveAllDataEvent>() {
+            @Override
+            public void onEvent(RemoveAllDataEvent event) {
+                ForecastListAdapter adapter = getAdapter();
+                adapter.removeAllForecasts();
+                adapter.notifyDataSetChanged();
+            }
+        });
         manager.subscribe(this, EventType.LOAD_STATIONS, new EventManager.OnEventListener<LoadStationsEvent>() {
             @Override
             public void onEvent(LoadStationsEvent event) {
-                hideAllViews();
                 List<SelectedStation> selectedStations = event.getStations();
                 if (selectedStations.size() == 0) {
-                    noStationSelectedView.setVisibility(View.VISIBLE);
+                    showNoStationSelectedView();
                 } else {
                     ForecastListAdapter adapter = getAdapter();
                     adapter.setSelectedStations(selectedStations);
                     adapter.notifyDataSetChanged();
                     expandAllGroups();
-                    forecastsView.setVisibility(View.VISIBLE);
+                    showForecastsView();
                 }
             }
         });
@@ -332,14 +349,6 @@ public class ForecastFragment extends Fragment {
             public void onEvent(UpdateForecastEvent event) {
                 ForecastListAdapter adapter = getAdapter();
                 adapter.updateForecast(event.getForecast());
-                adapter.notifyDataSetChanged();
-            }
-        });
-        manager.subscribe(this, EventType.REMOVE_ALL_DATA, new EventManager.OnEventListener<RemoveAllDataEvent>() {
-            @Override
-            public void onEvent(RemoveAllDataEvent event) {
-                ForecastListAdapter adapter = getAdapter();
-                adapter.removeAllForecasts();
                 adapter.notifyDataSetChanged();
             }
         });

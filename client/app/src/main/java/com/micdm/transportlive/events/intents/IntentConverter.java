@@ -49,6 +49,8 @@ public class IntentConverter {
                 return new RequestLoadServiceEvent();
             case LOAD_SERVICE:
                 return getLoadServiceEvent(intent);
+            case REMOVE_ALL_DATA:
+                return new RemoveAllDataEvent();
             case REQUEST_LOAD_ROUTES:
                 return new RequestLoadRoutesEvent();
             case LOAD_ROUTES:
@@ -75,8 +77,6 @@ public class IntentConverter {
                 return getUpdateForecastEvent(intent);
             case REQUEST_FOCUS_VEHICLE:
                 return getRequestFocusVehicleEvent(intent);
-            case REMOVE_ALL_DATA:
-                return new RemoveAllDataEvent();
             case REQUEST_LOAD_DONATE_PRODUCTS:
                 return new RequestLoadDonateProductsEvent();
             case LOAD_DONATE_PRODUCTS:

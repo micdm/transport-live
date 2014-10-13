@@ -5,11 +5,18 @@
     android:layout_height="match_parent">
     <TextView
         android:id="@+id/f__map__no_route_selected"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:padding="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:padding="10dp"
         android:text="@string/f__map__no_route_selected"/>
+    <TextView
+        android:id="@+id/f__map__no_vehicles"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:padding="10dp"
+        android:text="@string/f__map__no_vehicles"/>
     <ImageView
         android:id="@+id/f__map__zoom_in"
         android:layout_width="wrap_content"

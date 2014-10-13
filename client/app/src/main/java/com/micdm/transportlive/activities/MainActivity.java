@@ -199,8 +199,8 @@ public class MainActivity extends FragmentActivity {
                 }
                 selectedRoutes.add(route);
                 selectedRouteStore.put(selectedRoutes);
-                gate.selectRoute(route);
                 manager.publish(new LoadRoutesEvent(selectedRoutes));
+                gate.selectRoute(route);
             }
         });
         manager.subscribe(this, EventType.REQUEST_UNSELECT_ROUTE, new EventManager.OnEventListener<RequestUnselectRouteEvent>() {
@@ -211,9 +211,9 @@ public class MainActivity extends FragmentActivity {
                 int routeNumber = route.getRouteNumber();
                 removeSelectedRoute(transportId, routeNumber);
                 selectedRouteStore.put(selectedRoutes);
-                gate.unselectRoute(route);
                 manager.publish(new UnselectRouteEvent(route));
                 manager.publish(new LoadRoutesEvent(selectedRoutes));
+                gate.unselectRoute(route);
             }
         });
         manager.subscribe(this, EventType.REQUEST_LOAD_STATIONS, new EventManager.OnEventListener<RequestLoadStationsEvent>() {
@@ -237,8 +237,8 @@ public class MainActivity extends FragmentActivity {
                 }
                 selectedStations.add(station);
                 selectedStationStore.put(selectedStations);
-                gate.selectStation(station);
                 manager.publish(new LoadStationsEvent(selectedStations));
+                gate.selectStation(station);
             }
         });
         manager.subscribe(this, EventType.REQUEST_UNSELECT_STATION, new EventManager.OnEventListener<RequestUnselectStationEvent>() {
@@ -247,8 +247,8 @@ public class MainActivity extends FragmentActivity {
                 SelectedStation station = event.getStation();
                 removeSelectedStation(station.getTransportId(), station.getStationId());
                 selectedStationStore.put(selectedStations);
-                gate.unselectStation(station);
                 manager.publish(new LoadStationsEvent(selectedStations));
+                gate.unselectStation(station);
             }
         });
         manager.subscribe(this, EventType.REQUEST_FOCUS_VEHICLE, new EventManager.OnEventListener<RequestFocusVehicleEvent>() {
@@ -287,7 +287,9 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void subscribeForData() {
-        final ServerGate gate = App.get().getServerGate();
+        App app = App.get();
+        final ServerGate gate = app.getServerGate();
+        final EventManager manager = app.getEventManager();
         final Drawable connectingIcon = getConnectingIcon();
         gate.connect(new ServerGate.OnConnectListener() {
             @Override
@@ -306,7 +308,7 @@ public class MainActivity extends FragmentActivity {
                 ActionBar actionBar = getActionBar();
                 actionBar.setIcon(R.drawable.ic_launcher);
                 actionBar.setDisplayShowTitleEnabled(false);
-                App.get().getEventManager().publish(new RemoveAllDataEvent());
+                manager.publish(new RemoveAllDataEvent());
                 if (selectedRoutes != null) {
                     for (SelectedRoute route: selectedRoutes) {
                         gate.selectRoute(route);

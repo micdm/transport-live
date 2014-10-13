@@ -170,6 +170,7 @@ public class MapFragment extends Fragment {
 
     private ViewGroup mapContainerView;
     private View noRouteSelectedView;
+    private View noVehiclesView;
     private MapView mapView;
     private View zoomInView;
     private View zoomOutView;
@@ -179,6 +180,7 @@ public class MapFragment extends Fragment {
         View view = inflater.inflate(R.layout.f__map, container, false);
         mapContainerView = (ViewGroup) view.findViewById(R.id.f__map__map_container);
         noRouteSelectedView = view.findViewById(R.id.f__map__no_route_selected);
+        noVehiclesView = view.findViewById(R.id.f__map__no_vehicles);
         externalMapUsed = needUseExternalMap();
         mapView = getMapView(externalMapUsed);
         mapView.setVisibility(View.GONE);
@@ -245,9 +247,27 @@ public class MapFragment extends Fragment {
 
     private void hideAllViews() {
         noRouteSelectedView.setVisibility(View.GONE);
+        noVehiclesView.setVisibility(View.GONE);
         mapView.setVisibility(View.GONE);
         zoomInView.setVisibility(View.GONE);
         zoomOutView.setVisibility(View.GONE);
+    }
+
+    private void showNoRouteSelectedView() {
+        hideAllViews();
+        noRouteSelectedView.setVisibility(View.VISIBLE);
+    }
+
+    private void showNoVehiclesView() {
+        hideAllViews();
+        noVehiclesView.setVisibility(View.VISIBLE);
+    }
+
+    private void showMapViewWithControls() {
+        hideAllViews();
+        mapView.setVisibility(View.VISIBLE);
+        zoomInView.setVisibility(View.VISIBLE);
+        zoomOutView.setVisibility(View.VISIBLE);
     }
 
     private void switchMapSource() {
@@ -276,17 +296,19 @@ public class MapFragment extends Fragment {
                 builder = new MarkerBuilder();
             }
         });
+        manager.subscribe(this, EventType.REMOVE_ALL_DATA, new EventManager.OnEventListener<RemoveAllDataEvent>() {
+            @Override
+            public void onEvent(RemoveAllDataEvent event) {
+                removeAllVehicles();
+                showNoVehiclesView();
+            }
+        });
         manager.subscribe(this, EventType.LOAD_ROUTES, new EventManager.OnEventListener<LoadRoutesEvent>() {
             @Override
             public void onEvent(LoadRoutesEvent event) {
                 selectedRoutes = event.getRoutes();
-                hideAllViews();
-                if (selectedRoutes.size() == 0) {
-                    noRouteSelectedView.setVisibility(View.VISIBLE);
-                } else {
-                    mapView.setVisibility(View.VISIBLE);
-                    zoomInView.setVisibility(View.VISIBLE);
-                    zoomOutView.setVisibility(View.VISIBLE);
+                if (selectedRoutes.isEmpty()) {
+                    showNoRouteSelectedView();
                 }
             }
         });
@@ -305,18 +327,25 @@ public class MapFragment extends Fragment {
                 for (String number: numbers) {
                     removeVehicle(number);
                 }
+                if (items.isEmpty()) {
+                    showNoVehiclesView();
+                }
             }
         });
         manager.subscribe(this, EventType.UPDATE_VEHICLE, new EventManager.OnEventListener<UpdateVehicleEvent>() {
             @Override
             public void onEvent(UpdateVehicleEvent event) {
                 updateVehicle(event.getVehicle());
+                showMapViewWithControls();
             }
         });
         manager.subscribe(this, EventType.REMOVE_VEHICLE, new EventManager.OnEventListener<RemoveVehicleEvent>() {
             @Override
             public void onEvent(RemoveVehicleEvent event) {
                 removeVehicle(event.getNumber());
+                if (items.isEmpty()) {
+                    showNoVehiclesView();
+                }
             }
         });
         manager.subscribe(this, EventType.REQUEST_FOCUS_VEHICLE, new EventManager.OnEventListener<RequestFocusVehicleEvent>() {
@@ -332,12 +361,6 @@ public class MapFragment extends Fragment {
                 } else {
                     Toast.makeText(getActivity(), getString(R.string.f__map__route_not_selected, String.valueOf(routeNumber)), Toast.LENGTH_LONG).show();
                 }
-            }
-        });
-        manager.subscribe(this, EventType.REMOVE_ALL_DATA, new EventManager.OnEventListener<RemoveAllDataEvent>() {
-            @Override
-            public void onEvent(RemoveAllDataEvent event) {
-                removeAllVehicles();
             }
         });
     }

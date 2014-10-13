@@ -37,6 +37,7 @@
     <string name="f__select_station__direction_list_item">%1$s → %2$s</string>
     <!-- Фрагмент с картой -->
     <string name="f__map__no_route_selected">Здесь на карте в реальном времени будет показан транспорт, маршрут которого вы выберете.</string>
+    <string name="f__map__no_vehicles">Похоже, весь транспорт в парке.</string>
     <string name="f__map__route_not_selected">Сперва выберите маршрут №%s.</string>
     <!-- Фрагмент выбора маршрутов -->
     <string name="f__select_route__title">Выберите маршруты</string>
