@@ -43,11 +43,6 @@ public class SettingsActivity extends FragmentActivity implements PreferenceFrag
         super.onCreate(savedInstanceState);
         donateManager.init();
         setContentView(R.layout.a__settings);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
         subscribeForEvents();
     }
 
@@ -69,6 +64,12 @@ public class SettingsActivity extends FragmentActivity implements PreferenceFrag
                 }
             }
         });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        App.get().getAnalytics().reportActivityStart(this);
     }
 
     @Override
@@ -132,12 +133,13 @@ public class SettingsActivity extends FragmentActivity implements PreferenceFrag
     @Override
     public void onStop() {
         super.onStop();
-        App.get().getEventManager().unsubscribeAll(this);
+        App.get().getAnalytics().reportActivityStop(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        App.get().getEventManager().unsubscribeAll(this);
         donateManager.deinit();
     }
 }
