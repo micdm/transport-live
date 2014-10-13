@@ -15,6 +15,7 @@ import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestDonateEvent;
+import com.micdm.transportlive.events.events.RequestFocusVehicleEvent;
 import com.micdm.transportlive.events.events.RequestSelectRouteEvent;
 import com.micdm.transportlive.events.events.RequestSelectStationEvent;
 import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
@@ -73,6 +74,9 @@ public class EventConverter {
                 break;
             case UPDATE_FORECAST:
                 buildIntentForUpdateForecastEvent((UpdateForecastEvent) event, intent);
+                break;
+            case REQUEST_FOCUS_VEHICLE:
+                buildIntentForRequestFocusVehicleEvent((RequestFocusVehicleEvent) event, intent);
                 break;
             case LOAD_DONATE_PRODUCTS:
                 buildIntentForLoadDonateProductsEvent((LoadDonateProductsEvent) event, intent);
@@ -138,6 +142,12 @@ public class EventConverter {
 
     private void buildIntentForUpdateForecastEvent(UpdateForecastEvent event, Intent intent) {
         intent.putExtra("forecast", new ForecastParcel(event.getForecast()));
+    }
+
+    private void buildIntentForRequestFocusVehicleEvent(RequestFocusVehicleEvent event, Intent intent) {
+        intent.putExtra("number", event.getNumber());
+        intent.putExtra("transport_id", event.getTransportId());
+        intent.putExtra("route_number", event.getRouteNumber());
     }
 
     private void buildIntentForLoadDonateProductsEvent(LoadDonateProductsEvent event, Intent intent) {

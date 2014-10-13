@@ -20,6 +20,7 @@ import com.micdm.transportlive.events.events.LoadStationsEvent;
 import com.micdm.transportlive.events.events.RemoveAllDataEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestDonateEvent;
+import com.micdm.transportlive.events.events.RequestFocusVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadDonateProductsEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
@@ -72,6 +73,8 @@ public class IntentConverter {
                 return getRequestUnselectStationEvent(intent);
             case UPDATE_FORECAST:
                 return getUpdateForecastEvent(intent);
+            case REQUEST_FOCUS_VEHICLE:
+                return getRequestFocusVehicleEvent(intent);
             case REMOVE_ALL_DATA:
                 return new RemoveAllDataEvent();
             case REQUEST_LOAD_DONATE_PRODUCTS:
@@ -158,6 +161,13 @@ public class IntentConverter {
     private UpdateForecastEvent getUpdateForecastEvent(Intent intent) {
         Forecast forecast = ((ForecastParcel) intent.getParcelableExtra("forecast")).getForecast();
         return new UpdateForecastEvent(forecast);
+    }
+
+    private RequestFocusVehicleEvent getRequestFocusVehicleEvent(Intent intent) {
+        String number = intent.getStringExtra("number");
+        int transportId = intent.getIntExtra("transport_id", 0);
+        int routeNumber = intent.getIntExtra("route_number", 0);
+        return new RequestFocusVehicleEvent(number, transportId, routeNumber);
     }
 
     private LoadDonateProductsEvent getLoadDonateProductsEvent(Intent intent) {

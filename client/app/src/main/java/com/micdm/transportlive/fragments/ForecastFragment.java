@@ -25,6 +25,7 @@ import com.micdm.transportlive.events.EventType;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
 import com.micdm.transportlive.events.events.RemoveAllDataEvent;
+import com.micdm.transportlive.events.events.RequestFocusVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestLoadStationsEvent;
 import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
@@ -254,7 +255,7 @@ public class ForecastFragment extends Fragment {
 
         @Override
         public boolean isChildSelectable(int groupPosition, int childPosition) {
-            return false;
+            return getChild(groupPosition, childPosition) != null;
         }
     }
 
@@ -270,6 +271,19 @@ public class ForecastFragment extends Fragment {
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
                 return true;
+            }
+        });
+        forecastsView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                ForecastListAdapter adapter = ((ForecastListAdapter) parent.getExpandableListAdapter());
+                SelectedStation station = adapter.getGroup(groupPosition);
+                ForecastVehicle vehicle = adapter.getChild(groupPosition, childPosition);
+                if (vehicle != null) {
+                    App.get().getEventManager().publish(new RequestFocusVehicleEvent(vehicle.getNumber(), station.getTransportId(), vehicle.getRouteNumber()));
+                    return true;
+                }
+                return false;
             }
         });
         View selectStationView = view.findViewById(R.id.f__forecasts__select_station);

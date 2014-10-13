@@ -30,6 +30,7 @@ import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
 import com.micdm.transportlive.events.events.RemoveAllDataEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
+import com.micdm.transportlive.events.events.RequestFocusVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestLoadStationsEvent;
@@ -99,6 +100,8 @@ public class MainActivity extends FragmentActivity {
             return pages.get(i).title;
         }
     }
+
+    private static final int MAP_TAB_INDEX = 0;
 
     private Service service;
 
@@ -242,6 +245,12 @@ public class MainActivity extends FragmentActivity {
                 selectedStationStore.put(selectedStations);
                 gate.unselectStation(station);
                 manager.publish(new LoadStationsEvent(selectedStations));
+            }
+        });
+        manager.subscribe(this, EventType.REQUEST_FOCUS_VEHICLE, new EventManager.OnEventListener<RequestFocusVehicleEvent>() {
+            @Override
+            public void onEvent(RequestFocusVehicleEvent event) {
+                getActionBar().setSelectedNavigationItem(MAP_TAB_INDEX);
             }
         });
     }

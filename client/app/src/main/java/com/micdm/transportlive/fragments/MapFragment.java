@@ -18,6 +18,7 @@ import android.support.v4.util.Pools;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.micdm.transportlive.App;
 import com.micdm.transportlive.R;
@@ -32,12 +33,14 @@ import com.micdm.transportlive.events.events.LoadRoutesEvent;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.RemoveAllDataEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
+import com.micdm.transportlive.events.events.RequestFocusVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.UnselectRouteEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
 import com.micdm.transportlive.misc.AssetArchive;
 import com.micdm.transportlive.misc.RouteColors;
+import com.micdm.transportlive.misc.Utils;
 import com.micdm.transportlive.misc.analytics.Analytics;
 
 import org.osmdroid.DefaultResourceProxyImpl;
@@ -164,6 +167,7 @@ public class MapFragment extends Fragment {
     private final Map<MapVehicle, OverlayItem> items = new HashMap<MapVehicle, OverlayItem>();
 
     private Service service;
+    private List<SelectedRoute> selectedRoutes;
 
     private ViewGroup mapContainerView;
     private View noRouteSelectedView;
@@ -287,8 +291,9 @@ public class MapFragment extends Fragment {
         manager.subscribe(this, EventType.LOAD_ROUTES, new EventManager.OnEventListener<LoadRoutesEvent>() {
             @Override
             public void onEvent(LoadRoutesEvent event) {
+                selectedRoutes = event.getRoutes();
                 hideAllViews();
-                if (event.getRoutes().size() == 0) {
+                if (selectedRoutes.size() == 0) {
                     noRouteSelectedView.setVisibility(View.VISIBLE);
                 } else {
                     mapView.setVisibility(View.VISIBLE);
@@ -324,6 +329,21 @@ public class MapFragment extends Fragment {
             @Override
             public void onEvent(RemoveVehicleEvent event) {
                 removeVehicle(event.getNumber());
+            }
+        });
+        manager.subscribe(this, EventType.REQUEST_FOCUS_VEHICLE, new EventManager.OnEventListener<RequestFocusVehicleEvent>() {
+            @Override
+            public void onEvent(RequestFocusVehicleEvent event) {
+                int transportId = event.getTransportId();
+                int routeNumber = event.getRouteNumber();
+                if (Utils.isRouteSelected(selectedRoutes, transportId, routeNumber)) {
+                    Map.Entry<MapVehicle, OverlayItem> pair = getMapVehicleAndOverlayItemPair(event.getNumber());
+                    if (pair != null) {
+                        mapView.getController().setCenter(getVehicleGeoPoint(pair.getKey()));
+                    }
+                } else {
+                    Toast.makeText(getActivity(), getString(R.string.f__map__route_not_selected, String.valueOf(routeNumber)), Toast.LENGTH_LONG).show();
+                }
             }
         });
         manager.subscribe(this, EventType.REMOVE_ALL_DATA, new EventManager.OnEventListener<RemoveAllDataEvent>() {
