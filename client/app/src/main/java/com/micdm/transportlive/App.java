@@ -2,8 +2,13 @@ package com.micdm.transportlive;
 
 import android.content.Context;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.micdm.transportlive.events.EventManager;
 import com.micdm.transportlive.events.intents.IntentBasedEventManager;
+import com.micdm.transportlive.location.DefaultLocator;
+import com.micdm.transportlive.location.GooglePlayLocator;
+import com.micdm.transportlive.location.Locator;
 import com.micdm.transportlive.misc.ServiceLoader;
 import com.micdm.transportlive.misc.analytics.Analytics;
 import com.micdm.transportlive.misc.analytics.DevModeAnalytics;
@@ -21,6 +26,7 @@ public class App extends android.app.Application {
     private ServiceLoader serviceLoader;
     private SelectedRouteStore selectedRouteStore;
     private SelectedStationStore selectedStationStore;
+    private Locator locator;
     private Analytics analytics;
 
     public static App get() {
@@ -34,10 +40,6 @@ public class App extends android.app.Application {
     public void onCreate() {
         super.onCreate();
         instance = this;
-    }
-
-    public boolean isDevMode() {
-        return getPackageName().endsWith(".dev");
     }
 
     public ServerGate getServerGate() {
@@ -75,10 +77,20 @@ public class App extends android.app.Application {
         return selectedStationStore;
     }
 
+    public Locator getLocator() {
+        if (locator == null) {
+            Context context = getApplicationContext();
+            boolean isPlayServicesAvailable = (GooglePlayServicesUtil.isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS);
+            locator = isPlayServicesAvailable ? new GooglePlayLocator(context) : new DefaultLocator(context);
+        }
+        return locator;
+    }
+
     public Analytics getAnalytics() {
         if (analytics == null) {
             Context context = getApplicationContext();
-            analytics = isDevMode() ? new DevModeAnalytics(context) : new ProdModeAnalytics(context);
+            boolean isDevMode = getPackageName().endsWith(".dev");
+            analytics = isDevMode ? new DevModeAnalytics(context) : new ProdModeAnalytics(context);
         }
         return analytics;
     }

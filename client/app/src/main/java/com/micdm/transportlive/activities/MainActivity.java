@@ -5,6 +5,7 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -40,12 +41,15 @@ import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
 import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
 import com.micdm.transportlive.events.events.UnselectRouteEvent;
 import com.micdm.transportlive.events.events.UpdateForecastEvent;
+import com.micdm.transportlive.events.events.UpdateLocationEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
 import com.micdm.transportlive.fragments.ForecastFragment;
 import com.micdm.transportlive.fragments.FragmentTag;
 import com.micdm.transportlive.fragments.MapFragment;
 import com.micdm.transportlive.fragments.SelectRouteFragment;
 import com.micdm.transportlive.fragments.SelectStationFragment;
+import com.micdm.transportlive.location.DefaultLocator;
+import com.micdm.transportlive.location.Locator;
 import com.micdm.transportlive.misc.ServiceLoader;
 import com.micdm.transportlive.misc.Utils;
 import com.micdm.transportlive.misc.ViewPager;
@@ -58,6 +62,7 @@ import com.micdm.transportlive.stores.SelectedRouteStore;
 import com.micdm.transportlive.stores.SelectedStationStore;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -284,6 +289,7 @@ public class MainActivity extends FragmentActivity {
         super.onStart();
         App.get().getAnalytics().reportActivityStart(this);
         subscribeForData();
+        subscribeForLocation();
     }
 
     private void subscribeForData() {
@@ -372,11 +378,26 @@ public class MainActivity extends FragmentActivity {
         App.get().getEventManager().publish(new UpdateForecastEvent(forecast));
     }
 
+    private void subscribeForLocation() {
+        Locator locator = App.get().getLocator();
+        locator.setOnUpdateLocationListener(new DefaultLocator.OnUpdateLocationListener() {
+            @Override
+            public void onUpdateLocation(Location location) {
+                BigDecimal latitude = new BigDecimal(location.getLatitude(), MathContext.DECIMAL64);
+                BigDecimal longitude = new BigDecimal(location.getLongitude(), MathContext.DECIMAL64);
+                App.get().getEventManager().publish(new UpdateLocationEvent(latitude, longitude, location.getAccuracy()));
+            }
+        });
+        locator.start();
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
-        App.get().getServerGate().disconnect();
-        App.get().getAnalytics().reportActivityStop(this);
+        App app = App.get();
+        app.getLocator().stop();
+        app.getServerGate().disconnect();
+        app.getAnalytics().reportActivityStop(this);
     }
 
     @Override

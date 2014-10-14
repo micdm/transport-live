@@ -22,6 +22,7 @@ import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
 import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
 import com.micdm.transportlive.events.events.UnselectRouteEvent;
 import com.micdm.transportlive.events.events.UpdateForecastEvent;
+import com.micdm.transportlive.events.events.UpdateLocationEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
 import com.micdm.transportlive.parcels.ForecastParcel;
 import com.micdm.transportlive.parcels.SelectedRouteParcel;
@@ -77,6 +78,9 @@ public class EventConverter {
                 break;
             case REQUEST_FOCUS_VEHICLE:
                 buildIntentForRequestFocusVehicleEvent((RequestFocusVehicleEvent) event, intent);
+                break;
+            case UPDATE_LOCATION:
+                buildIntentForUpdateLocationEvent((UpdateLocationEvent) event, intent);
                 break;
             case LOAD_DONATE_PRODUCTS:
                 buildIntentForLoadDonateProductsEvent((LoadDonateProductsEvent) event, intent);
@@ -148,6 +152,12 @@ public class EventConverter {
         intent.putExtra("number", event.getNumber());
         intent.putExtra("transport_id", event.getTransportId());
         intent.putExtra("route_number", event.getRouteNumber());
+    }
+
+    private void buildIntentForUpdateLocationEvent(UpdateLocationEvent event, Intent intent) {
+        intent.putExtra("latitude", event.getLatitude().toString());
+        intent.putExtra("longitude", event.getLongitude().toString());
+        intent.putExtra("accuracy", event.getAccuracy());
     }
 
     private void buildIntentForLoadDonateProductsEvent(LoadDonateProductsEvent event, Intent intent) {

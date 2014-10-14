@@ -31,6 +31,7 @@ import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
 import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
 import com.micdm.transportlive.events.events.UnselectRouteEvent;
 import com.micdm.transportlive.events.events.UpdateForecastEvent;
+import com.micdm.transportlive.events.events.UpdateLocationEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
 import com.micdm.transportlive.parcels.ForecastParcel;
 import com.micdm.transportlive.parcels.SelectedRouteParcel;
@@ -38,6 +39,7 @@ import com.micdm.transportlive.parcels.SelectedStationParcel;
 import com.micdm.transportlive.parcels.ServiceParcel;
 import com.micdm.transportlive.parcels.VehicleParcel;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,6 +79,8 @@ public class IntentConverter {
                 return getUpdateForecastEvent(intent);
             case REQUEST_FOCUS_VEHICLE:
                 return getRequestFocusVehicleEvent(intent);
+            case UPDATE_LOCATION:
+                return getUpdateLocationEvent(intent);
             case REQUEST_LOAD_DONATE_PRODUCTS:
                 return new RequestLoadDonateProductsEvent();
             case LOAD_DONATE_PRODUCTS:
@@ -168,6 +172,13 @@ public class IntentConverter {
         int transportId = intent.getIntExtra("transport_id", 0);
         int routeNumber = intent.getIntExtra("route_number", 0);
         return new RequestFocusVehicleEvent(number, transportId, routeNumber);
+    }
+
+    private UpdateLocationEvent getUpdateLocationEvent(Intent intent) {
+        BigDecimal latitude = new BigDecimal(intent.getStringExtra("latitude"));
+        BigDecimal longitude = new BigDecimal(intent.getStringExtra("longitude"));
+        float accuracy = intent.getFloatExtra("accuracy", 0);
+        return new UpdateLocationEvent(latitude, longitude, accuracy);
     }
 
     private LoadDonateProductsEvent getLoadDonateProductsEvent(Intent intent) {

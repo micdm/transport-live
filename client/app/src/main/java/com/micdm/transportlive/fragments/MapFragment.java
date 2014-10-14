@@ -1,5 +1,6 @@
 package com.micdm.transportlive.fragments;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.LightingColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -36,6 +38,7 @@ import com.micdm.transportlive.events.events.RequestFocusVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.UnselectRouteEvent;
+import com.micdm.transportlive.events.events.UpdateLocationEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
 import com.micdm.transportlive.misc.AssetArchive;
 import com.micdm.transportlive.misc.RouteColors;
@@ -56,6 +59,7 @@ import org.osmdroid.tileprovider.util.SimpleRegisterReceiver;
 import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.Projection;
 import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
@@ -149,6 +153,64 @@ public class MapFragment extends Fragment {
         }
     }
 
+    private class UserLocationOverlay extends Overlay {
+
+        private final Bitmap bitmap;
+        private final Paint locationPaint;
+        private final Paint accuracyPaint;
+
+        private final Point coords = new Point();
+
+        private GeoPoint location;
+        private float accuracy;
+
+        public UserLocationOverlay(Context context) {
+            super(context);
+            bitmap = getBitmap();
+            locationPaint = getLocationPaint();
+            accuracyPaint = getAccuracyPaint();
+        }
+
+        private Bitmap getBitmap() {
+            return BitmapFactory.decodeResource(getResources(), R.drawable.ic_user);
+        }
+
+        private Paint getLocationPaint() {
+            return new Paint(Paint.ANTI_ALIAS_FLAG);
+        }
+
+        private Paint getAccuracyPaint() {
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(getResources().getColor(R.color.user_location_background));
+            paint.setAlpha(50);
+            return paint;
+        }
+
+        public void setLocation(GeoPoint location) {
+            this.location = location;
+        }
+
+        public void setAccuracy(float accuracy) {
+            this.accuracy = accuracy;
+        }
+
+        @Override
+        public void draw(Canvas canvas, MapView view, boolean shadow) {
+            if (shadow) {
+                return;
+            }
+            if (location == null) {
+                return;
+            }
+            Projection projection = view.getProjection();
+            projection.toPixels(location, coords);
+            float radius = projection.metersToEquatorPixels(accuracy);
+            canvas.drawCircle(coords.x, coords.y, radius, accuracyPaint);
+            canvas.drawBitmap(bitmap, coords.x - bitmap.getWidth() / 2, coords.y - bitmap.getHeight() / 2, locationPaint);
+        }
+    }
+
     private static final String PREF_KEY_USE_EXTERNAL_MAP = "pref_use_external_map";
 
     private static final int TILE_SIZE = 256;
@@ -162,38 +224,45 @@ public class MapFragment extends Fragment {
 
     private boolean externalMapUsed;
     private MarkerBuilder builder;
-    private ItemizedIconOverlay<OverlayItem> overlay;
+    private ItemizedIconOverlay<OverlayItem> vehicleOverlay;
     private final Map<MapVehicle, OverlayItem> items = new HashMap<MapVehicle, OverlayItem>();
+    private UserLocationOverlay userOverlay;
+    private GeoPoint userLocation;
 
     private Service service;
     private List<SelectedRoute> selectedRoutes;
 
-    private ViewGroup mapContainerView;
     private View noRouteSelectedView;
     private View noVehiclesView;
+    private ViewGroup mapContainerView;
     private MapView mapView;
-    private View zoomInView;
-    private View zoomOutView;
+    private View locateUserView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.f__map, container, false);
-        mapContainerView = (ViewGroup) view.findViewById(R.id.f__map__map_container);
         noRouteSelectedView = view.findViewById(R.id.f__map__no_route_selected);
         noVehiclesView = view.findViewById(R.id.f__map__no_vehicles);
+        mapContainerView = (ViewGroup) view.findViewById(R.id.f__map__map_container);
         externalMapUsed = needUseExternalMap();
         mapView = getMapView(externalMapUsed);
-        mapView.setVisibility(View.GONE);
         mapContainerView.addView(mapView, 0);
         setupMapController(mapView);
-        zoomInView = view.findViewById(R.id.f__map__zoom_in);
+        locateUserView = view.findViewById(R.id.f__map__locate_user);
+        locateUserView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mapView.getController().setCenter(userLocation);
+            }
+        });
+        View zoomInView = view.findViewById(R.id.f__map__zoom_in);
         zoomInView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mapView.getController().zoomIn();
             }
         });
-        zoomOutView = view.findViewById(R.id.f__map__zoom_out);
+        View zoomOutView = view.findViewById(R.id.f__map__zoom_out);
         zoomOutView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -248,9 +317,7 @@ public class MapFragment extends Fragment {
     private void hideAllViews() {
         noRouteSelectedView.setVisibility(View.GONE);
         noVehiclesView.setVisibility(View.GONE);
-        mapView.setVisibility(View.GONE);
-        zoomInView.setVisibility(View.GONE);
-        zoomOutView.setVisibility(View.GONE);
+        mapContainerView.setVisibility(View.VISIBLE);
     }
 
     private void showNoRouteSelectedView() {
@@ -265,9 +332,11 @@ public class MapFragment extends Fragment {
 
     private void showMapViewWithControls() {
         hideAllViews();
-        mapView.setVisibility(View.VISIBLE);
-        zoomInView.setVisibility(View.VISIBLE);
-        zoomOutView.setVisibility(View.VISIBLE);
+        mapContainerView.setVisibility(View.VISIBLE);
+    }
+
+    private void showLocateUserView() {
+        locateUserView.setVisibility(View.VISIBLE);
     }
 
     private void switchMapSource() {
@@ -356,11 +425,19 @@ public class MapFragment extends Fragment {
                 if (Utils.isRouteSelected(selectedRoutes, transportId, routeNumber)) {
                     Map.Entry<MapVehicle, OverlayItem> pair = getMapVehicleAndOverlayItemPair(event.getNumber());
                     if (pair != null) {
-                        mapView.getController().setCenter(getVehicleGeoPoint(pair.getKey()));
+                        MapVehicle vehicle = pair.getKey();
+                        mapView.getController().setCenter(getGeoPoint(vehicle.getLatitude(), vehicle.getLongitude()));
                     }
                 } else {
                     Toast.makeText(getActivity(), getString(R.string.f__map__route_not_selected, String.valueOf(routeNumber)), Toast.LENGTH_LONG).show();
                 }
+            }
+        });
+        manager.subscribe(this, EventType.UPDATE_LOCATION, new EventManager.OnEventListener<UpdateLocationEvent>() {
+            @Override
+            public void onEvent(UpdateLocationEvent event) {
+                updateUserLocation(event.getLatitude(), event.getLongitude(), event.getAccuracy());
+                showLocateUserView();
             }
         });
     }
@@ -372,9 +449,9 @@ public class MapFragment extends Fragment {
     }
 
     private void updateVehicle(MapVehicle vehicle) {
-        ItemizedIconOverlay<OverlayItem> overlay = getOverlay();
+        ItemizedIconOverlay<OverlayItem> overlay = getVehicleOverlay();
         removeVehicle(vehicle.getNumber());
-        OverlayItem item = new OverlayItem(null, null, null, getVehicleGeoPoint(vehicle));
+        OverlayItem item = new OverlayItem(null, null, getGeoPoint(vehicle.getLatitude(), vehicle.getLongitude()));
         item.setMarker(new BitmapDrawable(getResources(), builder.build(vehicle)));
         item.setMarkerHotspot(OverlayItem.HotspotPlace.CENTER);
         overlay.addItem(item);
@@ -387,7 +464,7 @@ public class MapFragment extends Fragment {
         if (pair != null) {
             OverlayItem item = pair.getValue();
             builder.release(((BitmapDrawable) item.getDrawable()).getBitmap());
-            ItemizedIconOverlay<OverlayItem> overlay = getOverlay();
+            ItemizedIconOverlay<OverlayItem> overlay = getVehicleOverlay();
             overlay.removeItem(pair.getValue());
             items.remove(pair.getKey());
             mapView.invalidate();
@@ -395,7 +472,7 @@ public class MapFragment extends Fragment {
     }
 
     private void removeAllVehicles() {
-        ItemizedIconOverlay<OverlayItem> overlay = getOverlay();
+        ItemizedIconOverlay<OverlayItem> overlay = getVehicleOverlay();
         for (int i = 0; i < overlay.size(); i += 1) {
             OverlayItem item = overlay.getItem(i);
             builder.release(((BitmapDrawable) item.getDrawable()).getBitmap());
@@ -405,9 +482,9 @@ public class MapFragment extends Fragment {
         mapView.invalidate();
     }
 
-    private ItemizedIconOverlay<OverlayItem> getOverlay() {
-        if (overlay == null) {
-            overlay = new ItemizedIconOverlay<OverlayItem>(getActivity(), new ArrayList<OverlayItem>(), new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
+    private ItemizedIconOverlay<OverlayItem> getVehicleOverlay() {
+        if (vehicleOverlay == null) {
+            vehicleOverlay = new ItemizedIconOverlay<OverlayItem>(getActivity(), new ArrayList<OverlayItem>(), new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
                 @Override
                 public boolean onItemSingleTapUp(int i, OverlayItem item) {
                     return false;
@@ -417,9 +494,9 @@ public class MapFragment extends Fragment {
                     return false;
                 }
             });
-            mapView.getOverlays().add(overlay);
+            mapView.getOverlays().add(0, vehicleOverlay);
         }
-        return overlay;
+        return vehicleOverlay;
     }
 
     private Map.Entry<MapVehicle, OverlayItem> getMapVehicleAndOverlayItemPair(String number) {
@@ -432,11 +509,25 @@ public class MapFragment extends Fragment {
         return null;
     }
 
-    private GeoPoint getVehicleGeoPoint(MapVehicle vehicle) {
+    private void updateUserLocation(BigDecimal latitude, BigDecimal longitude, float accuracy) {
+        userLocation = getGeoPoint(latitude, longitude);
+        UserLocationOverlay overlay = getUserOverlay();
+        overlay.setLocation(userLocation);
+        overlay.setAccuracy(accuracy);
+        mapView.invalidate();
+    }
+
+    private UserLocationOverlay getUserOverlay() {
+        if (userOverlay == null) {
+            userOverlay = new UserLocationOverlay(getActivity());
+            mapView.getOverlays().add(userOverlay);
+        }
+        return userOverlay;
+    }
+
+    private GeoPoint getGeoPoint(BigDecimal latitude, BigDecimal longitude) {
         BigDecimal multiplier = new BigDecimal(1e6);
-        int latitude = vehicle.getLatitude().multiply(multiplier).intValue();
-        int longitude = vehicle.getLongitude().multiply(multiplier).intValue();
-        return new GeoPoint(latitude, longitude);
+        return new GeoPoint(latitude.multiply(multiplier).intValue(), longitude.multiply(multiplier).intValue());
     }
 
     @Override

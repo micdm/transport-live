@@ -2,4 +2,5 @@
 <resources>
     <color name="connecting_icon">#99cc0000</color>
     <color name="connecting_text">#cc0000</color>
+    <color name="user_location_background">#0093cc</color>
 </resources>
