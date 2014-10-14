@@ -17,7 +17,7 @@
         android:layout_centerInParent="true"
         android:padding="10dp"
         android:text="@string/f__map__no_vehicles"/>
-    <ImageView
+    <ImageButton
         android:id="@+id/f__map__zoom_in"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
         android:layout_marginBottom="10dp"
         android:padding="5dp"
         android:background="@drawable/map_control_background"/>
-    <ImageView
+    <ImageButton
         android:id="@+id/f__map__zoom_out"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
