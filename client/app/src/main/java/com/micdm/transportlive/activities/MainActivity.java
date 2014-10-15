@@ -23,7 +23,11 @@ import com.micdm.transportlive.data.ForecastVehicle;
 import com.micdm.transportlive.data.MapVehicle;
 import com.micdm.transportlive.data.SelectedRoute;
 import com.micdm.transportlive.data.SelectedStation;
+import com.micdm.transportlive.data.service.Direction;
+import com.micdm.transportlive.data.service.Route;
 import com.micdm.transportlive.data.service.Service;
+import com.micdm.transportlive.data.service.Station;
+import com.micdm.transportlive.data.service.Transport;
 import com.micdm.transportlive.events.EventManager;
 import com.micdm.transportlive.events.EventType;
 import com.micdm.transportlive.events.events.LoadRoutesEvent;
@@ -32,6 +36,7 @@ import com.micdm.transportlive.events.events.LoadStationsEvent;
 import com.micdm.transportlive.events.events.RemoveAllDataEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestFocusVehicleEvent;
+import com.micdm.transportlive.events.events.RequestLoadNearestStationsEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestLoadStationsEvent;
@@ -42,6 +47,7 @@ import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
 import com.micdm.transportlive.events.events.UnselectRouteEvent;
 import com.micdm.transportlive.events.events.UpdateForecastEvent;
 import com.micdm.transportlive.events.events.UpdateLocationEvent;
+import com.micdm.transportlive.events.events.UpdateNearestStationsEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
 import com.micdm.transportlive.fragments.ForecastFragment;
 import com.micdm.transportlive.fragments.FragmentTag;
@@ -57,6 +63,7 @@ import com.micdm.transportlive.misc.analytics.Analytics;
 import com.micdm.transportlive.server.ServerGate;
 import com.micdm.transportlive.server.messages.Message;
 import com.micdm.transportlive.server.messages.incoming.ForecastMessage;
+import com.micdm.transportlive.server.messages.incoming.NearestStationsMessage;
 import com.micdm.transportlive.server.messages.incoming.VehicleMessage;
 import com.micdm.transportlive.stores.SelectedRouteStore;
 import com.micdm.transportlive.stores.SelectedStationStore;
@@ -262,6 +269,12 @@ public class MainActivity extends FragmentActivity {
                 getActionBar().setSelectedNavigationItem(MAP_TAB_INDEX);
             }
         });
+        manager.subscribe(this, EventType.REQUEST_LOAD_NEAREST_STATIONS, new EventManager.OnEventListener<RequestLoadNearestStationsEvent>() {
+            @Override
+            public void onEvent(RequestLoadNearestStationsEvent event) {
+                gate.loadNearestStations(event.getLatitude(), event.getLongitude());
+            }
+        });
     }
 
     private void removeSelectedRoute(int transportId, int routeNumber) {
@@ -335,6 +348,9 @@ public class MainActivity extends FragmentActivity {
                 if (message instanceof ForecastMessage) {
                     handleForecastMessage((ForecastMessage) message);
                 }
+                if (message instanceof NearestStationsMessage) {
+                    handleNearestStationsMessage((NearestStationsMessage) message);
+                }
             }
         });
     }
@@ -376,6 +392,28 @@ public class MainActivity extends FragmentActivity {
         }
         Forecast forecast = new Forecast(transportId, stationId, vehicles);
         App.get().getEventManager().publish(new UpdateForecastEvent(forecast));
+    }
+
+    private void handleNearestStationsMessage(NearestStationsMessage message) {
+        List<SelectedStation> stations = new ArrayList<SelectedStation>();
+        for (NearestStationsMessage.Station station: message.getStations()) {
+            stations.add(getFirstSuitableStation(station.getTransportId(), station.getStationId()));
+        }
+        App.get().getEventManager().publish(new UpdateNearestStationsEvent(stations));
+    }
+
+    private SelectedStation getFirstSuitableStation(int transportId, int stationId) {
+        Transport transport = service.getTransportById(transportId);
+        for (Route route: transport.getRoutes()) {
+            for (Direction direction: route.getDirections()) {
+                for (Station station: direction.getStations()) {
+                    if (station.getId() == stationId) {
+                        return new SelectedStation(transportId, route.getNumber(), direction.getId(), stationId);
+                    }
+                }
+            }
+        }
+        throw new RuntimeException(String.format("cannot find station %s %s", transportId, stationId));
     }
 
     private void subscribeForLocation() {

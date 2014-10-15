@@ -16,6 +16,7 @@ import com.micdm.transportlive.events.events.LoadStationsEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestDonateEvent;
 import com.micdm.transportlive.events.events.RequestFocusVehicleEvent;
+import com.micdm.transportlive.events.events.RequestLoadNearestStationsEvent;
 import com.micdm.transportlive.events.events.RequestSelectRouteEvent;
 import com.micdm.transportlive.events.events.RequestSelectStationEvent;
 import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
@@ -23,6 +24,7 @@ import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
 import com.micdm.transportlive.events.events.UnselectRouteEvent;
 import com.micdm.transportlive.events.events.UpdateForecastEvent;
 import com.micdm.transportlive.events.events.UpdateLocationEvent;
+import com.micdm.transportlive.events.events.UpdateNearestStationsEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
 import com.micdm.transportlive.parcels.ForecastParcel;
 import com.micdm.transportlive.parcels.SelectedRouteParcel;
@@ -81,6 +83,12 @@ public class EventConverter {
                 break;
             case UPDATE_LOCATION:
                 buildIntentForUpdateLocationEvent((UpdateLocationEvent) event, intent);
+                break;
+            case REQUEST_LOAD_NEAREST_STATIONS:
+                buildIntentForRequestLoadNearestStationsEvent((RequestLoadNearestStationsEvent) event, intent);
+                break;
+            case UPDATE_NEAREST_STATIONS:
+                buildIntentForUpdateNearestStationsEvent((UpdateNearestStationsEvent) event, intent);
                 break;
             case LOAD_DONATE_PRODUCTS:
                 buildIntentForLoadDonateProductsEvent((LoadDonateProductsEvent) event, intent);
@@ -158,6 +166,19 @@ public class EventConverter {
         intent.putExtra("latitude", event.getLatitude().toString());
         intent.putExtra("longitude", event.getLongitude().toString());
         intent.putExtra("accuracy", event.getAccuracy());
+    }
+
+    private void buildIntentForRequestLoadNearestStationsEvent(RequestLoadNearestStationsEvent event, Intent intent) {
+        intent.putExtra("latitude", event.getLatitude().toString());
+        intent.putExtra("longitude", event.getLongitude().toString());
+    }
+
+    private void buildIntentForUpdateNearestStationsEvent(UpdateNearestStationsEvent event, Intent intent) {
+        ArrayList<SelectedStationParcel> parcels = new ArrayList<SelectedStationParcel>();
+        for (SelectedStation station: event.getStations()) {
+            parcels.add(new SelectedStationParcel(station));
+        }
+        intent.putParcelableArrayListExtra("stations", parcels);
     }
 
     private void buildIntentForLoadDonateProductsEvent(LoadDonateProductsEvent event, Intent intent) {

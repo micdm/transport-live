@@ -25,16 +25,22 @@ import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
 import com.micdm.transportlive.events.events.RemoveAllDataEvent;
 import com.micdm.transportlive.events.events.RequestFocusVehicleEvent;
+import com.micdm.transportlive.events.events.RequestLoadNearestStationsEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestLoadStationsEvent;
+import com.micdm.transportlive.events.events.RequestSelectStationEvent;
 import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
 import com.micdm.transportlive.events.events.UpdateForecastEvent;
+import com.micdm.transportlive.events.events.UpdateLocationEvent;
+import com.micdm.transportlive.events.events.UpdateNearestStationsEvent;
 import com.micdm.transportlive.misc.RouteColors;
+import com.micdm.transportlive.misc.TimeChecker;
 import com.micdm.transportlive.misc.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 public class ForecastFragment extends Fragment {
@@ -257,6 +263,11 @@ public class ForecastFragment extends Fragment {
         }
     }
 
+    private static final int NEAREST_STATIONS_UPDATE_INTERVAL = 20;
+
+    private final TimeChecker timeChecker = new TimeChecker(NEAREST_STATIONS_UPDATE_INTERVAL);
+    private final List<SelectedStation> nearestStations = new ArrayList<SelectedStation>();
+
     private View noStationSelectedView;
     private ExpandableListView forecastsView;
 
@@ -311,7 +322,7 @@ public class ForecastFragment extends Fragment {
     }
 
     private void subscribeForEvents() {
-        EventManager manager = App.get().getEventManager();
+        final EventManager manager = App.get().getEventManager();
         manager.subscribe(this, EventType.LOAD_SERVICE, new EventManager.OnEventListener<LoadServiceEvent>() {
             @Override
             public void onEvent(LoadServiceEvent event) {
@@ -352,6 +363,38 @@ public class ForecastFragment extends Fragment {
                 adapter.notifyDataSetChanged();
             }
         });
+        manager.subscribe(this, EventType.UPDATE_LOCATION, new EventManager.OnEventListener<UpdateLocationEvent>() {
+            @Override
+            public void onEvent(UpdateLocationEvent event) {
+                if (timeChecker.check()) {
+                    manager.publish(new RequestLoadNearestStationsEvent(event.getLatitude(), event.getLongitude()));
+                }
+            }
+        });
+        manager.subscribe(this, EventType.UPDATE_NEAREST_STATIONS, new EventManager.OnEventListener<UpdateNearestStationsEvent>() {
+            @Override
+            public void onEvent(UpdateNearestStationsEvent event) {
+                updateNearestStations(event.getStations());
+            }
+        });
+    }
+
+    private void updateNearestStations(List<SelectedStation> nearestStations) {
+        EventManager manager = App.get().getEventManager();
+        Iterator<SelectedStation> iterator = this.nearestStations.iterator();
+        while (iterator.hasNext()) {
+            SelectedStation station = iterator.next();
+            if (!Utils.isStationSelected(nearestStations, station.getTransportId(), station.getStationId())) {
+                manager.publish(new RequestUnselectStationEvent(station));
+                iterator.remove();
+            }
+        }
+        for (SelectedStation station: nearestStations) {
+            if (!Utils.isStationSelected(this.nearestStations, station.getTransportId(), station.getStationId())) {
+                manager.publish(new RequestSelectStationEvent(station));
+                this.nearestStations.add(station);
+            }
+        }
     }
 
     private void requestForData() {

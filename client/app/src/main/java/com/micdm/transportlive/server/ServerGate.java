@@ -11,11 +11,14 @@ import com.micdm.transportlive.server.converters.IncomingMessageConverter;
 import com.micdm.transportlive.server.converters.OutcomingMessageConverter;
 import com.micdm.transportlive.server.messages.Message;
 import com.micdm.transportlive.server.messages.outcoming.GreetingMessage;
+import com.micdm.transportlive.server.messages.outcoming.LoadNearestStationsMessage;
 import com.micdm.transportlive.server.messages.outcoming.SelectRouteMessage;
 import com.micdm.transportlive.server.messages.outcoming.SelectStationMessage;
 import com.micdm.transportlive.server.messages.outcoming.UnselectRouteMessage;
 import com.micdm.transportlive.server.messages.outcoming.UnselectStationMessage;
 import com.micdm.transportlive.server.transport.ClientManager;
+
+import java.math.BigDecimal;
 
 public class ServerGate {
 
@@ -82,6 +85,10 @@ public class ServerGate {
 
     public void unselectStation(SelectedStation station) {
         send(new UnselectStationMessage(station.getTransportId(), station.getStationId()));
+    }
+
+    public void loadNearestStations(BigDecimal latitude, BigDecimal longitude) {
+        send(new LoadNearestStationsMessage(latitude, longitude));
     }
 
     private void send(Message message) {

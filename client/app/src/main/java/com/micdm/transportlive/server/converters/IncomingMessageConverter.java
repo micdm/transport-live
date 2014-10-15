@@ -2,6 +2,7 @@ package com.micdm.transportlive.server.converters;
 
 import com.micdm.transportlive.server.messages.Message;
 import com.micdm.transportlive.server.messages.incoming.ForecastMessage;
+import com.micdm.transportlive.server.messages.incoming.NearestStationsMessage;
 import com.micdm.transportlive.server.messages.incoming.VehicleMessage;
 
 import org.json.JSONArray;
@@ -18,6 +19,7 @@ public class IncomingMessageConverter {
 
         public static final int VEHICLE = 0;
         public static final int FORECAST = 1;
+        public static final int NEAREST_STATIONS = 2;
     }
 
     public Message convert(String message) {
@@ -29,6 +31,8 @@ public class IncomingMessageConverter {
                     return getVehicleMessage(json);
                 case MessageType.FORECAST:
                     return getForecastMessage(json);
+                case MessageType.NEAREST_STATIONS:
+                    return getNearestStationsMessage(json);
                 default:
                     throw new RuntimeException(String.format("unknown message type %s", type));
             }
@@ -69,5 +73,17 @@ public class IncomingMessageConverter {
             vehicles.add(new ForecastMessage.Vehicle(number, routeNumber, arrivalTime, isLowFloor));
         }
         return vehicles;
+    }
+
+    private NearestStationsMessage getNearestStationsMessage(JSONObject json) throws JSONException {
+        JSONArray stationsJson = json.getJSONArray("stations");
+        List<NearestStationsMessage.Station> stations = new ArrayList<NearestStationsMessage.Station>();
+        for (int i = 0; i < stationsJson.length(); i += 1) {
+            JSONObject stationJson = stationsJson.getJSONObject(i);
+            int transportId = stationJson.getInt("transport_id");
+            int stationId = stationJson.getInt("station_id");
+            stations.add(new NearestStationsMessage.Station(transportId, stationId));
+        }
+        return new NearestStationsMessage(stations);
     }
 }

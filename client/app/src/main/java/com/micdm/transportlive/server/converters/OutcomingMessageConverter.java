@@ -2,6 +2,7 @@ package com.micdm.transportlive.server.converters;
 
 import com.micdm.transportlive.server.messages.Message;
 import com.micdm.transportlive.server.messages.outcoming.GreetingMessage;
+import com.micdm.transportlive.server.messages.outcoming.LoadNearestStationsMessage;
 import com.micdm.transportlive.server.messages.outcoming.SelectRouteMessage;
 import com.micdm.transportlive.server.messages.outcoming.SelectStationMessage;
 import com.micdm.transportlive.server.messages.outcoming.UnselectRouteMessage;
@@ -19,6 +20,7 @@ public class OutcomingMessageConverter {
         private static final int UNSELECT_ROUTE = 2;
         private static final int SELECT_STATION = 3;
         private static final int UNSELECT_STATION = 4;
+        private static final int LOAD_NEAREST_STATIONS = 5;
     }
 
     public String convert(Message message) {
@@ -42,6 +44,9 @@ public class OutcomingMessageConverter {
                 case MessageType.UNSELECT_STATION:
                     buildJsonForUnselectStationMessage((UnselectStationMessage) message, json);
                     break;
+                case MessageType.LOAD_NEAREST_STATIONS:
+                    buildJsonForLoadNearestStationsMessage((LoadNearestStationsMessage) message, json);
+                    break;
             }
             return serialize(json);
         } catch (JSONException e) {
@@ -64,6 +69,9 @@ public class OutcomingMessageConverter {
         }
         if (message instanceof UnselectStationMessage) {
             return MessageType.UNSELECT_STATION;
+        }
+        if (message instanceof LoadNearestStationsMessage) {
+            return MessageType.LOAD_NEAREST_STATIONS;
         }
         throw new RuntimeException("unknown message type");
     }
@@ -90,6 +98,11 @@ public class OutcomingMessageConverter {
     private void buildJsonForUnselectStationMessage(UnselectStationMessage message, JSONObject json) throws JSONException {
         json.put("transport_id", message.getTransportId());
         json.put("station_id", message.getStationId());
+    }
+
+    private void buildJsonForLoadNearestStationsMessage(LoadNearestStationsMessage message, JSONObject json) throws JSONException {
+        json.put("latitude", message.getLatitude().toString());
+        json.put("longitude", message.getLongitude().toString());
     }
 
     private String serialize(JSONObject json) {

@@ -22,6 +22,7 @@ import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestDonateEvent;
 import com.micdm.transportlive.events.events.RequestFocusVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadDonateProductsEvent;
+import com.micdm.transportlive.events.events.RequestLoadNearestStationsEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestLoadStationsEvent;
@@ -32,6 +33,7 @@ import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
 import com.micdm.transportlive.events.events.UnselectRouteEvent;
 import com.micdm.transportlive.events.events.UpdateForecastEvent;
 import com.micdm.transportlive.events.events.UpdateLocationEvent;
+import com.micdm.transportlive.events.events.UpdateNearestStationsEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
 import com.micdm.transportlive.parcels.ForecastParcel;
 import com.micdm.transportlive.parcels.SelectedRouteParcel;
@@ -81,6 +83,10 @@ public class IntentConverter {
                 return getRequestFocusVehicleEvent(intent);
             case UPDATE_LOCATION:
                 return getUpdateLocationEvent(intent);
+            case REQUEST_LOAD_NEAREST_STATIONS:
+                return getRequestLoadNearestStationsEvent(intent);
+            case UPDATE_NEAREST_STATIONS:
+                return getUpdateNearestStationsEvent(intent);
             case REQUEST_LOAD_DONATE_PRODUCTS:
                 return new RequestLoadDonateProductsEvent();
             case LOAD_DONATE_PRODUCTS:
@@ -179,6 +185,20 @@ public class IntentConverter {
         BigDecimal longitude = new BigDecimal(intent.getStringExtra("longitude"));
         float accuracy = intent.getFloatExtra("accuracy", 0);
         return new UpdateLocationEvent(latitude, longitude, accuracy);
+    }
+
+    private RequestLoadNearestStationsEvent getRequestLoadNearestStationsEvent(Intent intent) {
+        BigDecimal latitude = new BigDecimal(intent.getStringExtra("latitude"));
+        BigDecimal longitude = new BigDecimal(intent.getStringExtra("longitude"));
+        return new RequestLoadNearestStationsEvent(latitude, longitude);
+    }
+
+    private UpdateNearestStationsEvent getUpdateNearestStationsEvent(Intent intent) {
+        List<SelectedStation> stations = new ArrayList<SelectedStation>();
+        for (Parcelable parcel: intent.getParcelableArrayListExtra("stations")) {
+            stations.add(((SelectedStationParcel) parcel).getStation());
+        }
+        return new UpdateNearestStationsEvent(stations);
     }
 
     private LoadDonateProductsEvent getLoadDonateProductsEvent(Intent intent) {

@@ -28,9 +28,11 @@ class ClientManager:
             self._handle_select_station_message(request_handler, message)
         if isinstance(message, messages.UnselectStationMessage):
             self._handle_unselect_station_message(request_handler, message)
+        if isinstance(message, messages.LoadNearestStationsMessage):
+            self._handle_load_nearest_stations_message(request_handler, message)
 
     def _handle_greeting_message(self, request_handler, message):
-        logger.info("New client connected: %s", message.version)
+        logger.info("New client connected: %s (%s)", request_handler, message.version)
 
     def _handle_select_route_message(self, request_handler, message):
         route = (message.transport_id, message.route_number)
@@ -65,6 +67,7 @@ class ClientManager:
         self._remove_request_handler_from_station_subscription(request_handler, station)
 
     def on_close(self, request_handler):
+        logger.debug("Closing connection %s...", request_handler)
         for route in list(self._selected_routes.keys()):
             self._remove_request_handler_from_route_subscription(request_handler, route)
         for station in list(self._selected_stations.keys()):
@@ -136,3 +139,8 @@ class ClientManager:
     def _build_forecast_message(self, forecast):
         vehicles = [(vehicle.number, vehicle.route.number, arrival_time, vehicle.is_low_floor) for vehicle, arrival_time in forecast.vehicles]
         return messages.ForecastMessage(forecast.transport.type, forecast.station.id, vehicles)
+
+    def _handle_load_nearest_stations_message(self, request_handler, message):
+        message = messages.NearestStationsMessage(((0, 1), (0, 2), (0, 4)))
+        message_text = self._outcoming_message_converter.convert(message)
+        request_handler.write_message(message_text)

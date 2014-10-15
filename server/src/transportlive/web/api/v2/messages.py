@@ -30,6 +30,12 @@ class UnselectStationMessage(Message):
         self.transport_id = transport_id
         self.station_id = station_id
 
+class LoadNearestStationsMessage(Message):
+
+    def __init__(self, latitude, longitude):
+        self.latitude = latitude
+        self.longitude = longitude
+
 class VehicleMessage(Message):
 
     def __init__(self, number, transport_id, route_number, latitude, longitude, course):
@@ -46,3 +52,8 @@ class ForecastMessage(Message):
         self.transport_id = transport_id
         self.station_id = station_id
         self.vehicles = vehicles
+
+class NearestStationsMessage(Message):
+
+    def __init__(self, stations):
+        self.stations = stations
