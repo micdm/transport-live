@@ -6,6 +6,7 @@ from tornado.options import options
 from transportlive.forecast.forecast_calculator import ForecastCalculator
 from transportlive.misc.low_floor_vehicles_builder import LowFloorVehiclesBuilder
 from transportlive.misc.service_builder import ServiceBuilder
+from transportlive.misc.station_finder import StationFinder
 from transportlive.models import Vehicle
 
 logger = getLogger(__name__)
@@ -19,6 +20,7 @@ class DataStore:
         self._low_floor_vehicles = LowFloorVehiclesBuilder().build()
         self._vehicles = {}
         self._forecast_calculator = ForecastCalculator(self._service)
+        self._station_finder = StationFinder(self._service)
         self._on_update_vehicle = None
         self._on_remove_vehicle = None
 
@@ -48,6 +50,9 @@ class DataStore:
 
     def get_forecast(self, transport_type, station_id):
         return self._forecast_calculator.get_forecast(transport_type, station_id)
+
+    def get_nearest_stations(self, latitude, longitude):
+        return self._station_finder.find(latitude, longitude)
 
     def cleanup(self):
         logger.info("Cleaning up datastore...")

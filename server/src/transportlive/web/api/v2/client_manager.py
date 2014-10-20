@@ -141,6 +141,7 @@ class ClientManager:
         return messages.ForecastMessage(forecast.transport.type, forecast.station.id, vehicles)
 
     def _handle_load_nearest_stations_message(self, request_handler, message):
-        message = messages.NearestStationsMessage(((0, 1), (0, 2), (0, 4)))
+        stations = self._datastore.get_nearest_stations(message.latitude, message.longitude)
+        message = messages.NearestStationsMessage((transport.type, station.id) for transport, station in stations)
         message_text = self._outcoming_message_converter.convert(message)
         request_handler.write_message(message_text)
