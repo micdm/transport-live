@@ -42,7 +42,7 @@ public class SelectedStationStore {
                 Route route = transport.getRouteByNumber(getRouteNumber(attrs));
                 Direction direction = route.getDirectionById(getDirectionId(attrs));
                 Station station = direction.getStationById(getStationId(attrs));
-                selected.add(new SelectedStation(transport.getId(), route.getNumber(), direction.getId(), station.getId()));
+                selected.add(new SelectedStation(transport.getId(), route.getNumber(), direction.getId(), station.getId(), true));
             }
         }
 
@@ -103,7 +103,7 @@ public class SelectedStationStore {
             int routeNumber = route.getNumber();
             int stationId = station.getId();
             if (!Utils.isStationSelected(stations, transportId, stationId)) {
-                stations.add(new SelectedStation(transportId, routeNumber, direction.getId(), stationId));
+                stations.add(new SelectedStation(transportId, routeNumber, direction.getId(), stationId, true));
             }
         }
         return stations;

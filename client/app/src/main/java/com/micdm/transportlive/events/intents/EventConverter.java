@@ -15,10 +15,12 @@ import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestDonateEvent;
+import com.micdm.transportlive.events.events.RequestFavouriteStationEvent;
 import com.micdm.transportlive.events.events.RequestFocusVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadNearestStationsEvent;
 import com.micdm.transportlive.events.events.RequestSelectRouteEvent;
 import com.micdm.transportlive.events.events.RequestSelectStationEvent;
+import com.micdm.transportlive.events.events.RequestUnfavouriteStationEvent;
 import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
 import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
 import com.micdm.transportlive.events.events.UnselectRouteEvent;
@@ -74,6 +76,12 @@ public class EventConverter {
                 break;
             case REQUEST_UNSELECT_STATION:
                 buildIntentForRequestUnselectStationEvent((RequestUnselectStationEvent) event, intent);
+                break;
+            case REQUEST_FAVOURITE_STATION:
+                buildIntentForRequestFavouriteStationEvent((RequestFavouriteStationEvent) event, intent);
+                break;
+            case REQUEST_UNFAVOURITE_STATION:
+                buildIntentForRequestUnfavouriteStationEvent((RequestUnfavouriteStationEvent) event, intent);
                 break;
             case UPDATE_FORECAST:
                 buildIntentForUpdateForecastEvent((UpdateForecastEvent) event, intent);
@@ -149,6 +157,14 @@ public class EventConverter {
     }
 
     private void buildIntentForRequestUnselectStationEvent(RequestUnselectStationEvent event, Intent intent) {
+        intent.putExtra("station", new SelectedStationParcel(event.getStation()));
+    }
+
+    private void buildIntentForRequestFavouriteStationEvent(RequestFavouriteStationEvent event, Intent intent) {
+        intent.putExtra("station", new SelectedStationParcel(event.getStation()));
+    }
+
+    private void buildIntentForRequestUnfavouriteStationEvent(RequestUnfavouriteStationEvent event, Intent intent) {
         intent.putExtra("station", new SelectedStationParcel(event.getStation()));
     }
 

@@ -20,6 +20,7 @@ import com.micdm.transportlive.events.events.LoadStationsEvent;
 import com.micdm.transportlive.events.events.RemoveAllDataEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
 import com.micdm.transportlive.events.events.RequestDonateEvent;
+import com.micdm.transportlive.events.events.RequestFavouriteStationEvent;
 import com.micdm.transportlive.events.events.RequestFocusVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadDonateProductsEvent;
 import com.micdm.transportlive.events.events.RequestLoadNearestStationsEvent;
@@ -28,6 +29,7 @@ import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestLoadStationsEvent;
 import com.micdm.transportlive.events.events.RequestSelectRouteEvent;
 import com.micdm.transportlive.events.events.RequestSelectStationEvent;
+import com.micdm.transportlive.events.events.RequestUnfavouriteStationEvent;
 import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
 import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
 import com.micdm.transportlive.events.events.UnselectRouteEvent;
@@ -77,6 +79,10 @@ public class IntentConverter {
                 return getRequestSelectStationEvent(intent);
             case REQUEST_UNSELECT_STATION:
                 return getRequestUnselectStationEvent(intent);
+            case REQUEST_FAVOURITE_STATION:
+                return getRequestFavouriteStationEvent(intent);
+            case REQUEST_UNFAVOURITE_STATION:
+                return getRequestUnfavouriteStationEvent(intent);
             case UPDATE_FORECAST:
                 return getUpdateForecastEvent(intent);
             case REQUEST_FOCUS_VEHICLE:
@@ -166,6 +172,16 @@ public class IntentConverter {
     private RequestUnselectStationEvent getRequestUnselectStationEvent(Intent intent) {
         SelectedStation station = ((SelectedStationParcel) intent.getParcelableExtra("station")).getStation();
         return new RequestUnselectStationEvent(station);
+    }
+
+    private RequestFavouriteStationEvent getRequestFavouriteStationEvent(Intent intent) {
+        SelectedStation station = ((SelectedStationParcel) intent.getParcelableExtra("station")).getStation();
+        return new RequestFavouriteStationEvent(station);
+    }
+
+    private RequestUnfavouriteStationEvent getRequestUnfavouriteStationEvent(Intent intent) {
+        SelectedStation station = ((SelectedStationParcel) intent.getParcelableExtra("station")).getStation();
+        return new RequestUnfavouriteStationEvent(station);
     }
 
     private UpdateForecastEvent getUpdateForecastEvent(Intent intent) {

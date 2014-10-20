@@ -24,6 +24,7 @@ import com.micdm.transportlive.data.service.Transport;
 import com.micdm.transportlive.events.EventManager;
 import com.micdm.transportlive.events.EventType;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
+import com.micdm.transportlive.events.events.RequestFavouriteStationEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestSelectStationEvent;
 import com.micdm.transportlive.misc.Utils;
@@ -134,7 +135,9 @@ public class SelectStationFragment extends DialogFragment {
                 Direction direction = (Direction) getDirectionListSpinner().getSelectedItem();
                 Station station = (Station) getStationListSpinner().getSelectedItem();
                 SelectedStation selectedStation = new SelectedStation(transport.getId(), route.getNumber(), direction.getId(), station.getId());
-                App.get().getEventManager().publish(new RequestSelectStationEvent(selectedStation));
+                EventManager manager = App.get().getEventManager();
+                manager.publish(new RequestSelectStationEvent(selectedStation));
+                manager.publish(new RequestFavouriteStationEvent(selectedStation));
             }
         });
         return builder.create();

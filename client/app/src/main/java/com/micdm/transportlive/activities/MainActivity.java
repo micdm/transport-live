@@ -35,6 +35,7 @@ import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
 import com.micdm.transportlive.events.events.RemoveAllDataEvent;
 import com.micdm.transportlive.events.events.RemoveVehicleEvent;
+import com.micdm.transportlive.events.events.RequestFavouriteStationEvent;
 import com.micdm.transportlive.events.events.RequestFocusVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadNearestStationsEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
@@ -42,6 +43,7 @@ import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestLoadStationsEvent;
 import com.micdm.transportlive.events.events.RequestSelectRouteEvent;
 import com.micdm.transportlive.events.events.RequestSelectStationEvent;
+import com.micdm.transportlive.events.events.RequestUnfavouriteStationEvent;
 import com.micdm.transportlive.events.events.RequestUnselectRouteEvent;
 import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
 import com.micdm.transportlive.events.events.UnselectRouteEvent;
@@ -71,7 +73,6 @@ import com.micdm.transportlive.stores.SelectedStationStore;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class MainActivity extends FragmentActivity {
@@ -180,7 +181,6 @@ public class MainActivity extends FragmentActivity {
         final ServerGate gate = app.getServerGate();
         final ServiceLoader serviceLoader = app.getServiceLoader();
         final SelectedRouteStore selectedRouteStore = app.getSelectedRouteStore();
-        final SelectedStationStore selectedStationStore = app.getSelectedStationStore();
         manager.subscribe(this, EventType.REQUEST_LOAD_SERVICE, new EventManager.OnEventListener<RequestLoadServiceEvent>() {
             @Override
             public void onEvent(RequestLoadServiceEvent event) {
@@ -221,7 +221,10 @@ public class MainActivity extends FragmentActivity {
                 SelectedRoute route = event.getRoute();
                 int transportId = route.getTransportId();
                 int routeNumber = route.getRouteNumber();
-                removeSelectedRoute(transportId, routeNumber);
+                if (!Utils.isRouteSelected(selectedRoutes, transportId, routeNumber)) {
+                    return;
+                }
+                selectedRoutes.remove(getSelectedRoute(transportId, routeNumber));
                 selectedRouteStore.put(selectedRoutes);
                 manager.publish(new UnselectRouteEvent(route));
                 manager.publish(new LoadRoutesEvent(selectedRoutes));
@@ -248,7 +251,6 @@ public class MainActivity extends FragmentActivity {
                     return;
                 }
                 selectedStations.add(station);
-                selectedStationStore.put(selectedStations);
                 manager.publish(new LoadStationsEvent(selectedStations));
                 gate.selectStation(station);
             }
@@ -257,10 +259,26 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void onEvent(RequestUnselectStationEvent event) {
                 SelectedStation station = event.getStation();
-                removeSelectedStation(station.getTransportId(), station.getStationId());
-                selectedStationStore.put(selectedStations);
+                int transportId = station.getTransportId();
+                int stationId = station.getStationId();
+                if (!Utils.isStationSelected(selectedStations, transportId, stationId)) {
+                    return;
+                }
+                selectedStations.remove(getSelectedStation(transportId, stationId));
                 manager.publish(new LoadStationsEvent(selectedStations));
                 gate.unselectStation(station);
+            }
+        });
+        manager.subscribe(this, EventType.REQUEST_FAVOURITE_STATION, new EventManager.OnEventListener<RequestFavouriteStationEvent>() {
+            @Override
+            public void onEvent(RequestFavouriteStationEvent event) {
+                setStationFavourite(event.getStation(), true);
+            }
+        });
+        manager.subscribe(this, EventType.REQUEST_UNFAVOURITE_STATION, new EventManager.OnEventListener<RequestUnfavouriteStationEvent>() {
+            @Override
+            public void onEvent(RequestUnfavouriteStationEvent event) {
+                setStationFavourite(event.getStation(), false);
             }
         });
         manager.subscribe(this, EventType.REQUEST_FOCUS_VEHICLE, new EventManager.OnEventListener<RequestFocusVehicleEvent>() {
@@ -277,24 +295,45 @@ public class MainActivity extends FragmentActivity {
         });
     }
 
-    private void removeSelectedRoute(int transportId, int routeNumber) {
-        Iterator<SelectedRoute> iterator = selectedRoutes.iterator();
-        while (iterator.hasNext()) {
-            SelectedRoute route = iterator.next();
+    private SelectedRoute getSelectedRoute(int transportId, int routeNumber) {
+        for (SelectedRoute route: selectedRoutes) {
             if (route.getTransportId() == transportId && route.getRouteNumber() == routeNumber) {
-                iterator.remove();
+                return route;
             }
         }
+        throw new RuntimeException(String.format("cannot find route %s %s", transportId, routeNumber));
     }
 
-    private void removeSelectedStation(int transportId, int stationId) {
-        Iterator<SelectedStation> iterator = selectedStations.iterator();
-        while (iterator.hasNext()) {
-            SelectedStation station = iterator.next();
+    private SelectedStation getSelectedStation(int transportId, int stationId) {
+        for (SelectedStation station: selectedStations) {
             if (station.getTransportId() == transportId && station.getStationId() == stationId) {
-                iterator.remove();
+                return station;
             }
         }
+        throw new RuntimeException(String.format("cannot find station %s %s", transportId, stationId));
+    }
+
+    private void setStationFavourite(SelectedStation station, boolean value) {
+        int transportId = station.getTransportId();
+        int stationId = station.getStationId();
+        if (!Utils.isStationSelected(selectedStations, transportId, stationId)) {
+            return;
+        }
+        selectedStations.remove(getSelectedStation(transportId, stationId));
+        selectedStations.add(new SelectedStation(transportId, station.getRouteNumber(), station.getDirectionId(), stationId, value));
+        App app = App.get();
+        app.getSelectedStationStore().put(getFavouriteStations());
+        app.getEventManager().publish(new LoadStationsEvent(selectedStations));
+    }
+
+    private List<SelectedStation> getFavouriteStations() {
+        List<SelectedStation> favourite = new ArrayList<SelectedStation>();
+        for (SelectedStation station: selectedStations) {
+            if (station.isFavourite()) {
+                favourite.add(station);
+            }
+        }
+        return favourite;
     }
 
     @Override

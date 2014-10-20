@@ -14,7 +14,8 @@ public class SelectedStationParcel implements Parcelable {
             int routeNumber = in.readInt();
             int directionId = in.readInt();
             int stationId = in.readInt();
-            return new SelectedStation(transportId, routeNumber, directionId, stationId);
+            boolean isFavourite = (in.readInt() == 1);
+            return new SelectedStation(transportId, routeNumber, directionId, stationId, isFavourite);
         }
 
         public SelectedStation[] newArray(int size) {
@@ -39,6 +40,7 @@ public class SelectedStationParcel implements Parcelable {
         dest.writeInt(station.getRouteNumber());
         dest.writeInt(station.getDirectionId());
         dest.writeInt(station.getStationId());
+        dest.writeInt(station.isFavourite() ? 1 : 0);
     }
 
     public SelectedStation getStation() {

@@ -9,7 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_toLeftOf="@+id/v__forecasts_list_item_title__remove_station"
+        android:layout_toLeftOf="@+id/v__forecasts_list_item_title__favourite"
         android:textSize="20sp"
         android:textStyle="bold"/>
     <TextView
@@ -17,11 +17,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/v__forecasts_list_item_title__station"/>
-    <ImageView
-        android:id="@+id/v__forecasts_list_item_title__remove_station"
-        android:layout_width="wrap_content"
+    <ImageButton
+        android:id="@+id/v__forecasts_list_item_title__favourite"
+        android:layout_width="50dp"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:src="@drawable/ic_action_remove"/>
+        android:src="@drawable/favourite_button"
+        android:background="@android:color/transparent"/>
 </RelativeLayout>

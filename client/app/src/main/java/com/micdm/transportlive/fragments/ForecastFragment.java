@@ -24,11 +24,13 @@ import com.micdm.transportlive.events.EventType;
 import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.LoadStationsEvent;
 import com.micdm.transportlive.events.events.RemoveAllDataEvent;
+import com.micdm.transportlive.events.events.RequestFavouriteStationEvent;
 import com.micdm.transportlive.events.events.RequestFocusVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadNearestStationsEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestLoadStationsEvent;
 import com.micdm.transportlive.events.events.RequestSelectStationEvent;
+import com.micdm.transportlive.events.events.RequestUnfavouriteStationEvent;
 import com.micdm.transportlive.events.events.RequestUnselectStationEvent;
 import com.micdm.transportlive.events.events.UpdateForecastEvent;
 import com.micdm.transportlive.events.events.UpdateLocationEvent;
@@ -51,12 +53,12 @@ public class ForecastFragment extends Fragment {
 
             public final TextView stationView;
             public final TextView directionView;
-            public final View removeView;
+            public final View favouriteView;
 
-            private GroupViewHolder(TextView stationView, TextView directionView, View removeView) {
+            private GroupViewHolder(TextView stationView, TextView directionView, View favouriteView) {
                 this.stationView = stationView;
                 this.directionView = directionView;
-                this.removeView = removeView;
+                this.favouriteView = favouriteView;
             }
         }
 
@@ -79,6 +81,18 @@ public class ForecastFragment extends Fragment {
             }
         }
 
+        private final Comparator<SelectedStation> STATION_COMPARATOR = new Comparator<SelectedStation>() {
+            @Override
+            public int compare(SelectedStation a, SelectedStation b) {
+                if (a.isFavourite() != b.isFavourite()) {
+                    return b.isFavourite() ? 1 : -1;
+                }
+                if (a.getTransportId() != b.getTransportId()) {
+                    return (a.getTransportId() > b.getTransportId()) ? 1 : -1;
+                }
+                return (a.getStationId() > b.getStationId()) ? 1 : -1;
+            }
+        };
         private final Comparator<ForecastVehicle> VEHICLE_COMPARATOR = new Comparator<ForecastVehicle>() {
             @Override
             public int compare(ForecastVehicle a, ForecastVehicle b) {
@@ -98,6 +112,7 @@ public class ForecastFragment extends Fragment {
         }
 
         public void setSelectedStations(List<SelectedStation> selectedStations) {
+            Collections.sort(selectedStations, STATION_COMPARATOR);
             this.selectedStations = selectedStations;
         }
 
@@ -182,6 +197,7 @@ public class ForecastFragment extends Fragment {
             }
             GroupViewHolder holder = getGroupViewHolder(view);
             final SelectedStation selectedStation = getGroup(position);
+            view.setBackgroundColor(getResources().getColor(selectedStation.isFavourite() ? R.color.favourite_station_background : R.color.non_favourite_station_background));
             Station station = service
                     .getTransportById(selectedStation.getTransportId())
                     .getStationById(selectedStation.getStationId());
@@ -191,10 +207,19 @@ public class ForecastFragment extends Fragment {
                     .getRouteByNumber(selectedStation.getRouteNumber())
                     .getDirectionById(selectedStation.getDirectionId());
             holder.directionView.setText(getString(R.string.f__forecast__direction, direction.getFinish()));
-            holder.removeView.setOnClickListener(new View.OnClickListener() {
+            holder.favouriteView.setSelected(selectedStation.isFavourite());
+            holder.favouriteView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    App.get().getEventManager().publish(new RequestUnselectStationEvent(selectedStation));
+                    EventManager manager = App.get().getEventManager();
+                    if (selectedStation.isFavourite()) {
+                        manager.publish(new RequestUnfavouriteStationEvent(selectedStation));
+                        if (!Utils.isStationSelected(nearestStations, selectedStation.getTransportId(), selectedStation.getStationId())) {
+                            manager.publish(new RequestUnselectStationEvent(selectedStation));
+                        }
+                    } else {
+                        manager.publish(new RequestFavouriteStationEvent(selectedStation));
+                    }
                 }
             });
             return view;
@@ -207,7 +232,7 @@ public class ForecastFragment extends Fragment {
             }
             TextView stationView = (TextView) view.findViewById(R.id.v__forecasts_list_item_title__station);
             TextView directionView = (TextView) view.findViewById(R.id.v__forecasts_list_item_title__direction);
-            View removeView = view.findViewById(R.id.v__forecasts_list_item_title__remove_station);
+            View removeView = view.findViewById(R.id.v__forecasts_list_item_title__favourite);
             holder = new GroupViewHolder(stationView, directionView, removeView);
             view.setTag(holder);
             return holder;
@@ -220,6 +245,7 @@ public class ForecastFragment extends Fragment {
             }
             ChildViewHolder holder = getChildViewHolder(view);
             SelectedStation selectedStation = getGroup(groupPosition);
+            view.setBackgroundColor(getResources().getColor(selectedStation.isFavourite() ? R.color.favourite_station_background : R.color.non_favourite_station_background));
             ForecastVehicle vehicle = getChild(groupPosition, childPosition);
             if (vehicle == null) {
                 holder.noVehiclesView.setVisibility(View.VISIBLE);
