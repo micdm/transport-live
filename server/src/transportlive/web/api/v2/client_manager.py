@@ -142,6 +142,6 @@ class ClientManager:
 
     def _handle_load_nearest_stations_message(self, request_handler, message):
         stations = self._datastore.get_nearest_stations(message.latitude, message.longitude)
-        message = messages.NearestStationsMessage((transport.type, station.id) for transport, station in stations)
+        message = messages.NearestStationsMessage((station["transport"].type, station["station"].id) for station in stations)
         message_text = self._outcoming_message_converter.convert(message)
         request_handler.write_message(message_text)
