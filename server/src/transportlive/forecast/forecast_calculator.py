@@ -65,7 +65,6 @@ class ForecastCalculator:
     def get_forecast(self, transport_type, station_id):
         transport = self._service.get_transport_by_type(transport_type)
         station = transport.get_station_by_id(station_id)
-        logger.debug('Building forecast for station "%s" (%s-%s)...', station.name, transport_type, station.id)
         forecast = Forecast(transport, station)
         for route, vehicle, distance in self._get_vehicles(station):
             speed = self._get_vehicle_speed(vehicle)
@@ -74,7 +73,10 @@ class ForecastCalculator:
             time = int(distance / speed)
             if time > self.MAX_ARRIVAL_TIME:
                 continue
-            forecast.vehicles.append((vehicle, time))
+            forecast.vehicles.append({
+                "vehicle": vehicle,
+                "arrival_time": time
+            })
         return forecast
 
     def _get_vehicles(self, station):
@@ -161,7 +163,7 @@ class _DistanceCalculator:
         self._distance_cache = {}
 
     def get_distance(self, direction, point):
-        key = "%s-%s"%(direction, point)
+        key = "{}-{}".format(direction, point)
         if key not in self._distance_cache:
             self._distance_cache[key] = self._get_distance(direction, point)
         return self._distance_cache[key]

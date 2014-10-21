@@ -104,7 +104,7 @@ class ClientManager:
         for station in stations:
             transport_id, station_id = station
             forecast = self._datastore.get_forecast(transport_id, station_id)
-            if forecast == self._forecasts.get(station):
+            if not self._is_forecast_changed(station, forecast):
                 continue
             message = self._build_forecast_message(forecast)
             message_text = self._outcoming_message_converter.convert(message)
@@ -118,6 +118,28 @@ class ClientManager:
             if station[0] == transport_id:
                 stations.append(station)
         return stations
+
+    def _is_forecast_changed(self, station, forecast):
+        original_forecast = self._forecasts.get(station)
+        if not original_forecast:
+            return True
+        for vehicle in forecast.vehicles:
+            original_vehicle = self._get_forecast_vehicle(original_forecast, vehicle["vehicle"].id)
+            if not original_vehicle:
+                return True
+            if vehicle["arrival_time"] != original_vehicle["arrival_time"]:
+                return True
+        for original_vehicle in original_forecast.vehicles:
+            vehicle = self._get_forecast_vehicle(forecast, original_vehicle["vehicle"].id)
+            if not vehicle:
+                return True
+        return False
+
+    def _get_forecast_vehicle(self, forecast, vehicle_id):
+        for vehicle in forecast.vehicles:
+            if vehicle["vehicle"].id == vehicle_id:
+                return vehicle
+        return None
 
     def _on_remove_vehicle(self, vehicle):
         self._send_remove_vehicle_messages(vehicle)
@@ -137,10 +159,12 @@ class ClientManager:
                                        vehicle.last_mark.course)
 
     def _build_forecast_message(self, forecast):
-        vehicles = [(vehicle.number, vehicle.route.number, arrival_time, vehicle.is_low_floor) for vehicle, arrival_time in forecast.vehicles]
+        vehicles = [(vehicle["vehicle"].number, vehicle["vehicle"].route.number, vehicle["arrival_time"],
+                     vehicle["vehicle"].is_low_floor) for vehicle in forecast.vehicles]
         return messages.ForecastMessage(forecast.transport.type, forecast.station.id, vehicles)
 
     def _handle_load_nearest_stations_message(self, request_handler, message):
+        logger.debug("Finding nearest stations for (%s, %s)", message.latitude, message.longitude)
         stations = self._datastore.get_nearest_stations(message.latitude, message.longitude)
         message = messages.NearestStationsMessage((station["transport"].type, station["station"].id) for station in stations)
         message_text = self._outcoming_message_converter.convert(message)
