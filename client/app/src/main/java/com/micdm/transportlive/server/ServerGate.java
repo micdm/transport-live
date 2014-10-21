@@ -36,28 +36,28 @@ public class ServerGate {
 
     private final Context context;
 
+    private final ClientManager clientManager;
     private OnConnectListener onConnectListener;
     private OnMessageListener onMessageListener;
 
-    private final ClientManager clientManager = new ClientManager(new ClientManager.OnConnectListener() {
-        @Override
-        public void onStartConnect(int tryNumber) {
-            onConnectListener.onStartConnect(tryNumber);
-        }
-        @Override
-        public void onCompleteConnect() {
-            sendGreeting();
-            onConnectListener.OnCompleteConnect();
-        }
-    }, new ClientManager.OnMessageListener() {
-        @Override
-        public void onMessage(String message) {
-            handleMessage(message);
-        }
-    });
-
     public ServerGate(Context context) {
         this.context = context;
+        clientManager = new ClientManager(context, new ClientManager.OnConnectListener() {
+            @Override
+            public void onStartConnect(int tryNumber) {
+                onConnectListener.onStartConnect(tryNumber);
+            }
+            @Override
+            public void onCompleteConnect() {
+                sendGreeting();
+                onConnectListener.OnCompleteConnect();
+            }
+        }, new ClientManager.OnMessageListener() {
+            @Override
+            public void onMessage(String message) {
+                handleMessage(message);
+            }
+        });
     }
 
     public void connect(OnConnectListener onConnectListener, OnMessageListener onMessageListener) {

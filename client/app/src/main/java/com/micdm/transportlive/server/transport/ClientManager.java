@@ -1,8 +1,18 @@
 package com.micdm.transportlive.server.transport;
 
+import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 
+import com.micdm.transportlive.R;
+import com.micdm.transportlive.misc.Utils;
+
 import org.java_websocket.WebSocket;
+import org.java_websocket.drafts.Draft_17;
+
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ClientManager {
 
@@ -15,6 +25,8 @@ public class ClientManager {
         public void onMessage(String message);
     }
 
+    private static final URI SERVER_URI = URI.create("ws://192.168.1.5/api/v2");
+    private static final int TIMEOUT = 10;
     private static final int RETRY_INTERVAL = 5;
 
     private static final Handler handler = new Handler();
@@ -52,12 +64,14 @@ public class ClientManager {
     private int tryNumber;
     private Runnable reconnectCallback;
 
+    private final Context context;
     private final OnConnectListener onConnectListener;
     private final OnMessageListener onMessageListener;
 
     private WebSocketClient client;
 
-    public ClientManager(OnConnectListener onConnectListener, OnMessageListener onMessageListener) {
+    public ClientManager(Context context, OnConnectListener onConnectListener, OnMessageListener onMessageListener) {
+        this.context = context;
         this.onConnectListener = onConnectListener;
         this.onMessageListener = onMessageListener;
     }
@@ -70,8 +84,14 @@ public class ClientManager {
         }
         tryNumber += 1;
         onConnectListener.onStartConnect(tryNumber);
-        client = new WebSocketClient(onClientOpenListener, onClientMessageListener, onClientCloseListener);
+        client = new WebSocketClient(SERVER_URI, new Draft_17(), getRequestHeaders(), TIMEOUT, onClientOpenListener, onClientMessageListener, onClientCloseListener);
         client.connect();
+    }
+
+    private Map<String, String> getRequestHeaders() {
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("User-Agent", context.getString(R.string.__user_agent, Utils.getAppVersion(context), Build.VERSION.RELEASE));
+        return headers;
     }
 
     public void send(String message) {

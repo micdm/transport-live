@@ -2,10 +2,11 @@ package com.micdm.transportlive.server.transport;
 
 import android.os.Handler;
 
-import org.java_websocket.drafts.Draft_17;
+import org.java_websocket.drafts.Draft;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
+import java.util.Map;
 
 public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
 
@@ -21,17 +22,15 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
         public void onClose();
     }
 
-    private static final URI SERVER_URI = URI.create("ws://192.168.1.5:8001/api/v2");
-    private static final int TIMEOUT = 10;
-
     private static final Handler handler = new Handler();
 
     private final OnOpenListener onOpenListener;
     private final OnMessageListener onMessageListener;
     private final OnCloseListener onCloseListener;
 
-    public WebSocketClient(OnOpenListener onOpenListener, OnMessageListener onMessageListener, OnCloseListener onCloseListener) {
-        super(SERVER_URI, new Draft_17(), null, TIMEOUT);
+    public WebSocketClient(URI serverUri, Draft draft, Map<String,String> headers, int timeout, OnOpenListener onOpenListener,
+                           OnMessageListener onMessageListener, OnCloseListener onCloseListener) {
+        super(serverUri, draft, headers, timeout);
         this.onOpenListener = onOpenListener;
         this.onMessageListener = onMessageListener;
         this.onCloseListener = onCloseListener;
