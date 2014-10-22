@@ -35,7 +35,9 @@ public class DefaultLocator extends Locator {
 
     @Override
     public void start() {
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_UPDATE_TIME * 1000, MIN_UPDATE_DISTANCE, locationListener);
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_UPDATE_TIME * 1000, MIN_UPDATE_DISTANCE, locationListener);
+        }
     }
 
     @Override

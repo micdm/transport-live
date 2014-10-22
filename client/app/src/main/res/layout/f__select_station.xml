@@ -1,28 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center">
-    <LinearLayout
+    android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/f__select_station__transport_list_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <Spinner
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/f__select_station__transport_list"/>
-        <Spinner
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/f__select_station__route_list"/>
-    </LinearLayout>
+        android:textStyle="bold"
+        android:padding="@dimen/regular_padding"
+        android:textSize="@dimen/regular_font"
+        android:text="@string/f__select_station__transport_list_title"/>
     <Spinner
+        android:id="@+id/f__select_station__transport_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/f__select_station__direction_list"/>
+        android:layout_below="@id/f__select_station__transport_list_title"
+        android:layout_marginLeft="@dimen/regular_padding"/>
     <Spinner
+        android:id="@+id/f__select_station__route_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/f__select_station__station_list"/>
-</LinearLayout>
+        android:layout_toRightOf="@id/f__select_station__transport_list"
+        android:layout_below="@id/f__select_station__transport_list_title"
+        android:layout_marginRight="@dimen/regular_padding"/>
+    <TextView
+        android:id="@+id/f__select_station__direction_list_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/f__select_station__transport_list"
+        android:textStyle="bold"
+        android:padding="@dimen/regular_padding"
+        android:textSize="@dimen/regular_font"
+        android:text="@string/f__select_station__direction_list_title"/>
+    <Spinner
+        android:id="@+id/f__select_station__direction_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/f__select_station__direction_list_title"
+        android:layout_marginLeft="@dimen/regular_padding"
+        android:layout_marginRight="@dimen/regular_padding"/>
+    <TextView
+        android:id="@+id/f__select_station__station_list_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/f__select_station__direction_list"
+        android:textStyle="bold"
+        android:padding="@dimen/regular_padding"
+        android:textSize="@dimen/regular_font"
+        android:text="@string/f__select_station__station_list_title"/>
+    <Spinner
+        android:id="@+id/f__select_station__station_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/f__select_station__station_list_title"
+        android:layout_marginLeft="@dimen/regular_padding"
+        android:layout_marginRight="@dimen/regular_padding"/>
+</RelativeLayout>

@@ -8,7 +8,8 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:gravity="center"
-        android:padding="10dp"
+        android:padding="@dimen/regular_padding"
+        android:textSize="@dimen/regular_font"
         android:text="@string/f__map__no_route_selected"/>
     <TextView
         android:id="@+id/f__map__no_vehicles"
@@ -16,7 +17,8 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:gravity="center"
-        android:padding="10dp"
+        android:padding="@dimen/regular_padding"
+        android:textSize="@dimen/regular_font"
         android:text="@string/f__map__no_vehicles"/>
     <RelativeLayout
         android:id="@+id/f__map__map_container"

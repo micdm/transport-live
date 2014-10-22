@@ -27,6 +27,7 @@ import com.micdm.transportlive.events.events.LoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestFavouriteStationEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.RequestSelectStationEvent;
+import com.micdm.transportlive.misc.RouteColors;
 import com.micdm.transportlive.misc.Utils;
 
 import java.util.List;
@@ -84,15 +85,68 @@ public class SelectStationFragment extends DialogFragment {
         }
     }
 
-    private class RouteListAdapter extends ListAdapter<Route> {
+    private class RouteListAdapter extends BaseAdapter {
 
-        public RouteListAdapter(List<Route> items) {
-            super(items);
+        private class ViewHolder {
+
+            public final View colorView;
+            public final TextView numberView;
+
+            private ViewHolder(View colorView, TextView numberView) {
+                this.colorView = colorView;
+                this.numberView = numberView;
+            }
+        }
+
+        private final RouteColors colors;
+        private final List<Route> routes;
+
+        public RouteListAdapter(Service service, List<Route> routes) {
+            colors = new RouteColors(service);
+            this.routes = routes;
         }
 
         @Override
-        protected String getItemName(int position) {
-            return getString(R.string.f__select_station__route_list_item, getItem(position).getNumber());
+        public int getCount() {
+            return routes.size();
+        }
+
+        @Override
+        public Route getItem(int position) {
+            return routes.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return getItem(position).getNumber();
+        }
+
+        @Override
+        public View getView(int position, View view, ViewGroup parent) {
+            if (view == null) {
+                view = View.inflate(getActivity(), R.layout.v__select_station_route_list_item, null);
+            }
+            ViewHolder holder = getViewHolder(view);
+            Route route = getItem(position);
+            holder.colorView.setBackgroundColor(colors.get(route));
+            holder.numberView.setText(String.valueOf(route.getNumber()));
+            return view;
+        }
+
+        private ViewHolder getViewHolder(View view) {
+            ViewHolder holder = (ViewHolder) view.getTag();
+            if (holder != null) {
+                return holder;
+            }
+            View colorView = view.findViewById(R.id.v__select_station_route_list_item__color);
+            TextView numberView = (TextView) view.findViewById(R.id.v__select_station_route_list_item__number);
+            holder = new ViewHolder(colorView, numberView);
+            view.setTag(holder);
+            return holder;
+        }
+
+        public int getItemPosition(Route route) {
+            return routes.indexOf(route);
         }
     }
 
@@ -105,7 +159,7 @@ public class SelectStationFragment extends DialogFragment {
         @Override
         protected String getItemName(int position) {
             Direction direction = getItem(position);
-            return getString(R.string.f__select_station__direction_list_item, direction.getStart(), direction.getFinish());
+            return getString(R.string.f__select_station__direction_list_item, direction.getFinish());
         }
     }
 
@@ -187,13 +241,13 @@ public class SelectStationFragment extends DialogFragment {
     }
 
     private void setup(Service service, Transport transport, Route route, Direction direction, Station station) {
-        setupTransportListSpinner(service.getTransports(), transport);
-        setupRouteListSpinner(transport.getRoutes(), route);
+        setupTransportListSpinner(service, service.getTransports(), transport);
+        setupRouteListSpinner(service, transport.getRoutes(), route);
         setupDirectionListSpinner(route.getDirections(), direction);
         setupStationListSpinner(direction.getStations(), station);
     }
 
-    private void setupTransportListSpinner(List<Transport> transports, Transport transport) {
+    private void setupTransportListSpinner(final Service service, List<Transport> transports, Transport transport) {
         Spinner view = getTransportListSpinner();
         TransportListAdapter adapter = new TransportListAdapter(transports);
         view.setAdapter(adapter);
@@ -203,16 +257,18 @@ public class SelectStationFragment extends DialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Transport transport = (Transport) parent.getAdapter().getItem(position);
-                getRouteListSpinner().setAdapter(new RouteListAdapter(transport.getRoutes()));
+                getRouteListSpinner().setAdapter(new RouteListAdapter(service, transport.getRoutes()));
             }
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
         });
     }
 
-    private void setupRouteListSpinner(List<Route> routes, Route route) {
+    private void setupRouteListSpinner(Service service, List<Route> routes, Route route) {
         Spinner view = getRouteListSpinner();
-        RouteListAdapter adapter = new RouteListAdapter(routes);
+        RouteListAdapter adapter = new RouteListAdapter(service, routes);
         view.setAdapter(adapter);
         int position = adapter.getItemPosition(route);
         view.setSelection(position, false);
@@ -223,7 +279,9 @@ public class SelectStationFragment extends DialogFragment {
                 getDirectionListSpinner().setAdapter(new DirectionListAdapter(route.getDirections()));
             }
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
         });
     }
 
@@ -240,7 +298,9 @@ public class SelectStationFragment extends DialogFragment {
                 getStationListSpinner().setAdapter(new StationListAdapter(direction.getStations()));
             }
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
         });
     }
 

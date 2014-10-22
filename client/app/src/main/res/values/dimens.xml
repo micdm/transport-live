@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="small_font">14sp</dimen>
+    <dimen name="regular_font">18sp</dimen>
+    <dimen name="large_font">22sp</dimen>
+    <dimen name="extra_large_font">40sp</dimen>
+    <dimen name="small_padding">5dp</dimen>
+    <dimen name="regular_padding">10dp</dimen>
+    <dimen name="large_padding">15dp</dimen>
+</resources>

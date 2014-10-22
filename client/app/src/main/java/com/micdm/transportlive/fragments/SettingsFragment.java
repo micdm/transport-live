@@ -41,13 +41,13 @@ public class SettingsFragment extends PreferenceFragment {
             @Override
             public void onEvent(LoadDonateProductsEvent event) {
                 List<DonateProduct> products = event.getProducts();
-                if (products == null) {
+                if (products == null || products.isEmpty()) {
                     if (donatePreference == null) {
                         donatePreference = findPreference(PREF_KEY_DONATE);
                         getPreferenceScreen().removePreference(donatePreference);
                     }
                 } else {
-                    if (products.size() != 0 && donatePreference != null) {
+                    if (donatePreference != null) {
                         getPreferenceScreen().addPreference(donatePreference);
                         donatePreference = null;
                     }

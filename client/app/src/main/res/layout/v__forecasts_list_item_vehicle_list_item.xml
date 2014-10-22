@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:paddingTop="5dp"
-    android:paddingBottom="5dp">
+    android:layout_height="match_parent">
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/v__forecasts_list_item_vehicle_list_item__no_vehicles"
         android:gravity="center"
-        android:padding="5dp"
+        android:padding="@dimen/small_padding"
         android:textColor="#888"
+        android:textSize="@dimen/small_font"
         android:text="@string/f__forecast__no_vehicles"/>
     <RelativeLayout
         android:id="@+id/v__forecasts_list_item_vehicle_list_item__vehicle_info"
@@ -21,29 +18,35 @@
         <View
             android:id="@+id/v__forecasts_list_item_vehicle_list_item__color"
             android:layout_width="15dp"
-            android:layout_height="15dp"
+            android:layout_height="25dp"
             android:layout_centerVertical="true"/>
         <TextView
             android:id="@+id/v__forecasts_list_item_vehicle_list_item__route"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/v__forecasts_list_item_vehicle_list_item__color"
-            android:padding="5dp"/>
+            android:layout_centerVertical="true"
+            android:padding="@dimen/regular_padding"
+            android:textSize="@dimen/regular_font"/>
         <TextView
             android:id="@+id/v__forecasts_list_item_vehicle_list_item__low_floor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/v__forecasts_list_item_vehicle_list_item__route"
-            android:padding="5dp"
+            android:layout_centerVertical="true"
+            android:padding="@dimen/small_padding"
             android:textStyle="italic"
             android:textColor="#999999"
+            android:textSize="@dimen/small_font"
             android:background="@drawable/low_floor_label_background"
             android:text="@string/f__forecast__low_floor"/>
         <TextView
             android:id="@+id/v__forecasts_list_item_vehicle_list_item__arrival_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:layout_alignParentRight="true"/>
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:padding="@dimen/regular_padding"
+            android:textSize="@dimen/regular_font"/>
     </RelativeLayout>
 </FrameLayout>
