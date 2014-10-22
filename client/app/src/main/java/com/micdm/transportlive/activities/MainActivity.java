@@ -14,7 +14,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.micdm.transportlive.App;
 import com.micdm.transportlive.R;
@@ -357,7 +356,6 @@ public class MainActivity extends FragmentActivity {
                 actionBar.setDisplayShowTitleEnabled(true);
                 actionBar.setTitle(getString(R.string.__connecting));
                 if (tryNumber > 1) {
-                    showNoConnectionNotice();
                     App.get().getAnalytics().reportEvent(Analytics.Category.MISC, Analytics.Action.MISC, "no_connection", tryNumber);
                 }
             }
@@ -399,10 +397,6 @@ public class MainActivity extends FragmentActivity {
         Drawable icon = original.getConstantState().newDrawable().mutate();
         icon.setColorFilter(getResources().getColor(R.color.connecting_icon), PorterDuff.Mode.SRC_ATOP);
         return icon;
-    }
-
-    private void showNoConnectionNotice() {
-        Toast.makeText(this, getString(R.string.__no_connection_after_several_tries), Toast.LENGTH_LONG).show();
     }
 
     private void handleVehicleMessage(VehicleMessage message) {
