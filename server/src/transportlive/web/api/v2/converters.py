@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from tornado.escape import json_decode, json_encode
 
+from transportlive.misc.utils import normalize_coordinate
 import transportlive.web.api.v2.messages as messages
 
 class IncomingMessageConverter:
@@ -27,7 +28,9 @@ class IncomingMessageConverter:
         if message_type == self.MESSAGE_TYPE_UNSELECT_STATION:
             return messages.UnselectStationMessage(int(params["transport_id"]), int(params["station_id"]))
         if message_type == self.MESSAGE_TYPE_LOAD_NEAREST_STATIONS:
-            return messages.LoadNearestStationsMessage(Decimal(params["latitude"]), Decimal(params["longitude"]))
+            latitude = normalize_coordinate(Decimal(params["latitude"]))
+            longitude = normalize_coordinate(Decimal(params["longitude"]))
+            return messages.LoadNearestStationsMessage(latitude, longitude)
         raise Exception("unknown message type {}".format(message_type))
 
     def _unserialize(self, text):
