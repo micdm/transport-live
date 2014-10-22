@@ -11,11 +11,13 @@ from transportlive.web.site import IndexHandler
 logger = getLogger(__name__)
 
 def _get_app(datastore):
+    client_manager = ClientManager(datastore)
+    client_manager.init()
     return Application([
         (r"/", IndexHandler),
         (r"/api/v1/vehicles", VehicleHandler, {"datastore": datastore}),
         (r"/api/v1/forecasts", ForecastHandler, {"datastore": datastore}),
-        (r"/api/v2", ApiHandler, {"client_manager": ClientManager(datastore)})
+        (r"/api/v2", ApiHandler, {"client_manager": client_manager})
     ], debug=options.DEBUG)
 
 def start_web_server(datastore):

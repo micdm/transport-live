@@ -1,5 +1,6 @@
 from datetime import timedelta
 from logging import getLogger
+import logging
 import logging.config
 import sys
 import unittest
@@ -42,6 +43,7 @@ def _setup_datastore():
     return datastore
 
 def _run_tests():
+    logging.disable(logging.CRITICAL)
     loader = unittest.TestLoader()
     tests = loader.discover(options.TEST_ROOT, "*test.py")
     unittest.TextTestRunner(verbosity=2).run(tests)

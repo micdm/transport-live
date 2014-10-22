@@ -10,11 +10,13 @@ class ClientManager:
     def __init__(self, datastore):
         self._incoming_message_converter = IncomingMessageConverter()
         self._outcoming_message_converter = OutcomingMessageConverter()
-        datastore.set_callbacks(self._on_update_vehicle, self._on_remove_vehicle)
         self._datastore = datastore
         self._selected_routes = {}
         self._selected_stations = {}
         self._forecasts = {}
+
+    def init(self):
+        self._datastore.set_callbacks(self._on_update_vehicle, self._on_remove_vehicle)
 
     def on_data(self, request_handler, text):
         message = self._incoming_message_converter.convert(text)
@@ -36,11 +38,17 @@ class ClientManager:
 
     def _handle_select_route_message(self, request_handler, message):
         route = (message.transport_id, message.route_number)
-        logger.debug("Route %s selected", route)
-        if route not in self._selected_routes:
-            self._selected_routes[route] = []
-        self._selected_routes[route].append(request_handler)
-        for vehicle in self._datastore.get_vehicles(message.transport_id, message.route_number):
+        request_handlers = self._selected_routes.get(route)
+        if not request_handlers:
+            request_handlers = []
+            self._selected_routes[route] = request_handlers
+        if request_handler not in request_handlers:
+            logger.debug("Route %s selected", route)
+            self._selected_routes[route].append(request_handler)
+            self._send_initial_vehicles(request_handler, message.transport_id, message.route_number)
+
+    def _send_initial_vehicles(self, request_handler, transport_id, route_number):
+        for vehicle in self._datastore.get_vehicles(transport_id, route_number):
             message = self._build_vehicle_message(vehicle)
             message_text = self._outcoming_message_converter.convert(message)
             request_handler.write_message(message_text)
@@ -52,11 +60,17 @@ class ClientManager:
 
     def _handle_select_station_message(self, request_handler, message):
         station = (message.transport_id, message.station_id)
-        logger.debug("Station %s selected", station)
-        if station not in self._selected_stations:
-            self._selected_stations[station] = []
-        self._selected_stations[station].append(request_handler)
-        forecast = self._datastore.get_forecast(message.transport_id, message.station_id)
+        request_handlers = self._selected_stations.get(station)
+        if not request_handlers:
+            request_handlers = []
+            self._selected_stations[station] = request_handlers
+        if request_handler not in request_handlers:
+            logger.debug("Station %s selected", station)
+            self._selected_stations[station].append(request_handler)
+            self._send_initial_forecast(request_handler, message.transport_id, message.station_id)
+
+    def _send_initial_forecast(self, request_handler, transport_id, station_id):
+        forecast = self._datastore.get_forecast(transport_id, station_id)
         message = self._build_forecast_message(forecast)
         message_text = self._outcoming_message_converter.convert(message)
         request_handler.write_message(message_text)
