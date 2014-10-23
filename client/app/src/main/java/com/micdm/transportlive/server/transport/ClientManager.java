@@ -25,7 +25,7 @@ public class ClientManager {
         public void onMessage(String message);
     }
 
-    private static final URI SERVER_URI = URI.create("ws://192.168.1.5/api/v2");
+    private static final URI SERVER_URI = URI.create("ws://transport-live.tom.ru/api/v2");
     private static final int TIMEOUT = 10;
     private static final int RETRY_INTERVAL = 5;
 
