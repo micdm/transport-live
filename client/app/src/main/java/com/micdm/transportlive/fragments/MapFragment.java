@@ -82,6 +82,7 @@ public class MapFragment extends Fragment {
 
         private final Bitmap original;
         private final Pools.Pool<Bitmap> bitmapPool;
+        private final Map<Bitmap, Canvas> canvases = new HashMap<Bitmap, Canvas>();
         private final Map<Route, Paint> routePaints;
         private final Paint textPaint;
 
@@ -136,7 +137,7 @@ public class MapFragment extends Fragment {
             if (bitmap == null) {
                 return null;
             }
-            Canvas canvas = new Canvas(bitmap);
+            Canvas canvas = getCanvas(bitmap);
             matrix.setRotate(vehicle.getCourse(), original.getWidth() / 2, original.getHeight() / 2);
             Transport transport = service.getTransportById(vehicle.getTransportId());
             Route route = transport.getRouteByNumber(vehicle.getRouteNumber());
@@ -145,6 +146,15 @@ public class MapFragment extends Fragment {
             textPaint.getTextBounds(text, 0, text.length(), bounds);
             canvas.drawText(text, canvas.getWidth() / 2 - bounds.width() / 2, canvas.getHeight() / 2 + bounds.height() / 2 - SHADOW_SIZE, textPaint);
             return bitmap;
+        }
+
+        private Canvas getCanvas(Bitmap bitmap) {
+            Canvas canvas = canvases.get(bitmap);
+            if (canvas == null) {
+                canvas = new Canvas(bitmap);
+                canvases.put(bitmap, canvas);
+            }
+            return canvas;
         }
 
         public void release(Bitmap bitmap) {

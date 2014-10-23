@@ -400,14 +400,19 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void handleVehicleMessage(VehicleMessage message) {
+        int transportId = message.getTransportId();
+        int routeNumber = message.getRouteNumber();
+        if (!Utils.isRouteSelected(selectedRoutes, transportId, routeNumber)) {
+            return;
+        }
+        EventManager manager = App.get().getEventManager();
         String number = message.getNumber();
         BigDecimal latitude = message.getLatitude();
         BigDecimal longitude = message.getLongitude();
-        EventManager manager = App.get().getEventManager();
         if (latitude.equals(BigDecimal.ZERO) && longitude.equals(BigDecimal.ZERO)) {
             manager.publish(new RemoveVehicleEvent(number));
         } else {
-            MapVehicle vehicle = new MapVehicle(number, message.getTransportId(), message.getRouteNumber(), latitude, longitude, message.getCourse());
+            MapVehicle vehicle = new MapVehicle(number, transportId, routeNumber, latitude, longitude, message.getCourse());
             manager.publish(new UpdateVehicleEvent(vehicle));
         }
     }
@@ -415,6 +420,9 @@ public class MainActivity extends FragmentActivity {
     private void handleForecastMessage(ForecastMessage message) {
         int transportId = message.getTransportId();
         int stationId = message.getStationId();
+        if (!Utils.isStationSelected(selectedStations, transportId, stationId)) {
+            return;
+        }
         List<ForecastVehicle> vehicles = new ArrayList<ForecastVehicle>();
         for (ForecastMessage.Vehicle vehicle: message.getVehicles()) {
             String number = vehicle.getNumber();
