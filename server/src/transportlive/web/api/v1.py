@@ -20,14 +20,14 @@ class VehicleHandler(RequestHandler):
 
     def _result_to_dict(self, result):
         return {
-            "result": map(self._vehicles_to_dict, result)
+            "result": list(map(self._vehicles_to_dict, result))
         }
 
     def _vehicles_to_dict(self, vehicles):
         return {
             "transport": vehicles[0].transport.type,
             "route": vehicles[0].route.number,
-            "vehicles": map(self._vehicle_to_dict, vehicles)
+            "vehicles": list(map(self._vehicle_to_dict, vehicles))
         }
 
     def _vehicle_to_dict(self, vehicle):
@@ -62,14 +62,14 @@ class ForecastHandler(RequestHandler):
 
     def _result_to_dict(self, result):
         return {
-            "result": map(self._forecast_to_dict, result)
+            "result": list(map(self._forecast_to_dict, result))
         }
 
     def _forecast_to_dict(self, forecast):
         return {
             "transport": forecast.transport.type,
             "station": forecast.station.id,
-            "vehicles": map(lambda item: self._vehicles_to_dict(item["vehicle"], item["arrival_time"]), forecast.vehicles)
+            "vehicles": list(map(lambda item: self._vehicles_to_dict(item["vehicle"], item["arrival_time"]), forecast.vehicles))
         }
 
     def _vehicles_to_dict(self, vehicle, time):

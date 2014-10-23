@@ -46,7 +46,7 @@ class DataStore:
     def get_vehicles(self, transport_type, route_number):
         transport = self._service.get_transport_by_type(transport_type)
         route = transport.get_route_by_number(route_number)
-        return filter(lambda vehicle: vehicle.transport == transport and vehicle.route == route, self._vehicles.values())
+        return list(filter(lambda vehicle: vehicle.transport == transport and vehicle.route == route, self._vehicles.values()))
 
     def get_forecast(self, transport_type, station_id):
         return self._forecast_calculator.get_forecast(transport_type, station_id)
