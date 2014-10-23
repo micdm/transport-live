@@ -27,10 +27,6 @@ public class Transport {
         return Type.values()[id];
     }
 
-    public List<Station> getStations() {
-        return stations;
-    }
-
     public Station getStationById(int id) {
         for (Station station: stations) {
             if (station.getId() == id) {

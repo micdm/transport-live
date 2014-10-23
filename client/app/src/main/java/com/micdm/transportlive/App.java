@@ -5,7 +5,7 @@ import android.content.Context;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.micdm.transportlive.events.EventManager;
-import com.micdm.transportlive.events.intents.IntentBasedEventManager;
+import com.micdm.transportlive.events.PlainEventManager;
 import com.micdm.transportlive.location.DefaultLocator;
 import com.micdm.transportlive.location.GooglePlayLocator;
 import com.micdm.transportlive.location.Locator;
@@ -51,7 +51,7 @@ public class App extends android.app.Application {
 
     public EventManager getEventManager() {
         if (eventManager == null) {
-            eventManager = new IntentBasedEventManager(getApplicationContext());
+            eventManager = new PlainEventManager();
         }
         return eventManager;
     }

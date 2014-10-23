@@ -33,7 +33,6 @@ public class DonateManager {
             loadProducts();
         }
     });
-    private List<DonateProduct> products;
 
     private final Context context;
     private final OnLoadProductsListener listener;
@@ -114,7 +113,6 @@ public class DonateManager {
             }
             @Override
             protected void onPostExecute(List<DonateProduct> loaded) {
-                products = loaded;
                 listener.onLoadProducts(loaded);
             }
         };
