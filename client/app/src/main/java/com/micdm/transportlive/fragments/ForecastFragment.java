@@ -36,9 +36,9 @@ import com.micdm.transportlive.events.events.UpdateForecastEvent;
 import com.micdm.transportlive.events.events.UpdateLocationEvent;
 import com.micdm.transportlive.events.events.UpdateNearestStationsEvent;
 import com.micdm.transportlive.misc.RouteColors;
-import com.micdm.transportlive.misc.TimeChecker;
 import com.micdm.transportlive.misc.Utils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -289,9 +289,10 @@ public class ForecastFragment extends Fragment {
         }
     }
 
-    private static final int NEAREST_STATIONS_UPDATE_INTERVAL = 20;
+    private static final BigDecimal MAX_COORDINATE_DELTA = new BigDecimal("0.001");
 
-    private final TimeChecker timeChecker = new TimeChecker(NEAREST_STATIONS_UPDATE_INTERVAL);
+    private BigDecimal userLatitude;
+    private BigDecimal userLongitude;
     private final List<SelectedStation> nearestStations = new ArrayList<SelectedStation>();
 
     private View noStationSelectedView;
@@ -327,7 +328,6 @@ public class ForecastFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        timeChecker.reset();
         hideAllViews();
         subscribeForEvents();
         requestForData();
@@ -393,8 +393,12 @@ public class ForecastFragment extends Fragment {
         manager.subscribe(this, EventType.UPDATE_LOCATION, new EventManager.OnEventListener<UpdateLocationEvent>() {
             @Override
             public void onEvent(UpdateLocationEvent event) {
-                if (timeChecker.check()) {
-                    manager.publish(new RequestLoadNearestStationsEvent(event.getLatitude(), event.getLongitude()));
+                BigDecimal latitude = event.getLatitude();
+                BigDecimal longitude = event.getLongitude();
+                if (needUpdateNearestStations(latitude, longitude)) {
+                    userLatitude = latitude;
+                    userLongitude = longitude;
+                    manager.publish(new RequestLoadNearestStationsEvent(latitude, longitude));
                 }
             }
         });
@@ -404,6 +408,19 @@ public class ForecastFragment extends Fragment {
                 updateNearestStations(event.getStations());
             }
         });
+    }
+
+    private boolean needUpdateNearestStations(BigDecimal latitude, BigDecimal longitude) {
+        if (userLatitude == null || userLongitude == null) {
+            return true;
+        }
+        if (userLatitude.subtract(latitude).abs().compareTo(MAX_COORDINATE_DELTA) == 1) {
+            return true;
+        }
+        if (userLongitude.subtract(longitude).abs().compareTo(MAX_COORDINATE_DELTA) == 1) {
+            return true;
+        }
+        return false;
     }
 
     private void updateNearestStations(List<SelectedStation> nearestStations) {
