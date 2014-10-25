@@ -17,4 +17,8 @@ public class TimeChecker {
         }
         return false;
     }
+
+    public void reset() {
+        lastCheck = 0;
+    }
 }

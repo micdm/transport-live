@@ -327,6 +327,7 @@ public class ForecastFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        timeChecker.reset();
         hideAllViews();
         subscribeForEvents();
         requestForData();
