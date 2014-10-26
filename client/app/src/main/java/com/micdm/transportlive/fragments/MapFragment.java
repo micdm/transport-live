@@ -358,7 +358,7 @@ public class MapFragment extends Fragment {
         setupMapController(newMapView);
         List<Overlay> overlays = mapView.getOverlays();
         if (!overlays.isEmpty()) {
-            newMapView.getOverlays().add(overlays.get(0));
+            newMapView.getOverlays().addAll(overlays);
         }
         mapView = newMapView;
         if (needUseExternalMap()) {
