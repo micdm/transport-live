@@ -27,6 +27,7 @@ android {
             runProguard false
             zipAlign false
             applicationIdSuffix '.dev'
+            versionNameSuffix '-dev'
         }
     }
     packagingOptions {

@@ -27,7 +27,7 @@ public class ClientManager {
 
     private static final URI SERVER_URI = URI.create("ws://transport-live.tom.ru/api/v2");
     private static final int TIMEOUT = 10;
-    private static final int RETRY_INTERVAL = 5;
+    private static final int RETRY_INTERVAL = 3;
 
     private static final Handler handler = new Handler();
 
@@ -47,6 +47,9 @@ public class ClientManager {
     private final WebSocketClient.OnCloseListener onClientCloseListener = new WebSocketClient.OnCloseListener() {
         @Override
         public void onClose() {
+            if (!needKeepConnect) {
+                return;
+            }
             reconnectCallback = new Runnable() {
                 @Override
                 public void run() {
@@ -78,10 +81,6 @@ public class ClientManager {
 
     public void connect() {
         needKeepConnect = true;
-        if (reconnectCallback != null) {
-            handler.removeCallbacks(reconnectCallback);
-            reconnectCallback = null;
-        }
         tryNumber += 1;
         onConnectListener.onStartConnect(tryNumber);
         client = new WebSocketClient(SERVER_URI, new Draft_17(), getRequestHeaders(), TIMEOUT, onClientOpenListener, onClientMessageListener, onClientCloseListener);
@@ -106,7 +105,9 @@ public class ClientManager {
             handler.removeCallbacks(reconnectCallback);
             reconnectCallback = null;
         }
-        client.close();
-        client = null;
+        if (client != null) {
+            client.close();
+            client = null;
+        }
     }
 }
