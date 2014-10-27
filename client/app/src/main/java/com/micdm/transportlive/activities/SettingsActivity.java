@@ -19,6 +19,7 @@ import com.micdm.transportlive.events.EventType;
 import com.micdm.transportlive.events.events.DonateEvent;
 import com.micdm.transportlive.events.events.LoadDonateProductsEvent;
 import com.micdm.transportlive.events.events.RequestDonateEvent;
+import com.micdm.transportlive.events.events.RequestLoadDonateProductsEvent;
 import com.micdm.transportlive.fragments.AboutFragment;
 import com.micdm.transportlive.fragments.DonateFragment;
 import com.micdm.transportlive.fragments.FragmentTag;
@@ -31,12 +32,7 @@ public class SettingsActivity extends FragmentActivity implements PreferenceFrag
 
     private static final int BUY_REQUEST_CODE = 1001;
 
-    private final DonateManager donateManager = new DonateManager(this, new DonateManager.OnLoadProductsListener() {
-        @Override
-        public void onLoadProducts(List<DonateProduct> products) {
-            App.get().getEventManager().publish(new LoadDonateProductsEvent(products));
-        }
-    });
+    private final DonateManager donateManager = new DonateManager(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +44,17 @@ public class SettingsActivity extends FragmentActivity implements PreferenceFrag
 
     private void subscribeForEvents() {
         EventManager manager = App.get().getEventManager();
+        manager.subscribe(this, EventType.REQUEST_LOAD_DONATE_PRODUCTS, new EventManager.OnEventListener<RequestLoadDonateProductsEvent>() {
+            @Override
+            public void onEvent(RequestLoadDonateProductsEvent event) {
+                donateManager.loadProducts(new DonateManager.OnLoadProductsListener() {
+                    @Override
+                    public void onLoadProducts(List<DonateProduct> products) {
+                        App.get().getEventManager().publish(new LoadDonateProductsEvent(products));
+                    }
+                });
+            }
+        });
         manager.subscribe(this, EventType.REQUEST_DONATE, new EventManager.OnEventListener<RequestDonateEvent>() {
             @Override
             public void onEvent(RequestDonateEvent event) {

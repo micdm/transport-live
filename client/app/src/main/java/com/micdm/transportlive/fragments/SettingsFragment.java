@@ -26,6 +26,7 @@ public class SettingsFragment extends PreferenceFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preferences);
+        removeDonatePreference();
     }
 
     @Override
@@ -42,15 +43,9 @@ public class SettingsFragment extends PreferenceFragment {
             public void onEvent(LoadDonateProductsEvent event) {
                 List<DonateProduct> products = event.getProducts();
                 if (products == null || products.isEmpty()) {
-                    if (donatePreference == null) {
-                        donatePreference = findPreference(PREF_KEY_DONATE);
-                        getPreferenceScreen().removePreference(donatePreference);
-                    }
+                    removeDonatePreference();
                 } else {
-                    if (donatePreference != null) {
-                        getPreferenceScreen().addPreference(donatePreference);
-                        donatePreference = null;
-                    }
+                    addDonatePreference();
                 }
             }
         });
@@ -59,6 +54,20 @@ public class SettingsFragment extends PreferenceFragment {
     private void requestForData() {
         EventManager manager = App.get().getEventManager();
         manager.publish(new RequestLoadDonateProductsEvent());
+    }
+
+    private void addDonatePreference() {
+        if (donatePreference != null) {
+            getPreferenceScreen().addPreference(donatePreference);
+            donatePreference = null;
+        }
+    }
+
+    private void removeDonatePreference() {
+        if (donatePreference == null) {
+            donatePreference = findPreference(PREF_KEY_DONATE);
+            getPreferenceScreen().removePreference(donatePreference);
+        }
     }
 
     @Override
