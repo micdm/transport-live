@@ -1,5 +1,6 @@
 package com.micdm.transportlive.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -72,40 +73,45 @@ import java.util.Map;
 
 public class MapFragment extends Fragment {
 
-    private class MarkerBuilder {
+    private static class MarkerBuilder {
 
-        private static final int BITMAP_POOL_SIZE = 100;
+        private static final int BITMAP_POOL_SIZE = 200;
         private static final int SHADOW_SIZE = 2;
 
         private final Matrix matrix = new Matrix();
         private final Rect bounds = new Rect();
 
         private final Bitmap original;
-        private final Pools.Pool<Bitmap> bitmapPool;
+        private final Pools.Pool<Bitmap> bitmapPool = new Pools.SimplePool<Bitmap>(BITMAP_POOL_SIZE);
         private final Map<Bitmap, Canvas> canvases = new HashMap<Bitmap, Canvas>();
-        private final Map<Route, Paint> routePaints;
         private final Paint textPaint;
+        private Map<Route, Paint> routePaints;
 
-        public MarkerBuilder() {
-            original = getOriginalBitmap();
-            bitmapPool = getBitmapPool();
-            routePaints = getRoutePaints();
+        public MarkerBuilder(Context context) {
+            original = getOriginalBitmap(context);
             textPaint = getTextPaint();
         }
 
-        private Bitmap getOriginalBitmap() {
-            return BitmapFactory.decodeResource(getResources(), R.drawable.ic_vehicle);
+        private Bitmap getOriginalBitmap(Context context) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inPreferredConfig = Bitmap.Config.ARGB_4444;
+            return BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_vehicle, options);
         }
 
-        private Pools.Pool<Bitmap> getBitmapPool() {
-            Pools.Pool<Bitmap> pool = new Pools.SimplePool<Bitmap>(BITMAP_POOL_SIZE);
-            for (int i = 0; i < BITMAP_POOL_SIZE; i += 1) {
-                pool.release(Bitmap.createBitmap(original.getWidth(), original.getHeight(), original.getConfig()));
-            }
-            return pool;
+        private Paint getTextPaint() {
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            paint.setColor(Color.WHITE);
+            paint.setStyle(Paint.Style.FILL);
+            paint.setTextSize(original.getWidth() * 0.35f);
+            paint.setShadowLayer(SHADOW_SIZE, 0, SHADOW_SIZE, Color.BLACK);
+            return paint;
         }
 
-        private Map<Route, Paint> getRoutePaints() {
+        public void update(Service service) {
+            routePaints = getRoutePaints(service);
+        }
+
+        private Map<Route, Paint> getRoutePaints(Service service) {
             Map<Route, Paint> paints = new HashMap<Route, Paint>();
             RouteColors colors = new RouteColors(service);
             for (Transport transport: service.getTransports()) {
@@ -123,19 +129,10 @@ public class MapFragment extends Fragment {
             return paint;
         }
 
-        private Paint getTextPaint() {
-            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            paint.setColor(Color.WHITE);
-            paint.setStyle(Paint.Style.FILL);
-            paint.setTextSize(original.getWidth() * 0.35f);
-            paint.setShadowLayer(SHADOW_SIZE, 0, SHADOW_SIZE, Color.BLACK);
-            return paint;
-        }
-
-        public Bitmap build(MapVehicle vehicle) {
+        public Bitmap build(Service service, MapVehicle vehicle) {
             Bitmap bitmap = bitmapPool.acquire();
             if (bitmap == null) {
-                return null;
+                bitmap = getBitmap();
             }
             Canvas canvas = getCanvas(bitmap);
             matrix.setRotate(vehicle.getCourse(), original.getWidth() / 2, original.getHeight() / 2);
@@ -146,6 +143,10 @@ public class MapFragment extends Fragment {
             textPaint.getTextBounds(text, 0, text.length(), bounds);
             canvas.drawText(text, canvas.getWidth() / 2 - bounds.width() / 2, canvas.getHeight() / 2 + bounds.height() / 2 - SHADOW_SIZE, textPaint);
             return bitmap;
+        }
+
+        private Bitmap getBitmap() {
+            return Bitmap.createBitmap(original.getWidth(), original.getHeight(), Bitmap.Config.ARGB_4444);
         }
 
         private Canvas getCanvas(Bitmap bitmap) {
@@ -247,6 +248,12 @@ public class MapFragment extends Fragment {
     private ViewGroup mapContainerView;
     private MapView mapView;
     private View locateUserView;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        builder = new MarkerBuilder(activity);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -372,7 +379,7 @@ public class MapFragment extends Fragment {
             @Override
             public void onEvent(LoadServiceEvent event) {
                 service = event.getService();
-                builder = new MarkerBuilder();
+                builder.update(service);
             }
         });
         manager.subscribe(this, EventType.REMOVE_ALL_DATA, new EventManager.OnEventListener<RemoveAllDataEvent>() {
@@ -462,7 +469,7 @@ public class MapFragment extends Fragment {
         ItemizedIconOverlay<OverlayItem> overlay = getVehicleOverlay();
         removeVehicle(vehicle.getNumber());
         OverlayItem item = new OverlayItem(null, null, getGeoPoint(vehicle.getLatitude(), vehicle.getLongitude()));
-        item.setMarker(new BitmapDrawable(getResources(), builder.build(vehicle)));
+        item.setMarker(new BitmapDrawable(getResources(), builder.build(service, vehicle)));
         item.setMarkerHotspot(OverlayItem.HotspotPlace.CENTER);
         overlay.addItem(item);
         items.put(vehicle, item);
