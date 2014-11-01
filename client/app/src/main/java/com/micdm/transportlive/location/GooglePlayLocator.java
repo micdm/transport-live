@@ -20,7 +20,7 @@ public class GooglePlayLocator extends Locator {
         }
         @Override
         public void onDisconnected() {
-            locationClient.removeLocationUpdates(locationListener);
+
         }
     };
     private final GooglePlayServicesClient.OnConnectionFailedListener onConnectionFailedListener = new GoogleApiClient.OnConnectionFailedListener() {
@@ -64,6 +64,9 @@ public class GooglePlayLocator extends Locator {
 
     @Override
     public void stop() {
+        if (locationClient.isConnected()) {
+            locationClient.removeLocationUpdates(locationListener);
+        }
         locationClient.disconnect();
     }
 }
