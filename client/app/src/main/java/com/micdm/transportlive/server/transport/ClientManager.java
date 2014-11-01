@@ -11,8 +11,10 @@ import org.java_websocket.WebSocket;
 import org.java_websocket.drafts.Draft_17;
 
 import java.net.URI;
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
 
 public class ClientManager {
 
@@ -35,6 +37,10 @@ public class ClientManager {
         @Override
         public void onOpen() {
             tryNumber = 0;
+            while (!messages.isEmpty()) {
+                String message = messages.poll();
+                client.send(message);
+            }
             onConnectListener.onCompleteConnect();
         }
     };
@@ -66,6 +72,7 @@ public class ClientManager {
     private boolean needKeepConnect;
     private int tryNumber;
     private Runnable reconnectCallback;
+    private Queue<String> messages = new ArrayDeque<String>();
 
     private final Context context;
     private final OnConnectListener onConnectListener;
@@ -94,7 +101,9 @@ public class ClientManager {
     }
 
     public void send(String message) {
-        if (client != null && client.getReadyState() == WebSocket.READYSTATE.OPEN) {
+        if (client == null || client.getReadyState() != WebSocket.READYSTATE.OPEN) {
+            messages.add(message);
+        } else {
             client.send(message);
         }
     }
