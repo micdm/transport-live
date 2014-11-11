@@ -46,6 +46,9 @@ public class Utils {
     }
 
     public static boolean isRouteSelected(List<SelectedRoute> selectedRoutes, int transportId, int routeNumber) {
+        if (selectedRoutes == null) {
+            return false;
+        }
         for (SelectedRoute selectedRoute: selectedRoutes) {
             if (selectedRoute.getTransportId() == transportId && selectedRoute.getRouteNumber() == routeNumber) {
                 return true;
@@ -55,6 +58,9 @@ public class Utils {
     }
 
     public static boolean isStationSelected(List<SelectedStation> selectedStations, int transportId, int stationId) {
+        if (selectedStations == null) {
+            return false;
+        }
         for (SelectedStation selectedStation: selectedStations) {
             if (selectedStation.getTransportId() == transportId && selectedStation.getStationId() == stationId) {
                 return true;
