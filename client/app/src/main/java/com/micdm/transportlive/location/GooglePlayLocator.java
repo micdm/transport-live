@@ -66,7 +66,7 @@ public class GooglePlayLocator extends Locator {
     public void stop() {
         if (locationClient.isConnected()) {
             locationClient.removeLocationUpdates(locationListener);
+            locationClient.disconnect();
         }
-        locationClient.disconnect();
     }
 }
