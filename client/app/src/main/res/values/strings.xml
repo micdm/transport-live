@@ -33,7 +33,6 @@
     <!-- Фрагмент выбора остановки -->
     <string name="f__select_station__title">Выберите остановку</string>
     <string name="f__select_station__transport_list_title">Транспорт</string>
-    <string name="f__select_station__route_list_item">№%s</string>
     <string name="f__select_station__direction_list_title">Направление</string>
     <string name="f__select_station__direction_list_item">→ %s</string>
     <string name="f__select_station__station_list_title">Остановка</string>
