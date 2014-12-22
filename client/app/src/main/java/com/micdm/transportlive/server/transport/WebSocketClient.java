@@ -11,7 +11,7 @@ import java.util.Map;
 public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
 
     public static interface OnOpenListener {
-        public void onOpen();
+        public void onOpen(WebSocketClient client);
     }
 
     public static interface OnMessageListener {
@@ -41,7 +41,7 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                onOpenListener.onOpen();
+                onOpenListener.onOpen(WebSocketClient.this);
             }
         });
     }

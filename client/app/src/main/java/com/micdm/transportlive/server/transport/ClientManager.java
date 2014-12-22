@@ -7,7 +7,6 @@ import android.os.Handler;
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.misc.Utils;
 
-import org.java_websocket.WebSocket;
 import org.java_websocket.drafts.Draft_17;
 
 import java.net.URI;
@@ -35,7 +34,10 @@ public class ClientManager {
 
     private final WebSocketClient.OnOpenListener onClientOpenListener = new WebSocketClient.OnOpenListener() {
         @Override
-        public void onOpen() {
+        public void onOpen(WebSocketClient client) {
+            if (!client.getConnection().isOpen()) {
+                return;
+            }
             tryNumber = 0;
             while (!messages.isEmpty()) {
                 String message = messages.poll();
@@ -53,6 +55,7 @@ public class ClientManager {
     private final WebSocketClient.OnCloseListener onClientCloseListener = new WebSocketClient.OnCloseListener() {
         @Override
         public void onClose() {
+            client = null;
             if (!needKeepConnect) {
                 return;
             }
@@ -101,7 +104,7 @@ public class ClientManager {
     }
 
     public void send(String message) {
-        if (client == null || client.getReadyState() != WebSocket.READYSTATE.OPEN) {
+        if (client == null || !client.getConnection().isOpen()) {
             messages.add(message);
         } else {
             client.send(message);
@@ -116,7 +119,6 @@ public class ClientManager {
         }
         if (client != null) {
             client.close();
-            client = null;
         }
     }
 }
