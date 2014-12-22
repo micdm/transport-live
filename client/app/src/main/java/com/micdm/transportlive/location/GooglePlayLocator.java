@@ -5,25 +5,24 @@ import android.location.Location;
 import android.os.Bundle;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 
 public class GooglePlayLocator extends Locator {
 
-    private final GooglePlayServicesClient.ConnectionCallbacks connectionCallbacks = new GooglePlayServicesClient.ConnectionCallbacks() {
+    private final GoogleApiClient.ConnectionCallbacks connectionCallbacks = new GoogleApiClient.ConnectionCallbacks() {
         @Override
         public void onConnected(Bundle bundle) {
-            locationClient.requestLocationUpdates(locationRequest, locationListener);
+            LocationServices.FusedLocationApi.requestLocationUpdates(apiClient, locationRequest, locationListener);
         }
         @Override
-        public void onDisconnected() {
+        public void onConnectionSuspended(int reason) {
 
         }
     };
-    private final GooglePlayServicesClient.OnConnectionFailedListener onConnectionFailedListener = new GoogleApiClient.OnConnectionFailedListener() {
+    private final GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener = new GoogleApiClient.OnConnectionFailedListener() {
         @Override
         public void onConnectionFailed(ConnectionResult connectionResult) {
 
@@ -37,12 +36,12 @@ public class GooglePlayLocator extends Locator {
     };
 
     private final LocationRequest locationRequest;
-    private final LocationClient locationClient;
+    private final GoogleApiClient apiClient;
 
     public GooglePlayLocator(Context context) {
         super(context);
         locationRequest = getLocationRequest();
-        locationClient = getLocationClient();
+        apiClient = getApiClient(context);
     }
 
     private LocationRequest getLocationRequest() {
@@ -53,20 +52,24 @@ public class GooglePlayLocator extends Locator {
         return request;
     }
 
-    private LocationClient getLocationClient() {
-        return new LocationClient(context, connectionCallbacks, onConnectionFailedListener);
+    private GoogleApiClient getApiClient(Context context) {
+        GoogleApiClient.Builder builder = new GoogleApiClient.Builder(context);
+        builder.addApi(LocationServices.API);
+        builder.addConnectionCallbacks(connectionCallbacks);
+        builder.addOnConnectionFailedListener(onConnectionFailedListener);
+        return builder.build();
     }
 
     @Override
     public void start() {
-        locationClient.connect();
+        apiClient.connect();
     }
 
     @Override
     public void stop() {
-        if (locationClient.isConnected()) {
-            locationClient.removeLocationUpdates(locationListener);
-            locationClient.disconnect();
+        if (apiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(apiClient, locationListener);
+            apiClient.disconnect();
         }
     }
 }
