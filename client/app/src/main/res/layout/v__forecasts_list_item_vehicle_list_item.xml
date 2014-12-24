@@ -14,7 +14,8 @@
     <RelativeLayout
         android:id="@+id/v__forecasts_list_item_vehicle_list_item__vehicle_info"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@drawable/vehicle_list_item_background">
         <View
             android:id="@+id/v__forecasts_list_item_vehicle_list_item__color"
             android:layout_width="15dp"
