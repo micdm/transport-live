@@ -93,9 +93,7 @@ public class MapFragment extends Fragment {
         }
 
         private Bitmap getOriginalBitmap(Context context) {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inPreferredConfig = Bitmap.Config.ARGB_4444;
-            return BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_vehicle, options);
+            return BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_vehicle);
         }
 
         private Paint getTextPaint() {
@@ -146,7 +144,7 @@ public class MapFragment extends Fragment {
         }
 
         private Bitmap getBitmap() {
-            return Bitmap.createBitmap(original.getWidth(), original.getHeight(), Bitmap.Config.ARGB_4444);
+            return Bitmap.createBitmap(original.getWidth(), original.getHeight(), Bitmap.Config.ARGB_8888);
         }
 
         private Canvas getCanvas(Bitmap bitmap) {
