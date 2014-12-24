@@ -104,7 +104,7 @@ public class ForecastFragment extends Fragment {
         private RouteColors colors;
 
         private List<SelectedStation> selectedStations;
-        private final List<Forecast> forecasts = new ArrayList<Forecast>();
+        private final List<Forecast> forecasts = new ArrayList<>();
 
         public void setService(Service service) {
             this.service = service;
@@ -293,7 +293,7 @@ public class ForecastFragment extends Fragment {
 
     private BigDecimal userLatitude;
     private BigDecimal userLongitude;
-    private final List<SelectedStation> nearestStations = new ArrayList<SelectedStation>();
+    private final List<SelectedStation> nearestStations = new ArrayList<>();
 
     private View noStationSelectedView;
     private ExpandableListView forecastsView;

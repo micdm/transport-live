@@ -47,8 +47,6 @@
     <string name="f__donate__title">Выберите сумму</string>
     <string name="f__donate__thanks">Ваше пожертвование будет употреблено по назначению. Спасибо!</string>
     <!-- Фрагмент с настройками -->
-    <string name="f__settings__use_external_map_title">Дополнительные карты</string>
-    <string name="f__settings__use_external_map_summary">Вы сможете изменять масштаб, но это потребует больше Интернет-трафика</string>
     <string name="f__settings__donate_title">Пожертвовать…</string>
     <string name="f__settings__donate_summary">Сэкономили на проезде денег? Поделитесь с разработчиком!</string>
     <string name="f__settings__share_title">Рассказать…</string>

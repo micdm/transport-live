@@ -27,13 +27,13 @@ public class PlainEventManager implements EventManager {
         }
     }
 
-    private final Map<EventType, List<Subscriber>> subscribers = new HashMap<EventType, List<Subscriber>>();
+    private final Map<EventType, List<Subscriber>> subscribers = new HashMap<>();
 
     @Override
     public void subscribe(Object key, EventType type, OnEventListener<? extends Event> listener) {
         List<Subscriber> subscribers = this.subscribers.get(type);
         if (subscribers == null) {
-            subscribers = new ArrayList<Subscriber>();
+            subscribers = new ArrayList<>();
             this.subscribers.put(type, subscribers);
         }
         subscribers.add(new Subscriber(key, listener));

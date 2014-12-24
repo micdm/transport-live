@@ -18,7 +18,7 @@ public class RouteColors {
     }
 
     private Map<Route, Integer> getColors(Service service) {
-        Map<Route, Integer> colors = new HashMap<Route, Integer>();
+        Map<Route, Integer> colors = new HashMap<>();
         int count = getRouteCount(service);
         int number = 0;
         for (Transport transport: service.getTransports()) {

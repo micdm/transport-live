@@ -49,12 +49,12 @@ public class DonateManager {
 
         private Bundle getLoadProductsRequestBundle(String[] ids) {
             Bundle result = new Bundle();
-            result.putStringArrayList("ITEM_ID_LIST", new ArrayList<String>(Arrays.asList(ids)));
+            result.putStringArrayList("ITEM_ID_LIST", new ArrayList<>(Arrays.asList(ids)));
             return result;
         }
 
         private List<DonateProduct> getProducts(List<String> datas) throws JSONException {
-            List<DonateProduct> products = new ArrayList<DonateProduct>();
+            List<DonateProduct> products = new ArrayList<>();
             for (String data: datas) {
                 JSONObject json = new JSONObject(data);
                 products.add(new DonateProduct(json.getString("productId"), json.getString("price"), getProductTitle(json.getString("title"))));
@@ -101,7 +101,7 @@ public class DonateManager {
     });
 
     private final Context context;
-    private final List<AsyncTask> tasks = new ArrayList<AsyncTask>();
+    private final List<AsyncTask> tasks = new ArrayList<>();
     private Runnable onConnectionServiceReadyCallback;
 
     public DonateManager(Context context) {
@@ -127,7 +127,7 @@ public class DonateManager {
             if (result.getInt("RESPONSE_CODE") != 0) {
                 return null;
             }
-            List<String> tokens = new ArrayList<String>();
+            List<String> tokens = new ArrayList<>();
             List<String> orders = result.getStringArrayList("INAPP_PURCHASE_DATA_LIST");
             for (String order: orders) {
                 tokens.add(new JSONObject(order).getString("purchaseToken"));

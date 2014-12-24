@@ -75,7 +75,7 @@ public class ClientManager {
     private boolean needKeepConnect;
     private int tryNumber;
     private Runnable reconnectCallback;
-    private Queue<String> messages = new ArrayDeque<String>();
+    private final Queue<String> messages = new ArrayDeque<>();
 
     private final Context context;
     private final OnConnectListener onConnectListener;
@@ -98,7 +98,7 @@ public class ClientManager {
     }
 
     private Map<String, String> getRequestHeaders() {
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put("User-Agent", context.getString(R.string.__user_agent, Utils.getAppVersion(context), Build.VERSION.RELEASE));
         return headers;
     }

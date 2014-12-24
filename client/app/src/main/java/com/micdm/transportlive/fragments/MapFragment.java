@@ -2,7 +2,6 @@ package com.micdm.transportlive.fragments;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -10,11 +9,8 @@ import android.graphics.Color;
 import android.graphics.LightingColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pools;
 import android.view.LayoutInflater;
@@ -22,6 +18,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMapOptions;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.micdm.transportlive.App;
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.MapVehicle;
@@ -39,41 +46,28 @@ import com.micdm.transportlive.events.events.RequestFocusVehicleEvent;
 import com.micdm.transportlive.events.events.RequestLoadRoutesEvent;
 import com.micdm.transportlive.events.events.RequestLoadServiceEvent;
 import com.micdm.transportlive.events.events.UnselectRouteEvent;
-import com.micdm.transportlive.events.events.UpdateLocationEvent;
 import com.micdm.transportlive.events.events.UpdateVehicleEvent;
-import com.micdm.transportlive.misc.AssetArchive;
 import com.micdm.transportlive.misc.RouteColors;
 import com.micdm.transportlive.misc.Utils;
-import com.micdm.transportlive.misc.analytics.Analytics;
 
-import org.osmdroid.DefaultResourceProxyImpl;
-import org.osmdroid.ResourceProxy;
-import org.osmdroid.api.IMapController;
-import org.osmdroid.tileprovider.IRegisterReceiver;
-import org.osmdroid.tileprovider.MapTileProviderArray;
-import org.osmdroid.tileprovider.modules.IArchiveFile;
-import org.osmdroid.tileprovider.modules.MapTileFileArchiveProvider;
-import org.osmdroid.tileprovider.modules.MapTileModuleProviderBase;
-import org.osmdroid.tileprovider.tilesource.ITileSource;
-import org.osmdroid.tileprovider.tilesource.XYTileSource;
-import org.osmdroid.tileprovider.util.SimpleRegisterReceiver;
-import org.osmdroid.util.BoundingBoxE6;
-import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.MapView;
-import org.osmdroid.views.Projection;
-import org.osmdroid.views.overlay.ItemizedIconOverlay;
-import org.osmdroid.views.overlay.Overlay;
-import org.osmdroid.views.overlay.OverlayItem;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 public class MapFragment extends Fragment {
 
-    private static class MarkerBuilder {
+    private static class MarkerInfo {
+
+        public final Marker marker;
+        public Bitmap icon;
+
+        private MarkerInfo(Marker marker) {
+            this.marker = marker;
+        }
+    }
+
+    private static class MarkerIconBuilder {
 
         private static final int BITMAP_POOL_SIZE = 200;
         private static final int SHADOW_SIZE = 2;
@@ -82,12 +76,12 @@ public class MapFragment extends Fragment {
         private final Rect bounds = new Rect();
 
         private final Bitmap original;
-        private final Pools.Pool<Bitmap> bitmapPool = new Pools.SimplePool<Bitmap>(BITMAP_POOL_SIZE);
-        private final Map<Bitmap, Canvas> canvases = new HashMap<Bitmap, Canvas>();
+        private final Pools.Pool<Bitmap> bitmapPool = new Pools.SimplePool<>(BITMAP_POOL_SIZE);
+        private final Map<Bitmap, Canvas> canvases = new HashMap<>();
         private final Paint textPaint;
         private Map<Route, Paint> routePaints;
 
-        public MarkerBuilder(Context context) {
+        public MarkerIconBuilder(Context context) {
             original = getOriginalBitmap(context);
             textPaint = getTextPaint();
         }
@@ -112,7 +106,7 @@ public class MapFragment extends Fragment {
         }
 
         private Map<Route, Paint> getRoutePaints(Service service) {
-            Map<Route, Paint> paints = new HashMap<Route, Paint>();
+            Map<Route, Paint> paints = new HashMap<>();
             RouteColors colors = new RouteColors(service);
             for (Transport transport: service.getTransports()) {
                 for (Route route: transport.getRoutes()) {
@@ -164,169 +158,68 @@ public class MapFragment extends Fragment {
         }
     }
 
-    private class UserLocationOverlay extends Overlay {
+    private final static double CAMERA_LATITUDE = 56.484642;
+    private final static double CAMERA_LONGITUDE = 84.948100;
+    private final static int CAMERA_ZOOM = 14;
 
-        private final Bitmap bitmap;
-        private final Paint locationPaint;
-        private final Paint accuracyPaint;
-
-        private final Point coords = new Point();
-
-        private GeoPoint location;
-        private float accuracy;
-
-        public UserLocationOverlay(Context context) {
-            super(context);
-            bitmap = getBitmap();
-            locationPaint = getLocationPaint();
-            accuracyPaint = getAccuracyPaint();
-        }
-
-        private Bitmap getBitmap() {
-            return BitmapFactory.decodeResource(getResources(), R.drawable.ic_user);
-        }
-
-        private Paint getLocationPaint() {
-            return new Paint(Paint.ANTI_ALIAS_FLAG);
-        }
-
-        private Paint getAccuracyPaint() {
-            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            paint.setStyle(Paint.Style.FILL);
-            paint.setColor(getResources().getColor(R.color.user_location_background));
-            paint.setAlpha(50);
-            return paint;
-        }
-
-        public void setLocation(GeoPoint location) {
-            this.location = location;
-        }
-
-        public void setAccuracy(float accuracy) {
-            this.accuracy = accuracy;
-        }
-
-        @Override
-        public void draw(Canvas canvas, MapView view, boolean shadow) {
-            if (shadow) {
-                return;
-            }
-            if (location == null) {
-                return;
-            }
-            Projection projection = view.getProjection();
-            projection.toPixels(location, coords);
-            float radius = projection.metersToEquatorPixels(accuracy);
-            canvas.drawCircle(coords.x, coords.y, radius, accuracyPaint);
-            canvas.drawBitmap(bitmap, coords.x - bitmap.getWidth() / 2, coords.y - bitmap.getHeight() / 2, locationPaint);
-        }
-    }
-
-    private static final String PREF_KEY_USE_EXTERNAL_MAP = "pref_use_external_map";
-
-    private static final int TILE_SIZE = 256;
-    private static final int MIN_ZOOM = 14;
-    private static final int MAX_ZOOM = 16;
-    private static final int NORTH_EDGE = 56535258;
-    private static final int WEST_EDGE = 84924316;
-    private static final int SOUTH_EDGE = 56447313;
-    private static final int EAST_EDGE = 85111084;
-    private static final GeoPoint INITIAL_LOCATION = new GeoPoint(56484642, 84948100);
-
-    private boolean externalMapUsed;
-    private MarkerBuilder builder;
-    private ItemizedIconOverlay<OverlayItem> vehicleOverlay;
-    private final Map<MapVehicle, OverlayItem> items = new HashMap<MapVehicle, OverlayItem>();
-    private UserLocationOverlay userOverlay;
-    private GeoPoint userLocation;
+    private MarkerIconBuilder markerIconBuilder;
+    private final Map<MapVehicle, MarkerInfo> markers = new HashMap<>();
 
     private Service service;
     private List<SelectedRoute> selectedRoutes;
 
     private View noRouteSelectedView;
     private View noVehiclesView;
-    private ViewGroup mapContainerView;
     private MapView mapView;
-    private View locateUserView;
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        builder = new MarkerBuilder(activity);
+        MapsInitializer.initialize(activity);
+        markerIconBuilder = new MarkerIconBuilder(activity);
+        mapView = new MapView(activity, getMapOptions());
+    }
+
+    private GoogleMapOptions getMapOptions() {
+        GoogleMapOptions options = new GoogleMapOptions();
+        options.mapType(GoogleMap.MAP_TYPE_NORMAL);
+        options.camera(CameraPosition.fromLatLngZoom(new LatLng(CAMERA_LATITUDE, CAMERA_LONGITUDE), CAMERA_ZOOM));
+        options.rotateGesturesEnabled(false);
+        options.tiltGesturesEnabled(false);
+        return options;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mapView.onCreate(savedInstanceState);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.f__map, container, false);
+        ViewGroup view = (ViewGroup) inflater.inflate(R.layout.f__map, container, false);
         noRouteSelectedView = view.findViewById(R.id.f__map__no_route_selected);
         noVehiclesView = view.findViewById(R.id.f__map__no_vehicles);
-        mapContainerView = (ViewGroup) view.findViewById(R.id.f__map__map_container);
-        externalMapUsed = needUseExternalMap();
-        mapView = getMapView(externalMapUsed);
-        mapContainerView.addView(mapView, 0);
-        setupMapController(mapView);
-        locateUserView = view.findViewById(R.id.f__map__locate_user);
-        locateUserView.setOnClickListener(new View.OnClickListener() {
+        mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
-            public void onClick(View v) {
-                mapView.getController().setCenter(userLocation);
+            public void onMapReady(GoogleMap googleMap) {
+                googleMap.setMyLocationEnabled(true);
+                googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        return true;
+                    }
+                });
             }
         });
-        View zoomInView = view.findViewById(R.id.f__map__zoom_in);
-        zoomInView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mapView.getController().zoomIn();
-            }
-        });
-        View zoomOutView = view.findViewById(R.id.f__map__zoom_out);
-        zoomOutView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mapView.getController().zoomOut();
-            }
-        });
+        view.addView(mapView);
         return view;
-    }
-
-    private boolean needUseExternalMap() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        return prefs.getBoolean(PREF_KEY_USE_EXTERNAL_MAP, false);
-    }
-
-    private MapView getMapView(boolean needUseExternalMap) {
-        ResourceProxy proxy = new DefaultResourceProxyImpl(getActivity());
-        MapView mapView = new MapView(getActivity(), TILE_SIZE, proxy, needUseExternalMap ? null : getTileProviders());
-        mapView.setId(R.id.f__map__map);
-        if (!needUseExternalMap) {
-            mapView.setMinZoomLevel(MIN_ZOOM);
-            mapView.setMaxZoomLevel(MAX_ZOOM);
-        }
-        mapView.setScrollableAreaLimit(new BoundingBoxE6(NORTH_EDGE, EAST_EDGE, SOUTH_EDGE, WEST_EDGE));
-        return mapView;
-    }
-
-    private void setupMapController(MapView view) {
-        IMapController controller = view.getController();
-        controller.setZoom(MAX_ZOOM);
-        controller.setCenter(INITIAL_LOCATION);
-    }
-
-    private MapTileProviderArray getTileProviders() {
-        IRegisterReceiver receiver = new SimpleRegisterReceiver(getActivity());
-        ITileSource source = new XYTileSource("OSMPublicTransport", ResourceProxy.string.public_transport, MIN_ZOOM, MAX_ZOOM, TILE_SIZE, ".jpg", null);
-        AssetArchive archive = AssetArchive.getAssetArchive(getActivity());
-        MapTileFileArchiveProvider provider = new MapTileFileArchiveProvider(receiver, source, new IArchiveFile[] {archive});
-        return new MapTileProviderArray(source, receiver, new MapTileModuleProviderBase[] {provider});
     }
 
     @Override
     public void onStart() {
         super.onStart();
         hideAllViews();
-        if (externalMapUsed != needUseExternalMap()) {
-            switchMapSource();
-        }
         subscribeForEvents();
         requestForData();
     }
@@ -334,7 +227,7 @@ public class MapFragment extends Fragment {
     private void hideAllViews() {
         noRouteSelectedView.setVisibility(View.GONE);
         noVehiclesView.setVisibility(View.GONE);
-        mapContainerView.setVisibility(View.VISIBLE);
+        mapView.setVisibility(View.VISIBLE);
     }
 
     private void showNoRouteSelectedView() {
@@ -347,30 +240,9 @@ public class MapFragment extends Fragment {
         noVehiclesView.setVisibility(View.VISIBLE);
     }
 
-    private void showMapViewWithControls() {
+    private void showMapView() {
         hideAllViews();
-        mapContainerView.setVisibility(View.VISIBLE);
-    }
-
-    private void showLocateUserView() {
-        locateUserView.setVisibility(View.VISIBLE);
-    }
-
-    private void switchMapSource() {
-        externalMapUsed = needUseExternalMap();
-        MapView newMapView = getMapView(externalMapUsed);
-        newMapView.setVisibility(mapView.getVisibility());
-        mapContainerView.removeView(mapView);
-        mapContainerView.addView(newMapView, 0);
-        setupMapController(newMapView);
-        List<Overlay> overlays = mapView.getOverlays();
-        if (!overlays.isEmpty()) {
-            newMapView.getOverlays().addAll(overlays);
-        }
-        mapView = newMapView;
-        if (needUseExternalMap()) {
-            App.get().getAnalytics().reportEvent(Analytics.Category.MISC, Analytics.Action.CLICK, "use_external_map");
-        }
+        mapView.setVisibility(View.VISIBLE);
     }
 
     private void subscribeForEvents() {
@@ -379,7 +251,7 @@ public class MapFragment extends Fragment {
             @Override
             public void onEvent(LoadServiceEvent event) {
                 service = event.getService();
-                builder.update(service);
+                markerIconBuilder.update(service);
             }
         });
         manager.subscribe(this, EventType.REMOVE_ALL_DATA, new EventManager.OnEventListener<RemoveAllDataEvent>() {
@@ -404,16 +276,8 @@ public class MapFragment extends Fragment {
                 SelectedRoute route = event.getRoute();
                 int transportId = route.getTransportId();
                 int routeNumber = route.getRouteNumber();
-                List<String> numbers = new ArrayList<String>();
-                for (MapVehicle vehicle: items.keySet()) {
-                    if (vehicle.getTransportId() == transportId && vehicle.getRouteNumber() == routeNumber) {
-                        numbers.add(vehicle.getNumber());
-                    }
-                }
-                for (String number: numbers) {
-                    removeVehicle(number);
-                }
-                if (items.isEmpty()) {
+                removeVehiclesByTransportAndRoute(transportId, routeNumber);
+                if (markers.isEmpty()) {
                     showNoVehiclesView();
                 }
             }
@@ -422,14 +286,14 @@ public class MapFragment extends Fragment {
             @Override
             public void onEvent(UpdateVehicleEvent event) {
                 updateVehicle(event.getVehicle());
-                showMapViewWithControls();
+                showMapView();
             }
         });
         manager.subscribe(this, EventType.REMOVE_VEHICLE, new EventManager.OnEventListener<RemoveVehicleEvent>() {
             @Override
             public void onEvent(RemoveVehicleEvent event) {
                 removeVehicle(event.getNumber());
-                if (items.isEmpty()) {
+                if (markers.isEmpty()) {
                     showNoVehiclesView();
                 }
             }
@@ -440,84 +304,87 @@ public class MapFragment extends Fragment {
                 int transportId = event.getTransportId();
                 int routeNumber = event.getRouteNumber();
                 if (Utils.isRouteSelected(selectedRoutes, transportId, routeNumber)) {
-                    Map.Entry<MapVehicle, OverlayItem> pair = getMapVehicleAndOverlayItemPair(event.getNumber());
+                    Map.Entry<MapVehicle, MarkerInfo> pair = getMapVehicleAndMarkerPair(event.getNumber());
                     if (pair != null) {
-                        MapVehicle vehicle = pair.getKey();
-                        mapView.getController().setCenter(getGeoPoint(vehicle.getLatitude(), vehicle.getLongitude()));
+                        final MapVehicle vehicle = pair.getKey();
+                        mapView.getMapAsync(new OnMapReadyCallback() {
+                            @Override
+                            public void onMapReady(GoogleMap googleMap) {
+                                googleMap.animateCamera(CameraUpdateFactory.newLatLng(getGeoPoint(vehicle)));
+                            }
+                        });
                     }
                 } else {
                     Toast.makeText(getActivity(), getString(R.string.f__map__route_not_selected, String.valueOf(routeNumber)), Toast.LENGTH_LONG).show();
                 }
             }
         });
-        manager.subscribe(this, EventType.UPDATE_LOCATION, new EventManager.OnEventListener<UpdateLocationEvent>() {
+    }
+
+    private void updateVehicle(final MapVehicle vehicle) {
+        mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
-            public void onEvent(UpdateLocationEvent event) {
-                updateUserLocation(event.getLatitude(), event.getLongitude(), event.getAccuracy());
-                showLocateUserView();
+            public void onMapReady(GoogleMap googleMap) {
+                Map.Entry<MapVehicle, MarkerInfo> pair = getMapVehicleAndMarkerPair(vehicle.getNumber());
+                MarkerInfo markerInfo = (pair == null) ? null : pair.getValue();
+                if (markerInfo == null) {
+                    markerInfo = new MarkerInfo(googleMap.addMarker(getMarkerOptions()));
+                    markers.put(vehicle, markerInfo);
+                }
+                Marker marker = markerInfo.marker;
+                marker.setPosition(getGeoPoint(vehicle));
+                Bitmap icon = markerInfo.icon;
+                if (icon != null) {
+                    markerIconBuilder.release(icon);
+                }
+                icon = markerIconBuilder.build(service, vehicle);
+                marker.setIcon(BitmapDescriptorFactory.fromBitmap(icon));
+                markerInfo.icon = icon;
             }
         });
     }
 
-    private void requestForData() {
-        EventManager manager = App.get().getEventManager();
-        manager.publish(new RequestLoadServiceEvent());
-        manager.publish(new RequestLoadRoutesEvent());
-    }
-
-    private void updateVehicle(MapVehicle vehicle) {
-        ItemizedIconOverlay<OverlayItem> overlay = getVehicleOverlay();
-        removeVehicle(vehicle.getNumber());
-        OverlayItem item = new OverlayItem(null, null, getGeoPoint(vehicle.getLatitude(), vehicle.getLongitude()));
-        item.setMarker(new BitmapDrawable(getResources(), builder.build(service, vehicle)));
-        item.setMarkerHotspot(OverlayItem.HotspotPlace.CENTER);
-        overlay.addItem(item);
-        items.put(vehicle, item);
-        mapView.invalidate();
+    private MarkerOptions getMarkerOptions() {
+        MarkerOptions options = new MarkerOptions();
+        options.anchor(0.5f, 0.5f);
+        options.position(new LatLng(0, 0));
+        return options;
     }
 
     private void removeVehicle(String number) {
-        Map.Entry<MapVehicle, OverlayItem> pair = getMapVehicleAndOverlayItemPair(number);
+        Map.Entry<MapVehicle, MarkerInfo> pair = getMapVehicleAndMarkerPair(number);
         if (pair != null) {
-            OverlayItem item = pair.getValue();
-            builder.release(((BitmapDrawable) item.getDrawable()).getBitmap());
-            ItemizedIconOverlay<OverlayItem> overlay = getVehicleOverlay();
-            overlay.removeItem(pair.getValue());
-            items.remove(pair.getKey());
-            mapView.invalidate();
+            MarkerInfo markerInfo = pair.getValue();
+            markerInfo.marker.remove();
+            markerIconBuilder.release(markerInfo.icon);
+            markers.remove(pair.getKey());
+        }
+    }
+
+    private void removeVehiclesByTransportAndRoute(int transportId, int routeNumber) {
+        Iterator<Map.Entry<MapVehicle, MarkerInfo>> iterator = markers.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<MapVehicle, MarkerInfo> pair = iterator.next();
+            MapVehicle vehicle = pair.getKey();
+            if (vehicle.getTransportId() == transportId && vehicle.getRouteNumber() == routeNumber) {
+                MarkerInfo markerInfo = pair.getValue();
+                markerInfo.marker.remove();
+                markerIconBuilder.release(markerInfo.icon);
+                iterator.remove();
+            }
         }
     }
 
     private void removeAllVehicles() {
-        ItemizedIconOverlay<OverlayItem> overlay = getVehicleOverlay();
-        for (int i = 0; i < overlay.size(); i += 1) {
-            OverlayItem item = overlay.getItem(i);
-            builder.release(((BitmapDrawable) item.getDrawable()).getBitmap());
+        for (MarkerInfo markerInfo: markers.values()) {
+            markerInfo.marker.remove();
+            markerIconBuilder.release(markerInfo.icon);
         }
-        overlay.removeAllItems();
-        items.clear();
-        mapView.invalidate();
+        markers.clear();
     }
 
-    private ItemizedIconOverlay<OverlayItem> getVehicleOverlay() {
-        if (vehicleOverlay == null) {
-            vehicleOverlay = new ItemizedIconOverlay<OverlayItem>(getActivity(), new ArrayList<OverlayItem>(), new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
-                @Override
-                public boolean onItemSingleTapUp(int i, OverlayItem item) {
-                    return false;
-                }
-                @Override
-                public boolean onItemLongPress(int i, OverlayItem item) {
-                    return false;
-                }
-            });
-            mapView.getOverlays().add(0, vehicleOverlay);
-        }
-        return vehicleOverlay;
-    }
-
-    private Map.Entry<MapVehicle, OverlayItem> getMapVehicleAndOverlayItemPair(String number) {
-        for (Map.Entry<MapVehicle, OverlayItem> item: items.entrySet()) {
+    private Map.Entry<MapVehicle, MarkerInfo> getMapVehicleAndMarkerPair(String number) {
+        for (Map.Entry<MapVehicle, MarkerInfo> item: markers.entrySet()) {
             MapVehicle vehicle = item.getKey();
             if (vehicle.getNumber().equals(number)) {
                 return item;
@@ -526,30 +393,49 @@ public class MapFragment extends Fragment {
         return null;
     }
 
-    private void updateUserLocation(BigDecimal latitude, BigDecimal longitude, float accuracy) {
-        userLocation = getGeoPoint(latitude, longitude);
-        UserLocationOverlay overlay = getUserOverlay();
-        overlay.setLocation(userLocation);
-        overlay.setAccuracy(accuracy);
-        mapView.invalidate();
+    private LatLng getGeoPoint(MapVehicle vehicle) {
+        return new LatLng(vehicle.getLatitude().doubleValue(), vehicle.getLongitude().doubleValue());
     }
 
-    private UserLocationOverlay getUserOverlay() {
-        if (userOverlay == null) {
-            userOverlay = new UserLocationOverlay(getActivity());
-            mapView.getOverlays().add(userOverlay);
-        }
-        return userOverlay;
+    private void requestForData() {
+        EventManager manager = App.get().getEventManager();
+        manager.publish(new RequestLoadServiceEvent());
+        manager.publish(new RequestLoadRoutesEvent());
     }
 
-    private GeoPoint getGeoPoint(BigDecimal latitude, BigDecimal longitude) {
-        BigDecimal multiplier = new BigDecimal(1e6);
-        return new GeoPoint(latitude.multiply(multiplier).intValue(), longitude.multiply(multiplier).intValue());
+    @Override
+    public void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mapView.onSaveInstanceState(outState);
     }
 
     @Override
     public void onStop() {
         super.onStop();
         App.get().getEventManager().unsubscribeAll(this);
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
     }
 }

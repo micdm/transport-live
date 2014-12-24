@@ -39,7 +39,6 @@ public class GooglePlayLocator extends Locator {
     private final GoogleApiClient apiClient;
 
     public GooglePlayLocator(Context context) {
-        super(context);
         locationRequest = getLocationRequest();
         apiClient = getApiClient(context);
     }

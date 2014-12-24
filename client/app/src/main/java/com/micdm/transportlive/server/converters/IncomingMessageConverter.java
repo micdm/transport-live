@@ -63,7 +63,7 @@ public class IncomingMessageConverter {
     }
 
     private List<ForecastMessage.Vehicle> getForecastMessageVehicles(JSONArray vehiclesJson) throws JSONException {
-        List<ForecastMessage.Vehicle> vehicles = new ArrayList<ForecastMessage.Vehicle>();
+        List<ForecastMessage.Vehicle> vehicles = new ArrayList<>();
         for (int i = 0; i < vehiclesJson.length(); i += 1) {
             JSONObject vehicleJson = vehiclesJson.getJSONObject(i);
             String number = vehicleJson.getString("number");
@@ -77,7 +77,7 @@ public class IncomingMessageConverter {
 
     private NearestStationsMessage getNearestStationsMessage(JSONObject json) throws JSONException {
         JSONArray stationsJson = json.getJSONArray("stations");
-        List<NearestStationsMessage.Station> stations = new ArrayList<NearestStationsMessage.Station>();
+        List<NearestStationsMessage.Station> stations = new ArrayList<>();
         for (int i = 0; i < stationsJson.length(); i += 1) {
             JSONObject stationJson = stationsJson.getJSONObject(i);
             int transportId = stationJson.getInt("transport_id");

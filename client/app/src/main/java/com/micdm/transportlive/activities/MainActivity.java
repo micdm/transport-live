@@ -89,7 +89,7 @@ public class MainActivity extends FragmentActivity {
             }
         }
         
-        private final List<Page> pages = new ArrayList<Page>();
+        private final List<Page> pages = new ArrayList<>();
 
         public CustomPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -326,7 +326,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     private List<SelectedStation> getFavouriteStations() {
-        List<SelectedStation> favourite = new ArrayList<SelectedStation>();
+        List<SelectedStation> favourite = new ArrayList<>();
         for (SelectedStation station: selectedStations) {
             if (station.isFavourite()) {
                 favourite.add(station);
@@ -423,7 +423,7 @@ public class MainActivity extends FragmentActivity {
         if (!Utils.isStationSelected(selectedStations, transportId, stationId)) {
             return;
         }
-        List<ForecastVehicle> vehicles = new ArrayList<ForecastVehicle>();
+        List<ForecastVehicle> vehicles = new ArrayList<>();
         for (ForecastMessage.Vehicle vehicle: message.getVehicles()) {
             String number = vehicle.getNumber();
             int routeNumber = vehicle.getRouteNumber();
@@ -436,7 +436,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void handleNearestStationsMessage(NearestStationsMessage message) {
-        List<SelectedStation> stations = new ArrayList<SelectedStation>();
+        List<SelectedStation> stations = new ArrayList<>();
         for (NearestStationsMessage.Station station: message.getStations()) {
             stations.add(getFirstSuitableStation(station.getTransportId(), station.getStationId()));
         }
@@ -464,7 +464,7 @@ public class MainActivity extends FragmentActivity {
             public void onUpdateLocation(Location location) {
                 BigDecimal latitude = new BigDecimal(location.getLatitude(), MathContext.DECIMAL64);
                 BigDecimal longitude = new BigDecimal(location.getLongitude(), MathContext.DECIMAL64);
-                App.get().getEventManager().publish(new UpdateLocationEvent(latitude, longitude, location.getAccuracy()));
+                App.get().getEventManager().publish(new UpdateLocationEvent(latitude, longitude));
             }
         });
         locator.start();

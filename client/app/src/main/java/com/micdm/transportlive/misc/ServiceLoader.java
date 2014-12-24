@@ -23,16 +23,16 @@ public class ServiceLoader {
     private static class ContentHandler extends DefaultHandler {
 
         private Service service;
-        private List<Transport> transports = new ArrayList<Transport>();
+        private List<Transport> transports = new ArrayList<>();
         private int transportId;
-        private List<Station> transportStations = new ArrayList<Station>();
+        private List<Station> transportStations = new ArrayList<>();
         private int stationId;
         private String stationName;
-        private List<Route> routes = new ArrayList<Route>();
+        private List<Route> routes = new ArrayList<>();
         private int routeNumber;
-        private List<Direction> directions = new ArrayList<Direction>();
+        private List<Direction> directions = new ArrayList<>();
         private int directionId;
-        private List<Station> directionStations = new ArrayList<Station>();
+        private List<Station> directionStations = new ArrayList<>();
 
         private boolean isTransportDescription;
 
@@ -43,20 +43,20 @@ public class ServiceLoader {
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attrs) {
             if (localName.equals("transports")) {
-                transports = new ArrayList<Transport>();
+                transports = new ArrayList<>();
             }
             if (localName.equals("transport")) {
                 transportId = getTransportId(attrs);
                 isTransportDescription = true;
             }
             if (localName.equals("routes")) {
-                routes = new ArrayList<Route>();
+                routes = new ArrayList<>();
             }
             if (localName.equals("route")) {
                 routeNumber = getRouteNumber(attrs);
             }
             if (localName.equals("directions")) {
-                directions = new ArrayList<Direction>();
+                directions = new ArrayList<>();
             }
             if (localName.equals("direction")) {
                 directionId = getDirectionId(attrs);
@@ -64,9 +64,9 @@ public class ServiceLoader {
             }
             if (localName.equals("stations")) {
                 if (isTransportDescription) {
-                    transportStations = new ArrayList<Station>();
+                    transportStations = new ArrayList<>();
                 } else {
-                    directionStations = new ArrayList<Station>();
+                    directionStations = new ArrayList<>();
                 }
             }
             if (localName.equals("station")) {

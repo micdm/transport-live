@@ -15,7 +15,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xmlpull.v1.XmlSerializer;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,7 +26,7 @@ public class SelectedRouteStore {
     private static class ContentHandler extends DefaultHandler {
 
         private final Service service;
-        public final List<SelectedRoute> selected = new ArrayList<SelectedRoute>();
+        public final List<SelectedRoute> selected = new ArrayList<>();
 
         public ContentHandler(Service service) {
             this.service = service;
@@ -70,9 +69,9 @@ public class SelectedRouteStore {
             input.close();
             return selected;
         } catch (SAXException e) {
-            return new ArrayList<SelectedRoute>();
+            return new ArrayList<>();
         } catch (IOException e) {
-            return new ArrayList<SelectedRoute>();
+            return new ArrayList<>();
         }
     }
 
@@ -81,7 +80,7 @@ public class SelectedRouteStore {
     }
 
     private List<SelectedRoute> getDefaultRoutes(Service service) {
-        List<SelectedRoute> routes = new ArrayList<SelectedRoute>();
+        List<SelectedRoute> routes = new ArrayList<>();
         while (routes.size() < DEFAULT_COUNT) {
             Transport transport = RandomItemSelector.get(service.getTransports());
             Route route = RandomItemSelector.get(transport.getRoutes());
@@ -105,8 +104,6 @@ public class SelectedRouteStore {
             OutputStream output = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE);
             serialize(output, selected);
             output.close();
-        } catch (FileNotFoundException e) {
-
         } catch (IOException e) {
 
         }

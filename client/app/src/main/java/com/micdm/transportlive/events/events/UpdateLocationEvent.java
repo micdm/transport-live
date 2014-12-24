@@ -9,13 +9,11 @@ public class UpdateLocationEvent extends Event {
 
     private final BigDecimal latitude;
     private final BigDecimal longitude;
-    private final float accuracy;
 
-    public UpdateLocationEvent(BigDecimal latitude, BigDecimal longitude, float accuracy) {
+    public UpdateLocationEvent(BigDecimal latitude, BigDecimal longitude) {
         super(EventType.UPDATE_LOCATION);
         this.latitude = latitude;
         this.longitude = longitude;
-        this.accuracy = accuracy;
     }
 
     public BigDecimal getLatitude() {
@@ -24,9 +22,5 @@ public class UpdateLocationEvent extends Event {
 
     public BigDecimal getLongitude() {
         return longitude;
-    }
-
-    public float getAccuracy() {
-        return accuracy;
     }
 }
