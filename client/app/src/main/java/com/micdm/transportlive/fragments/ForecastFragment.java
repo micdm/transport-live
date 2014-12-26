@@ -37,6 +37,7 @@ import com.micdm.transportlive.events.events.UpdateLocationEvent;
 import com.micdm.transportlive.events.events.UpdateNearestStationsEvent;
 import com.micdm.transportlive.misc.RouteColors;
 import com.micdm.transportlive.misc.Utils;
+import com.micdm.transportlive.misc.analytics.Analytics;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -316,7 +317,9 @@ public class ForecastFragment extends Fragment {
                 SelectedStation station = adapter.getGroup(groupPosition);
                 ForecastVehicle vehicle = adapter.getChild(groupPosition, childPosition);
                 if (vehicle != null) {
-                    App.get().getEventManager().publish(new RequestFocusVehicleEvent(vehicle.getNumber(), station.getTransportId(), vehicle.getRouteNumber()));
+                    App app = App.get();
+                    app.getEventManager().publish(new RequestFocusVehicleEvent(vehicle.getNumber(), station.getTransportId(), vehicle.getRouteNumber()));
+                    app.getAnalytics().reportEvent(Analytics.Category.MISC, Analytics.Action.CLICK, "forecast_vehicle");
                     return true;
                 }
                 return false;
