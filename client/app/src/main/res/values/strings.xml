@@ -20,8 +20,7 @@
     <string name="f__about__text">
         &lt;b&gt;%1$s v%2$s&lt;/b&gt;&lt;br&gt;&lt;br&gt;
         Больше информации про транспорт на raspisanie.tomsk.ru.&lt;br&gt;&lt;br&gt;
-        По любым вопросам пишите на %3$s.&lt;br&gt;&lt;br&gt;
-        Работает на основе openstreetmap.org.
+        По любым вопросам пишите на %3$s.
     </string>
     <!-- Фрагмент с прогнозами -->
     <string name="f__forecast__no_station_selected">Здесь будет показано ориентировочное время прибытия транспорта на остановки, которые вы выберете.</string>
