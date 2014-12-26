@@ -57,16 +57,6 @@ import java.util.Map;
 
 public class MapFragment extends Fragment {
 
-    private static class MarkerInfo {
-
-        public final Marker marker;
-        public Bitmap icon;
-
-        private MarkerInfo(Marker marker) {
-            this.marker = marker;
-        }
-    }
-
     private static class MarkerIconBuilder {
 
         private static final int BITMAP_POOL_SIZE = 200;
@@ -150,18 +140,47 @@ public class MapFragment extends Fragment {
             return canvas;
         }
 
-        public void release(Bitmap bitmap) {
+        public void recycle(Bitmap bitmap) {
             bitmap.eraseColor(Color.TRANSPARENT);
             bitmapPool.release(bitmap);
         }
     }
 
+    private static class MarkerInfo {
+
+        private MapVehicle vehicle;
+        private final Marker marker;
+        private Bitmap icon;
+
+        public MarkerInfo(Marker marker) {
+            this.marker = marker;
+        }
+
+        public MapVehicle getVehicle() {
+            return vehicle;
+        }
+
+        public Marker getMarker() {
+            return marker;
+        }
+
+        public Bitmap getIcon() {
+            return icon;
+        }
+
+        public void update(MapVehicle vehicle, Bitmap icon) {
+            this.vehicle = vehicle;
+            this.icon = icon;
+        }
+    }
+
+    private final static MarkerOptions MARKER_OPTIONS = new MarkerOptions().anchor(0.5f, 0.5f).position(new LatLng(0, 0));
     private final static double CAMERA_LATITUDE = 56.484642;
     private final static double CAMERA_LONGITUDE = 84.948100;
     private final static int CAMERA_ZOOM = 14;
 
     private MarkerIconBuilder markerIconBuilder;
-    private final Map<MapVehicle, MarkerInfo> markers = new HashMap<>();
+    private final Map<String, MarkerInfo> markers = new HashMap<>();
 
     private Service service;
     private List<SelectedRoute> selectedRoutes;
@@ -184,6 +203,7 @@ public class MapFragment extends Fragment {
         options.camera(CameraPosition.fromLatLngZoom(new LatLng(CAMERA_LATITUDE, CAMERA_LONGITUDE), CAMERA_ZOOM));
         options.rotateGesturesEnabled(false);
         options.tiltGesturesEnabled(false);
+        options.zoomControlsEnabled(true);
         return options;
     }
 
@@ -302,13 +322,12 @@ public class MapFragment extends Fragment {
                 int transportId = event.getTransportId();
                 int routeNumber = event.getRouteNumber();
                 if (Utils.isRouteSelected(selectedRoutes, transportId, routeNumber)) {
-                    Map.Entry<MapVehicle, MarkerInfo> pair = getMapVehicleAndMarkerPair(event.getNumber());
-                    if (pair != null) {
-                        final MapVehicle vehicle = pair.getKey();
+                    final MarkerInfo markerInfo = markers.get(event.getNumber());
+                    if (markerInfo != null) {
                         mapView.getMapAsync(new OnMapReadyCallback() {
                             @Override
                             public void onMapReady(GoogleMap googleMap) {
-                                googleMap.animateCamera(CameraUpdateFactory.newLatLng(getGeoPoint(vehicle)));
+                                googleMap.animateCamera(CameraUpdateFactory.newLatLng(getGeoPoint(markerInfo.getVehicle())));
                             }
                         });
                     }
@@ -323,51 +342,42 @@ public class MapFragment extends Fragment {
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap googleMap) {
-                Map.Entry<MapVehicle, MarkerInfo> pair = getMapVehicleAndMarkerPair(vehicle.getNumber());
-                MarkerInfo markerInfo = (pair == null) ? null : pair.getValue();
+                String number = vehicle.getNumber();
+                MarkerInfo markerInfo = markers.get(number);
                 if (markerInfo == null) {
-                    markerInfo = new MarkerInfo(googleMap.addMarker(getMarkerOptions()));
-                    markers.put(vehicle, markerInfo);
+                    markerInfo = new MarkerInfo(googleMap.addMarker(MARKER_OPTIONS));
+                    markers.put(number, markerInfo);
                 }
-                Marker marker = markerInfo.marker;
+                Marker marker = markerInfo.getMarker();
                 marker.setPosition(getGeoPoint(vehicle));
-                Bitmap icon = markerInfo.icon;
+                Bitmap icon = markerInfo.getIcon();
                 if (icon != null) {
-                    markerIconBuilder.release(icon);
+                    markerIconBuilder.recycle(icon);
                 }
                 icon = markerIconBuilder.build(service, vehicle);
                 marker.setIcon(BitmapDescriptorFactory.fromBitmap(icon));
-                markerInfo.icon = icon;
+                markerInfo.update(vehicle, icon);
             }
         });
     }
 
-    private MarkerOptions getMarkerOptions() {
-        MarkerOptions options = new MarkerOptions();
-        options.anchor(0.5f, 0.5f);
-        options.position(new LatLng(0, 0));
-        return options;
-    }
-
     private void removeVehicle(String number) {
-        Map.Entry<MapVehicle, MarkerInfo> pair = getMapVehicleAndMarkerPair(number);
-        if (pair != null) {
-            MarkerInfo markerInfo = pair.getValue();
-            markerInfo.marker.remove();
-            markerIconBuilder.release(markerInfo.icon);
-            markers.remove(pair.getKey());
+        MarkerInfo markerInfo = markers.get(number);
+        if (markerInfo != null) {
+            markerInfo.getMarker().remove();
+            markerIconBuilder.recycle(markerInfo.getIcon());
+            markers.remove(number);
         }
     }
 
     private void removeVehiclesByTransportAndRoute(int transportId, int routeNumber) {
-        Iterator<Map.Entry<MapVehicle, MarkerInfo>> iterator = markers.entrySet().iterator();
+        Iterator<MarkerInfo> iterator = markers.values().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<MapVehicle, MarkerInfo> pair = iterator.next();
-            MapVehicle vehicle = pair.getKey();
+            MarkerInfo markerInfo = iterator.next();
+            MapVehicle vehicle = markerInfo.getVehicle();
             if (vehicle.getTransportId() == transportId && vehicle.getRouteNumber() == routeNumber) {
-                MarkerInfo markerInfo = pair.getValue();
-                markerInfo.marker.remove();
-                markerIconBuilder.release(markerInfo.icon);
+                markerInfo.getMarker().remove();
+                markerIconBuilder.recycle(markerInfo.getIcon());
                 iterator.remove();
             }
         }
@@ -375,20 +385,10 @@ public class MapFragment extends Fragment {
 
     private void removeAllVehicles() {
         for (MarkerInfo markerInfo: markers.values()) {
-            markerInfo.marker.remove();
-            markerIconBuilder.release(markerInfo.icon);
+            markerInfo.getMarker().remove();
+            markerIconBuilder.recycle(markerInfo.getIcon());
         }
         markers.clear();
-    }
-
-    private Map.Entry<MapVehicle, MarkerInfo> getMapVehicleAndMarkerPair(String number) {
-        for (Map.Entry<MapVehicle, MarkerInfo> item: markers.entrySet()) {
-            MapVehicle vehicle = item.getKey();
-            if (vehicle.getNumber().equals(number)) {
-                return item;
-            }
-        }
-        return null;
     }
 
     private LatLng getGeoPoint(MapVehicle vehicle) {
