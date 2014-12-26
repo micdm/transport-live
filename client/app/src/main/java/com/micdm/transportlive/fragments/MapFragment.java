@@ -175,9 +175,9 @@ public class MapFragment extends Fragment {
     }
 
     private final static MarkerOptions MARKER_OPTIONS = new MarkerOptions().anchor(0.5f, 0.5f).position(new LatLng(0, 0));
-    private final static double CAMERA_LATITUDE = 56.484642;
-    private final static double CAMERA_LONGITUDE = 84.948100;
-    private final static int CAMERA_ZOOM = 14;
+    private final static double CAMERA_LATITUDE = 56.488881;
+    private final static double CAMERA_LONGITUDE = 84.987703;
+    private final static int CAMERA_ZOOM = 12;
 
     private MarkerIconBuilder markerIconBuilder;
     private final Map<String, MarkerInfo> markers = new HashMap<>();
