@@ -3,28 +3,26 @@ package com.micdm.transportlive.misc.analytics;
 import android.app.Activity;
 import android.content.Context;
 
-import com.google.android.gms.analytics.GoogleAnalytics;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
-import com.micdm.transportlive.R;
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Fields;
+import com.google.analytics.tracking.android.MapBuilder;
 
-public class ProdModeAnalytics extends Analytics {
+public class ProdModeAnalytics implements Analytics {
 
-    private final Tracker tracker;
+    private final EasyTracker tracker;
 
     public ProdModeAnalytics(Context context) {
-        super(context);
-        tracker = GoogleAnalytics.getInstance(context).newTracker(R.xml.tracker);
+        tracker = EasyTracker.getInstance(context);
     }
 
     @Override
     public void reportActivityStart(Activity activity) {
-        GoogleAnalytics.getInstance(context).reportActivityStart(activity);
+        tracker.activityStart(activity);
     }
 
     @Override
     public void reportActivityStop(Activity activity) {
-        GoogleAnalytics.getInstance(context).reportActivityStop(activity);
+        tracker.activityStop(activity);
     }
 
     @Override
@@ -34,12 +32,9 @@ public class ProdModeAnalytics extends Analytics {
 
     @Override
     public void reportEvent(Category category, Action action, String label, Integer value) {
-        HitBuilders.EventBuilder builder = new HitBuilders.EventBuilder();
-        builder.setCategory(category.toString().toLowerCase());
-        builder.setAction(action.toString().toLowerCase());
-        builder.setLabel(label);
+        MapBuilder builder = MapBuilder.createEvent(category.toString().toLowerCase(), action.toString().toLowerCase(), label, null);
         if (value != null) {
-            builder.setValue(value);
+            builder.set(Fields.EVENT_VALUE, value.toString());
         }
         tracker.send(builder.build());
     }

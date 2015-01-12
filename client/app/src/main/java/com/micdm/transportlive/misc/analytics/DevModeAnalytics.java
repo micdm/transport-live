@@ -1,13 +1,8 @@
 package com.micdm.transportlive.misc.analytics;
 
 import android.app.Activity;
-import android.content.Context;
 
-public class DevModeAnalytics extends Analytics {
-
-    public DevModeAnalytics(Context context) {
-        super(context);
-    }
+public class DevModeAnalytics implements Analytics {
 
     @Override
     public void reportActivityStart(Activity activity) {

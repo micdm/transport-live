@@ -1,6 +1,5 @@
 package com.micdm.transportlive.location;
 
-import android.content.Context;
 import android.location.Location;
 
 public abstract class Locator {
@@ -12,12 +11,7 @@ public abstract class Locator {
     protected static final int MIN_UPDATE_TIME = 5;
     protected static final int MIN_UPDATE_DISTANCE = 50;
 
-    protected final Context context;
     protected OnUpdateLocationListener onUpdateLocationListener;
-
-    public Locator(Context context) {
-        this.context = context;
-    }
 
     public void setOnUpdateLocationListener(OnUpdateLocationListener onUpdateLocationListener) {
         this.onUpdateLocationListener = onUpdateLocationListener;

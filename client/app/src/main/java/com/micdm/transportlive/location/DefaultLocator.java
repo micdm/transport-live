@@ -29,7 +29,6 @@ public class DefaultLocator extends Locator {
     };
 
     public DefaultLocator(Context context) {
-        super(context);
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     }
 

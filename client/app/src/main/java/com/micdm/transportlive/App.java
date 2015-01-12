@@ -2,12 +2,9 @@ package com.micdm.transportlive;
 
 import android.content.Context;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.micdm.transportlive.events.EventManager;
 import com.micdm.transportlive.events.PlainEventManager;
 import com.micdm.transportlive.location.DefaultLocator;
-import com.micdm.transportlive.location.GooglePlayLocator;
 import com.micdm.transportlive.location.Locator;
 import com.micdm.transportlive.misc.ServiceLoader;
 import com.micdm.transportlive.misc.analytics.Analytics;
@@ -79,9 +76,7 @@ public class App extends android.app.Application {
 
     public Locator getLocator() {
         if (locator == null) {
-            Context context = getApplicationContext();
-            boolean isPlayServicesAvailable = (GooglePlayServicesUtil.isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS);
-            locator = isPlayServicesAvailable ? new GooglePlayLocator(context) : new DefaultLocator(context);
+            locator = new DefaultLocator(getApplicationContext());
         }
         return locator;
     }
@@ -90,7 +85,7 @@ public class App extends android.app.Application {
         if (analytics == null) {
             Context context = getApplicationContext();
             boolean isDevMode = getPackageName().endsWith(".dev");
-            analytics = isDevMode ? new DevModeAnalytics(context) : new ProdModeAnalytics(context);
+            analytics = isDevMode ? new DevModeAnalytics() : new ProdModeAnalytics(context);
         }
         return analytics;
     }
