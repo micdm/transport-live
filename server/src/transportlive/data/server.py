@@ -70,7 +70,7 @@ class StreamHandler:
         self._stream.close()
 
     def _on_stream_data(self, data):
-        logger.debug("New data on stream %s of length %s:\r\n%s", self._id, len(data), data)
+        logger.debug("New data on stream %s of length %s:\n%s", self._id, len(data), data.decode('utf8'))
         self._buffer += data.decode("utf-8")
         self._parse_packets()
         if len(self._buffer) > self.MAX_BUFFER_SIZE:

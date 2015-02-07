@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from transportlive.models import Transport, Mark, Coords
 
 class VehicleBuilder:
@@ -6,9 +8,9 @@ class VehicleBuilder:
         transport, route = self._get_transport_and_route(packet)
         if transport is None or route is None:
             return None
-        mark = Mark(packet.datetime, Coords(packet.latitude, packet.longitude), self._get_normalized_speed(packet.speed), packet.course)
+        mark = Mark(datetime.utcnow(), Coords(packet.latitude, packet.longitude), self._get_normalized_speed(packet.speed), packet.course)
         is_on_line = self._is_on_line(packet)
-        return VehicleInfo(packet.imei, self._get_number(packet), transport, route, mark, is_on_line)
+        return VehicleInfo(packet.imei, packet.datetime_created, self._get_number(packet), transport, route, mark, is_on_line)
 
     def _get_transport_and_route(self, packet):
         info = packet.params.get("num")
@@ -38,8 +40,9 @@ class VehicleBuilder:
 
 class VehicleInfo:
 
-    def __init__(self, vehicle_id, number, transport_type, route_number, mark, is_on_line):
+    def __init__(self, vehicle_id, datetime_created, number, transport_type, route_number, mark, is_on_line):
         self.vehicle_id = vehicle_id
+        self.datetime_created = datetime_created
         self.number = number
         self.transport_type = transport_type
         self.route_number = route_number

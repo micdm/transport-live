@@ -19,9 +19,9 @@ class PingAnswerPacket:
 
 class DataPacket:
 
-    def __init__(self, imei, datetime, latitude, longitude, speed, course, params):
+    def __init__(self, imei, datetime_created, latitude, longitude, speed, course, params):
         self.imei = imei
-        self.datetime = datetime
+        self.datetime_created = datetime_created
         self.latitude = latitude
         self.longitude = longitude
         self.speed = speed

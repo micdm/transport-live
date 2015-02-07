@@ -67,8 +67,8 @@ class Vehicle:
 
 class Mark:
 
-    def __init__(self, datetime, coords, speed, course):
-        self.datetime = datetime
+    def __init__(self, datetime_created, coords, speed, course):
+        self.datetime_created = datetime_created
         self.coords = coords
         self.speed = speed
         self.course = course
