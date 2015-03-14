@@ -37,7 +37,9 @@ public class SelectedRouteStore {
             if (localName.equals("route")) {
                 Transport transport = service.getTransportById(getTransportId(attrs));
                 Route route = transport.getRouteByNumber(getRouteNumber(attrs));
-                selected.add(new SelectedRoute(transport.getId(), route.getNumber()));
+                if (route != null) {
+                    selected.add(new SelectedRoute(transport.getId(), route.getNumber()));
+                }
             }
         }
 

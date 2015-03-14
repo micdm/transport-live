@@ -39,9 +39,11 @@ public class SelectedStationStore {
             if (localName.equals("station")) {
                 Transport transport = service.getTransportById(getTransportId(attrs));
                 Route route = transport.getRouteByNumber(getRouteNumber(attrs));
-                Direction direction = route.getDirectionById(getDirectionId(attrs));
-                Station station = direction.getStationById(getStationId(attrs));
-                selected.add(new SelectedStation(transport.getId(), route.getNumber(), direction.getId(), station.getId(), true));
+                if (route != null) {
+                    Direction direction = route.getDirectionById(getDirectionId(attrs));
+                    Station station = direction.getStationById(getStationId(attrs));
+                    selected.add(new SelectedStation(transport.getId(), route.getNumber(), direction.getId(), station.getId(), true));
+                }
             }
         }
 
