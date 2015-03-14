@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Xml;
 
 import com.micdm.transportlive.data.service.Direction;
+import com.micdm.transportlive.data.service.Point;
 import com.micdm.transportlive.data.service.Route;
 import com.micdm.transportlive.data.service.Service;
 import com.micdm.transportlive.data.service.Station;
@@ -15,6 +16,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +35,9 @@ public class ServiceLoader {
         private List<Direction> directions = new ArrayList<>();
         private int directionId;
         private List<Station> directionStations = new ArrayList<>();
+        private List<Point> points = new ArrayList<>();
+        private BigDecimal pointLatitude;
+        private BigDecimal pointLongitude;
 
         private boolean isTransportDescription;
 
@@ -73,6 +78,13 @@ public class ServiceLoader {
                 stationId = getStationId(attrs);
                 stationName = getStationName(attrs);
             }
+            if (localName.equals("points")) {
+                points = new ArrayList<>();
+            }
+            if (localName.equals("point")) {
+                pointLatitude = getPointLatitude(attrs);
+                pointLongitude = getPointLongitude(attrs);
+            }
         }
 
         private int getTransportId(Attributes attrs) {
@@ -95,8 +107,19 @@ public class ServiceLoader {
             return attrs.getValue("name");
         }
 
+        private BigDecimal getPointLatitude(Attributes attrs) {
+            return new BigDecimal(attrs.getValue("lat"));
+        }
+
+        private BigDecimal getPointLongitude(Attributes attrs) {
+            return new BigDecimal(attrs.getValue("lon"));
+        }
+
         @Override
         public void endElement(String uri, String localName, String qName) {
+            if (localName.equals("point")) {
+                points.add(new Point(pointLatitude, pointLongitude));
+            }
             if (localName.equals("station")) {
                 if (isTransportDescription) {
                     transportStations.add(new Station(stationId, stationName));
@@ -105,7 +128,7 @@ public class ServiceLoader {
                 }
             }
             if (localName.equals("direction")) {
-                directions.add(new Direction(directionId, directionStations));
+                directions.add(new Direction(directionId, directionStations, points));
             }
             if (localName.equals("route")) {
                 routes.add(new Route(routeNumber, directions));

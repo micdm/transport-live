@@ -6,10 +6,12 @@ public class Direction {
 
     private final int id;
     private final List<Station> stations;
+    private final List<Point> points;
 
-    public Direction(int id, List<Station> stations) {
+    public Direction(int id, List<Station> stations, List<Point> points) {
         this.id = id;
         this.stations = stations;
+        this.points = points;
     }
 
     public int getId() {
@@ -35,5 +37,9 @@ public class Direction {
 
     public String getFinish() {
         return stations.get(stations.size() - 1).getName();
+    }
+
+    public List<Point> getPoints() {
+        return points;
     }
 }

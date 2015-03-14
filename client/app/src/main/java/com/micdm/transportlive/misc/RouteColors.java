@@ -42,6 +42,10 @@ public class RouteColors {
         return Color.HSVToColor(new float[] {(255.0f / count) * number, 1f, 0.8f});
     }
 
+    public Map<Route, Integer> getAll() {
+        return colors;
+    }
+
     public int get(Route route) {
         return colors.get(route);
     }

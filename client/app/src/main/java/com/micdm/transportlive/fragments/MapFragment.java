@@ -29,10 +29,14 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.micdm.transportlive.App;
 import com.micdm.transportlive.R;
 import com.micdm.transportlive.data.MapVehicle;
 import com.micdm.transportlive.data.SelectedRoute;
+import com.micdm.transportlive.data.service.Direction;
+import com.micdm.transportlive.data.service.Point;
 import com.micdm.transportlive.data.service.Route;
 import com.micdm.transportlive.data.service.Service;
 import com.micdm.transportlive.data.service.Transport;
@@ -50,6 +54,7 @@ import com.micdm.transportlive.events.events.UpdateVehicleEvent;
 import com.micdm.transportlive.misc.RouteColors;
 import com.micdm.transportlive.misc.Utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -89,17 +94,14 @@ public class MapFragment extends Fragment {
             return paint;
         }
 
-        public void update(Service service) {
-            routePaints = getRoutePaints(service);
+        public void update(RouteColors routeColors) {
+            routePaints = getRoutePaints(routeColors);
         }
 
-        private Map<Route, Paint> getRoutePaints(Service service) {
+        private Map<Route, Paint> getRoutePaints(RouteColors routeColors) {
             Map<Route, Paint> paints = new HashMap<>();
-            RouteColors colors = new RouteColors(service);
-            for (Transport transport: service.getTransports()) {
-                for (Route route: transport.getRoutes()) {
-                    paints.put(route, getRoutePaint(colors.get(route)));
-                }
+            for (Map.Entry<Route, Integer> entry: routeColors.getAll().entrySet()) {
+                paints.put(entry.getKey(), getRoutePaint(entry.getValue()));
             }
             return paints;
         }
@@ -175,15 +177,18 @@ public class MapFragment extends Fragment {
     }
 
     private final static MarkerOptions MARKER_OPTIONS = new MarkerOptions().anchor(0.5f, 0.5f).position(new LatLng(0, 0));
+    private final static PolylineOptions POLYLINE_OPTIONS = new PolylineOptions();
     private final static double CAMERA_LATITUDE = 56.488881;
     private final static double CAMERA_LONGITUDE = 84.987703;
     private final static int CAMERA_ZOOM = 12;
 
     private MarkerIconBuilder markerIconBuilder;
     private final Map<String, MarkerInfo> markers = new HashMap<>();
+    private final Map<Direction, Polyline> polylines = new HashMap<>();
 
     private Service service;
     private List<SelectedRoute> selectedRoutes;
+    private RouteColors routeColors;
 
     private View noRouteSelectedView;
     private View noVehiclesView;
@@ -269,7 +274,8 @@ public class MapFragment extends Fragment {
             @Override
             public void onEvent(LoadServiceEvent event) {
                 service = event.getService();
-                markerIconBuilder.update(service);
+                routeColors = new RouteColors(service);
+                markerIconBuilder.update(routeColors);
             }
         });
         manager.subscribe(this, EventType.REMOVE_ALL_DATA, new EventManager.OnEventListener<RemoveAllDataEvent>() {
@@ -285,6 +291,12 @@ public class MapFragment extends Fragment {
                 selectedRoutes = event.getRoutes();
                 if (selectedRoutes.isEmpty()) {
                     showNoRouteSelectedView();
+                } else {
+                    for (SelectedRoute route: selectedRoutes) {
+                        int transportId = route.getTransportId();
+                        int routeNumber = route.getRouteNumber();
+                        addRoutePolylines(transportId, routeNumber);
+                    }
                 }
             }
         });
@@ -294,6 +306,7 @@ public class MapFragment extends Fragment {
                 SelectedRoute route = event.getRoute();
                 int transportId = route.getTransportId();
                 int routeNumber = route.getRouteNumber();
+                removeRoutePolylines(transportId, routeNumber);
                 removeVehiclesByTransportAndRoute(transportId, routeNumber);
                 if (markers.isEmpty()) {
                     showNoVehiclesView();
@@ -336,6 +349,46 @@ public class MapFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void addRoutePolylines(int transportId, int routeNumber) {
+        Transport transport = service.getTransportById(transportId);
+        Route route = transport.getRouteByNumber(routeNumber);
+        for (Direction direction: route.getDirections()) {
+            addDirectionPolyline(route, direction);
+        }
+    }
+
+    private void addDirectionPolyline(final Route route, final Direction direction) {
+        if (polylines.containsKey(direction)) {
+            return;
+        }
+        mapView.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                Polyline polyline = googleMap.addPolyline(POLYLINE_OPTIONS);
+                int color = routeColors.get(route) & 0x00ffffff | 0x55000000;
+                polyline.setColor(color);
+                List<LatLng> points = new ArrayList<>();
+                for (Point point: direction.getPoints()) {
+                    points.add(new LatLng(point.getLatitude().doubleValue(), point.getLongitude().doubleValue()));
+                }
+                polyline.setPoints(points);
+                polylines.put(direction, polyline);
+            }
+        });
+    }
+
+    private void removeRoutePolylines(int transportId, int routeNumber) {
+        Transport transport = service.getTransportById(transportId);
+        Route route = transport.getRouteByNumber(routeNumber);
+        for (Direction direction: route.getDirections()) {
+            Polyline polyline = polylines.get(direction);
+            if (polyline != null) {
+                polyline.remove();
+                polylines.remove(direction);
+            }
+        }
     }
 
     private void updateVehicle(final MapVehicle vehicle) {
