@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="connecting_icon">#99cc0000</color>
-    <color name="connecting_text">#cc0000</color>
+    <color name="connecting_text">#9a9a9a</color>
+    <color name="connected_text">#3c9a32</color>
     <color name="favourite_station_background">#fff4dd</color>
     <color name="non_favourite_station_background">@android:color/transparent</color>
 </resources>

@@ -3,7 +3,8 @@ package com.micdm.transportlive.activities;
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.graphics.PorterDuff;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.text.Html;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -351,19 +353,14 @@ public class MainActivity extends FragmentActivity {
         gate.connect(new ServerGate.OnConnectListener() {
             @Override
             public void onStartConnect(int tryNumber) {
-                ActionBar actionBar = getActionBar();
-                actionBar.setIcon(connectingIcon);
-                actionBar.setDisplayShowTitleEnabled(true);
-                actionBar.setTitle(getString(R.string.__connecting));
+                setActionBarIconAndTitle(connectingIcon, R.string.__connecting, R.color.connecting_text);
                 if (tryNumber > 1) {
                     App.get().getAnalytics().reportEvent(Analytics.Category.MISC, Analytics.Action.MISC, "no_connection", tryNumber);
                 }
             }
             @Override
             public void OnCompleteConnect() {
-                ActionBar actionBar = getActionBar();
-                actionBar.setIcon(R.drawable.ic_launcher);
-                actionBar.setDisplayShowTitleEnabled(false);
+                setActionBarIconAndTitle(getDefaultIcon(), R.string.__connected, R.color.connected_text);
                 manager.publish(new RemoveAllDataEvent());
                 if (selectedRoutes != null) {
                     for (SelectedRoute route: selectedRoutes) {
@@ -392,11 +389,28 @@ public class MainActivity extends FragmentActivity {
         });
     }
 
+    private void setActionBarIconAndTitle(Drawable icon, int titleStringId, int titleColorId) {
+        ActionBar actionBar = getActionBar();
+        if (actionBar == null) {
+            return;
+        }
+        actionBar.setIcon(icon);
+        int color = getResources().getColor(titleColorId) & 0x00ffffff;
+        String title = String.format("<font color='0x%s'>%s</font>", Integer.toHexString(color), getString(titleStringId));
+        actionBar.setTitle(Html.fromHtml(title));
+    }
+
     private Drawable getConnectingIcon() {
-        Drawable original = getResources().getDrawable(R.drawable.ic_launcher);
+        Drawable original = getDefaultIcon();
         Drawable icon = original.getConstantState().newDrawable().mutate();
-        icon.setColorFilter(getResources().getColor(R.color.connecting_icon), PorterDuff.Mode.SRC_ATOP);
+        ColorMatrix matrix = new ColorMatrix();
+        matrix.setSaturation(0);
+        icon.setColorFilter(new ColorMatrixColorFilter(matrix));
         return icon;
+    }
+
+    private Drawable getDefaultIcon() {
+        return getResources().getDrawable(R.drawable.ic_launcher);
     }
 
     private void handleVehicleMessage(VehicleMessage message) {
