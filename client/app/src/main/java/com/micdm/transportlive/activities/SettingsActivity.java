@@ -114,8 +114,13 @@ public class SettingsActivity extends FragmentActivity implements PreferenceFrag
     }
 
     private void goToMarket() {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format("market://details?id=%s", getPackageName())));
-        startActivity(intent);
+        Uri uri = Uri.parse(String.format("market://details?id=%s", getPackageName()));
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+
+        }
         App.get().getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "rate");
     }
 
