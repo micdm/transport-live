@@ -5,6 +5,10 @@
         android:title="@string/f__settings__donate_title"
         android:summary="@string/f__settings__donate_summary"/>
     <Preference
+        android:key="pref_rate"
+        android:title="@string/f__settings__rate_title"
+        android:summary="@string/f__settings__rate_summary"/>
+    <Preference
         android:key="pref_share"
         android:title="@string/f__settings__share_title"
         android:summary="@string/f__settings__share_summary"/>

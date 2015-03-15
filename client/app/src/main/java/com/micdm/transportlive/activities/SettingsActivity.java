@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.support.v4.app.FragmentActivity;
@@ -89,6 +90,10 @@ public class SettingsActivity extends FragmentActivity implements PreferenceFrag
             showDonateMessage();
             return true;
         }
+        if (key.equals(SettingsFragment.PREF_KEY_RATE)) {
+            goToMarket();
+            return true;
+        }
         if (key.equals(SettingsFragment.PREF_KEY_SHARE)) {
             showShareMessage();
             return true;
@@ -106,6 +111,12 @@ public class SettingsActivity extends FragmentActivity implements PreferenceFrag
             (new DonateFragment()).show(manager, FragmentTag.DONATE);
             App.get().getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "donate");
         }
+    }
+
+    private void goToMarket() {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format("market://details?id=%s", getPackageName())));
+        startActivity(intent);
+        App.get().getAnalytics().reportEvent(Analytics.Category.DIALOGS, Analytics.Action.SHOW, "rate");
     }
 
     private void showShareMessage() {

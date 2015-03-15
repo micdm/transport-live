@@ -17,6 +17,7 @@ import java.util.List;
 public class SettingsFragment extends PreferenceFragment {
 
     public static final String PREF_KEY_DONATE = "pref_donate";
+    public static final String PREF_KEY_RATE = "pref_rate";
     public static final String PREF_KEY_SHARE = "pref_share";
     public static final String PREF_KEY_ABOUT = "pref_about";
 

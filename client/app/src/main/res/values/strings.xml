@@ -49,6 +49,8 @@
     <!-- Фрагмент с настройками -->
     <string name="f__settings__donate_title">Пожертвовать…</string>
     <string name="f__settings__donate_summary">Сэкономили на проезде денег? Поделитесь с разработчиком!</string>
+    <string name="f__settings__rate_title">Оценить…</string>
+    <string name="f__settings__rate_summary">Добавьте отзыв или оцените приложение</string>
     <string name="f__settings__share_title">Рассказать…</string>
     <string name="f__settings__share_summary">Пусть знакомые в соцсетях тоже знают</string>
     <string name="f__settings__about_title">О приложении…</string>
